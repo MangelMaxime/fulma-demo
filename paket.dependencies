@@ -1,0 +1,20 @@
+source https://www.nuget.org/api/v2
+storage:none
+
+nuget FSharp.Core redirects:force
+nuget Fable.Core prerelease
+nuget Fable.Elmish
+nuget Fable.Elmish.React
+nuget Fable.Elmish.Browser
+nuget Fable.Elmish.Debugger
+nuget Fable.PowerPack prerelease
+nuget Fable.React
+nuget Fulma prerelease
+nuget Fulma.Extensions prerelease
+nuget Fulma.Elmish prerelease
+
+clitool dotnet-fable prerelease
+
+group Build
+    source https://nuget.org/api/v2
+    nuget FAKE
