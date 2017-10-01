@@ -15,48 +15,11 @@ type Question =
 
 type Model =
     { CurrentPage : Navigation.Page
-      Questions : Question list }
+      QuestionDispatcher : Question.Dispatcher.Types.Model }
 
     static member Empty =
         { CurrentPage = Navigation.Home
-          Questions =
-            [ { Id = 0
-                Author =
-                    { Id = 0
-                      Firstname = "Maxime"
-                      Surname = "Mangel"
-                      Avatar = "1.png" }
-                Title = "What is the average wing speed of an unladen swallow?"
-                Description =
-                    """
-
-                    """
-                CreatedAt = "" }
-              { Id = 0
-                Author =
-                    { Id = 0
-                      Firstname = "Alfonso"
-                      Surname = "Garciacaro"
-                      Avatar = "1.png" }
-                Title = "What is the average wing speed of an unladen swallow?"
-                Description =
-                    """
-
-                    """
-                CreatedAt = "" }
-              { Id = 0
-                Author =
-                    { Id = 0
-                      Firstname = "Robin"
-                      Surname = "Munn"
-                      Avatar = "1.png" }
-                Title = "What is the average wing speed of an unladen swallow?"
-                Description =
-                    """
-
-                    """
-                CreatedAt = "" }
-            ] }
+          QuestionDispatcher = Question.Dispatcher.Types.Model.Empty }
 
 type Msg =
-    | Nothing
+    | QuestionDispatcherMsg of Question.Dispatcher.Types.Msg

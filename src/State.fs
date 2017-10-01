@@ -17,10 +17,15 @@ let urlUpdate (result: Option<Navigation.Page>) model =
         let model = { model with CurrentPage = page }
         match page with
         | Navigation.Home -> model, Cmd.none
+        | Navigation.Question questionPage ->
+            let (subModel, subCmd) = Question.Dispatcher.State.init questionPage
+            { model with QuestionDispatcher = subModel }, Cmd.map QuestionDispatcherMsg subCmd
 
 let init result =
     urlUpdate result Model.Empty
 
 let update msg model =
-    model, Cmd.none
-
+    match msg with
+    | QuestionDispatcherMsg msg ->
+        let (subModel, subCmd) = Question.Dispatcher.State.update msg model.QuestionDispatcher
+        { model with QuestionDispatcher = subModel }, Cmd.map QuestionDispatcherMsg subCmd
