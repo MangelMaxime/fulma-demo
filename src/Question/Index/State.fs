@@ -9,10 +9,15 @@ let init () =
 let update msg (model: Model) =
     match msg with
     | GetQuestions ->
-        model, Cmd.none
+        model, Cmd.ofPromise Rest.getQuestions () GetQuestionsResult (GetQuestionsRes.Error >> GetQuestionsResult)
 
-    | GetQuestionsError error ->
-        model, Cmd.none
+    | GetQuestionsResult result ->
+        match result with
+        | GetQuestionsRes.Success questions ->
+            Logger.debug questions
+            Logger.debug "Hourra"
+            { model with Questions = Some questions }, Cmd.none
 
-    | GetQuestionsSuccess questions ->
-        { model with Questions = Some questions }, Cmd.none
+        | GetQuestionsRes.Error error ->
+            Logger.debugfn "[Question.Index.State] Error when fetch questions:\n %A" error
+            model, Cmd.none

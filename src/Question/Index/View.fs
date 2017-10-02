@@ -5,4 +5,11 @@ open Fable.Helpers.React
 open Fable.Helpers.React.Props
 
 let root model dispatch =
-    str "questions index"
+    match model.Questions with
+    | Some questions ->
+        questions
+        |> List.map (fun x ->
+            str x.Author.Firstname
+        )
+        |> div []
+    | None -> str "Loading"

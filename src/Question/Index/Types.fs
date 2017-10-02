@@ -6,7 +6,10 @@ type Model =
     static member Empty =
         { Questions = None }
 
+type GetQuestionsRes =
+    | Success of Question list
+    | Error of exn
+
 type Msg =
     | GetQuestions
-    | GetQuestionsSuccess of Question list
-    | GetQuestionsError of exn
+    | GetQuestionsResult of GetQuestionsRes

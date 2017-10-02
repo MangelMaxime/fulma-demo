@@ -6,6 +6,7 @@
     <Compile Include="Import/Fable.Import.Marked.fs" />
     <Compile Include="Import/Fable.Import.PrismJS.fs" />
     <Compile Include="Import/Fable.Import.Lowdb.fs" />
+    <Compile Include="Global/Logger.fs" />
     <Compile Include="Global/Database.fs" />
     <Compile Include="Global/Navigation.fs" />
     <Compile Include="Global/Sugar.fs" />
