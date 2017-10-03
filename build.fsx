@@ -67,9 +67,9 @@ type CommitMessage = Printf.StringFormat<(string-> string)>
 let publishDocs isAppVeyor githubLink =
     let commitMessage : CommitMessage =
         if isAppVeyor then
-            "Update site (%s) from local"
-        else
             "Update site (%s) from AppVeyor"
+        else
+            "Update site (%s) from local"
 
     CleanDir temp
     Repository.cloneSingleBranch "" githubLink publishBranch temp
