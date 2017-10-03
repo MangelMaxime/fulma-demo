@@ -79,13 +79,13 @@ Target "PublishDocs" (fun _ ->
     ==> "InstallDotNetCore"
     ==> "Install"
     ==> "BuildDotnet"
-    ==> "YarnInstall"
 
 "BuildDotnet"
     ==> "YarnInstall"
     ==> "Watch"
 
 "BuildDotnet"
+    ==> "YarnInstall"
     ==> "Build"
     ==> "PublishDocs"
 
