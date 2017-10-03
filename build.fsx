@@ -63,16 +63,17 @@ let docsOuput = fableRoot </> "docs" </> "public"
 
 // --------------------------------------------------------------------------------------
 // Release Scripts
+let publishDocs _ =
+    CleanDir temp
+    Repository.cloneSingleBranch "" githubLink publishBranch temp
 
-Target "PublishDocs" (fun _ ->
-  CleanDir temp
-  Repository.cloneSingleBranch "" githubLink publishBranch temp
+    CopyRecursive docsOuput temp true |> tracefn "%A"
+    StageAll temp
+    Git.Commit.Commit temp (sprintf "Update site (%s)" (DateTime.Now.ToShortDateString()))
+    Branches.push temp
 
-  CopyRecursive docsOuput temp true |> tracefn "%A"
-  StageAll temp
-  Git.Commit.Commit temp (sprintf "Update site (%s)" (DateTime.Now.ToShortDateString()))
-  Branches.push temp
-)
+Target "PublishDocs" publishDocs
+Target "PublishDocsAppVeyor" publishDocs
 
 // Build order
 "Clean"
