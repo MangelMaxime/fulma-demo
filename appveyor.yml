@@ -8,3 +8,13 @@ image: Visual Studio 2017
 
 build_script:
     - cmd: build.cmd Build
+
+environment:
+  access_token:
+    secure: E7ICW0SQ5sUtlviMxMnKx+gOAEjMXvrSpasDc9rSzAvByRRPfN73wnLWob2NptUc
+
+on_success:
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+  - git config --global user.email "mangel.maxime@protonmail.com"
+  - git config --global user.name "MangelMaxime"
