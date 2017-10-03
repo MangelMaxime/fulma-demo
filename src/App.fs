@@ -12,7 +12,7 @@ let renderPage model dispatch =
         str "Home"
 
     | Navigation.Question questionPage ->
-        Question.Dispatcher.View.root model.QuestionDispatcher questionPage (QuestionDispatcherMsg >> dispatch)
+        Question.Dispatcher.View.root model.QuestionDispatcher (QuestionDispatcherMsg >> dispatch)
 
 let root model dispatch =
     renderPage model dispatch
