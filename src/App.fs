@@ -30,7 +30,7 @@ let navbarView =
                 [ Navbar.brand_a [ Fulma.Common.GenericOption.Props [ Href "" ] ]
                     [ Navbar.item_div [ ]
                         [ Image.image [ Image.is32x32 ]
-                            [ img [ Src "/assets/mini_logo.svg" ] ]
+                            [ img [ Src "assets/mini_logo.svg" ] ]
                           Heading.p [ Heading.is4 ]
                             [ str "Fulma-demo" ] ] ]
                   navbarEnd ] ] ]
