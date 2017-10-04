@@ -1,7 +1,10 @@
-var path = require("path");
-var webpack = require("webpack");
-var fableUtils = require("fable-utils");
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require("path");
+const webpack = require("webpack");
+const fableUtils = require("fable-utils");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 
 function resolve(filePath) {
     return path.join(__dirname, filePath)
@@ -31,21 +34,33 @@ var commonPlugins = [
 
 module.exports = {
     devtool: false,
-    entry: {
-        app: [
-            "babel-polyfill",
-            resolve('./src/Demo.fsproj')
-        ],
-        style: [
-            resolve('./src/sass/main.sass')
-        ]
-    },
+    entry: isProduction ? // We don't use the same entry for dev and production, to make HMR over style quicker for dev env
+        {
+            demo: [
+                "babel-polyfill",
+                resolve('./src/Demo.fsproj'),
+                resolve('./src/sass/main.sass')
+            ]
+        } : {
+            app: [
+                "babel-polyfill",
+                resolve('./src/Demo.fsproj')
+            ],
+            style: [
+                resolve('./src/sass/main.sass')
+            ]
+        },
     output: {
         path: resolve('./output'),
         filename: isProduction ? '[name].[hash].js' : '[name].js'
     },
     plugins: isProduction ?
-        commonPlugins
+        commonPlugins.concat([
+            new ExtractTextPlugin('style.css'),
+            new CopyWebpackPlugin([
+                { from: './public' }
+            ])
+        ])
         : commonPlugins.concat([
             new webpack.HotModuleReplacementPlugin(),
             new webpack.NamedModulesPlugin()
@@ -90,7 +105,13 @@ module.exports = {
             },
             {
                 test: /\.sass$/,
-                use: ["style-loader", "css-loader", "sass-loader"]
+                use: isProduction ?
+                    ExtractTextPlugin.extract({
+                        fallback: 'style-loader',
+                        //resolve-url-loader may be chained before sass-loader if necessary
+                        use: ['css-loader', 'sass-loader']
+                    })
+                    : ["style-loader", "css-loader", "sass-loader"]
             },
             {
                 test: /\.css$/,
