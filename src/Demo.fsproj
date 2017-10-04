@@ -8,7 +8,7 @@
     <Compile Include="Import/Fable.Import.Lowdb.fs" />
     <Compile Include="Global/Logger.fs" />
     <Compile Include="Global/Database.fs" />
-    <Compile Include="Global/Navigation.fs" />
+    <Compile Include="Global/Router.fs" />
     <Compile Include="Global/Sugar.fs" />
     <Compile Include="Question/Index/Types.fs" />
     <Compile Include="Question/Index/Rest.fs" />

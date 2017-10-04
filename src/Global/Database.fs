@@ -51,7 +51,7 @@ type Database =
                              { Id = 0
                                Firstname = "Maxime"
                                Surname = "Mangel"
-                               Avatar = "1.png" }
+                               Avatar = "maxime_mangel.png" }
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """
@@ -63,7 +63,7 @@ type Database =
                              { Id = 0
                                Firstname = "Alfonso"
                                Surname = "Garciacaro"
-                               Avatar = "1.png" }
+                               Avatar = "alfonso_garciacaro.png" }
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """
@@ -75,7 +75,7 @@ type Database =
                              { Id = 0
                                Firstname = "Robin"
                                Surname = "Munn"
-                               Avatar = "1.png" }
+                               Avatar = "robin_munn.png" }
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """

@@ -14,13 +14,13 @@ type Question =
       CreatedAt : string }
 
 type Model =
-    { CurrentPage : Navigation.Page
+    { CurrentPage : Router.Page
       QuestionDispatcher : Question.Dispatcher.Types.Model }
 
     static member Empty =
         { CurrentPage =
-            Navigation.QuestionPage.Index
-            |> Navigation.Question
+            Router.QuestionPage.Index
+            |> Router.Question
           QuestionDispatcher = Question.Dispatcher.Types.Model.Empty }
 
 type Msg =

@@ -6,17 +6,17 @@ open Types
 open Fable.Import
 
 
-let urlUpdate (result: Option<Navigation.Page>) model =
+let urlUpdate (result: Option<Router.Page>) model =
     match result with
     | None ->
 
         Browser.console.error("Error parsing url: " + Browser.window.location.href)
-        model, Navigation.newUrl (Navigation.toHash model.CurrentPage)
+        model, Navigation.modifyUrl (Router.toHash model.CurrentPage)
 
     | Some page ->
         let model = { model with CurrentPage = page }
         match page with
-        | Navigation.Question questionPage ->
+        | Router.Question questionPage ->
             let (subModel, subCmd) = Question.Dispatcher.State.init questionPage
             { model with QuestionDispatcher = subModel }, Cmd.map QuestionDispatcherMsg subCmd
 

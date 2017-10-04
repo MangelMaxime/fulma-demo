@@ -14,8 +14,6 @@ let update msg (model: Model) =
     | GetQuestionsResult result ->
         match result with
         | GetQuestionsRes.Success questions ->
-            Logger.debug questions
-            Logger.debug "Hourra"
             { model with Questions = Some questions }, Cmd.none
 
         | GetQuestionsRes.Error error ->

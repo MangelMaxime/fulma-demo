@@ -37,7 +37,7 @@ let navbarView =
 
 let renderPage model dispatch =
     match model.CurrentPage with
-    | Navigation.Question questionPage ->
+    | Router.Question questionPage ->
         Question.Dispatcher.View.root model.QuestionDispatcher (QuestionDispatcherMsg >> dispatch)
 
 let root model dispatch =
@@ -57,7 +57,7 @@ open Elmish.Browser.UrlParser
 Database.Init()
 
 Program.mkProgram init update root
-|> Program.toNavigable (parseHash Navigation.pageParser) urlUpdate
+|> Program.toNavigable (parseHash Router.pageParser) urlUpdate
 #if DEBUG
 |> Program.withHMR
 |> Program.withDebugger
