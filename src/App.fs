@@ -27,7 +27,7 @@ let navbarView =
     div [ ClassName "navbar-bg" ]
         [ Container.container [ ]
             [ Navbar.navbar [ ]
-                [ Navbar.brand_a [ Fulma.Common.GenericOption.Props [ Href "" ] ]
+                [ Navbar.brand_a [ Fulma.Common.GenericOption.Props [ Href "#" ] ]
                     [ Navbar.item_div [ ]
                         [ Image.image [ Image.is32x32 ]
                             [ img [ Src "assets/mini_logo.svg" ] ]

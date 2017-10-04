@@ -20,15 +20,20 @@ let loaderView isLoading =
 
 let questionsView (question : Database.Question) =
     let createdAt = DateTime.Now// DateTime.Parse(question.CreatedAt).ToLocalTime()
-    let url = "" //AuthenticatedPage.Question >> AuthPage >> toHash
+    let url =
+        Router.QuestionPage.Show
+        >> Router.Question
+        >> Router.toHash //AuthenticatedPage.Question >> AuthPage >> toHash
 
     Media.media [ ]
         [ Media.left [ ]
             [ Image.image [ Image.is64x64 ]
                 [ img [ Src ("avatars/" + question.Author.Avatar)  ] ] ]
           Media.content [ ]
-            [ a [ Href url ]
-                [ str question.Title ]
+            [ Heading.p [ Heading.isSubtitle
+                          Heading.is5 ]
+                [ a [ Href (url question.Id) ]
+                    [ str question.Title ] ]
               Level.level [ ]
                 [ Level.left [ ] [ ] // Needed to force the level right aligment
                   Level.right [ ]

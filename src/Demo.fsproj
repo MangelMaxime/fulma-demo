@@ -14,6 +14,10 @@
     <Compile Include="Question/Index/Rest.fs" />
     <Compile Include="Question/Index/State.fs" />
     <Compile Include="Question/Index/View.fs" />
+    <Compile Include="Question/Show/Types.fs" />
+    <Compile Include="Question/Show/Rest.fs" />
+    <Compile Include="Question/Show/State.fs" />
+    <Compile Include="Question/Show/View.fs" />
     <Compile Include="Question/Dispatcher/Types.fs" />
     <Compile Include="Question/Dispatcher/State.fs" />
     <Compile Include="Question/Dispatcher/View.fs" />

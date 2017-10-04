@@ -7,7 +7,7 @@ open Fable.Core.JsInterop
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 1
+let [<Literal>] CurrentVersion = 2
 
 type Author =
     { Id : int
@@ -52,8 +52,11 @@ type Database =
                 .value()
 
     static member Init () =
+        Logger.debugfn "CurrentVersion: %i" CurrentVersion
+        Logger.debugfn "Database.Version: %i" Database.Version
         if Database.Version <> CurrentVersion then
             Browser.localStorage.removeItem("database")
+            dbInstance <- None
             Database.Default()
 
     static member Default () =
