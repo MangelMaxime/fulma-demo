@@ -35,10 +35,6 @@ Target "Install" (fun _ ->
     runDotnet __SOURCE_DIRECTORY__ "restore Demo.sln"
 )
 
-Target "BuildDotnet" (fun _ ->
-    runDotnet __SOURCE_DIRECTORY__ "build Demo.sln"
-)
-
 Target "YarnInstall" (fun _ ->
     Yarn (fun p ->
     { p with
@@ -98,16 +94,14 @@ Target "PublishDocsAppVeyor" (fun _ ->
 "Clean"
     ==> "InstallDotNetCore"
     ==> "Install"
-    ==> "BuildDotnet"
-
-"BuildDotnet"
-    ==> "YarnInstall"
-    ==> "Watch"
-
-"BuildDotnet"
     ==> "YarnInstall"
     ==> "Build"
-    ==> "PublishDocs"
+
+"Watch"
+    <== [ "YarnInstall" ]
+
+"PublishDocs"
+    <== [ "Build" ]
 
 // start build
 RunTargetOrDefault "Build"
