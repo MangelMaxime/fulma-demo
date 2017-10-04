@@ -15,8 +15,7 @@ var babelOptions = fableUtils.resolveBabelOptions({
             },
             "modules": false
         }]
-    ],
-    plugins: ["transform-runtime"]
+    ]
 });
 
 var isProduction = process.argv.indexOf("-p") >= 0;
@@ -32,10 +31,18 @@ var commonPlugins = [
 
 module.exports = {
     devtool: false,
-    entry: resolve('./src/Demo.fsproj'),
+    entry: {
+        app: [
+            "babel-polyfill",
+            resolve('./src/Demo.fsproj')
+        ],
+        style: [
+            resolve('./src/sass/main.sass')
+        ]
+    },
     output: {
         path: resolve('./output'),
-        filename: '[name].js'
+        filename: isProduction ? '[name].[hash].js' : '[name].js'
     },
     plugins: isProduction ?
         commonPlugins
@@ -87,6 +94,10 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
+            },
+            {
+                test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)(\?.*$|$)/,
+                use: ["file-loader"]
             }
         ]
     }
