@@ -8,6 +8,6 @@ module Logger
 
     let inline log msg = console.log msg
 
-    let inline debug info = printfn "[Debug] %A" info
+    let inline debug info = console.log("[Debug] " + info)
 
     let inline debugfn fn info = console.log("[Debug] " + sprintf fn info)

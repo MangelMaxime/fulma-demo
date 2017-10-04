@@ -8,7 +8,7 @@ open System
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 3
+let [<Literal>] CurrentVersion = 4
 
 type Author =
     { Id : int
@@ -58,7 +58,11 @@ type Database =
                 .value()
 
     static member Init () =
+        Logger.debug "Init database"
+        Logger.debugfn "Database.Version: %i" Database.Version
+        Logger.debugfn "CurrentVersion: %i" CurrentVersion
         if Database.Version <> CurrentVersion then
+            Logger.debug "Migration detected, re-create the database"
             Browser.localStorage.removeItem("database")
             dbInstance <- None
             Database.Default()
