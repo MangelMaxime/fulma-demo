@@ -8,8 +8,8 @@
     <Compile Include="Import/Fable.Import.Lowdb.fs" />
     <Compile Include="Global/Env.fs" />
     <Compile Include="Global/Logger.fs" />
-    <Compile Include="Global/Database.fs" />
     <Compile Include="Global/Router.fs" />
+    <Compile Include="Global/Database.fs" />
     <Compile Include="Question/Index/Types.fs" />
     <Compile Include="Question/Index/Rest.fs" />
     <Compile Include="Question/Index/State.fs" />

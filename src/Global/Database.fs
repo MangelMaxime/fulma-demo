@@ -8,9 +8,9 @@ open System
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 4
+let [<Literal>] CurrentVersion = 5
 
-type Author =
+type User =
     { Id : int
       Firstname: string
       Surname: string
@@ -18,14 +18,15 @@ type Author =
 
 type Question =
     { Id : int
-      Author : Author
+      AuthorId : int
       Title : string
       Description : string
       CreatedAt : DateTime }
 
 type DatabaseData =
     { Version : int
-      Questions : Question [] }
+      Questions : Question []
+      Users : User [] }
 
 /// Database helpers
 
@@ -51,6 +52,11 @@ type Database =
             Database.Lowdb
                 .get(!^"Questions")
 
+    static member Users
+        with get() : Lowdb.Lowdb =
+            Database.Lowdb
+                .get(!^"Users")
+
     static member Version
         with get() : int =
             Database.Lowdb
@@ -59,9 +65,9 @@ type Database =
 
     static member Init () =
         Logger.debug "Init database"
-        Logger.debugfn "Database.Version: %i" Database.Version
-        Logger.debugfn "CurrentVersion: %i" CurrentVersion
         try
+            Logger.debugfn "Database.Version: %i" Database.Version
+            Logger.debugfn "CurrentVersion: %i" CurrentVersion
             if Database.Version <> CurrentVersion then
                 Logger.debug "Migration detected"
                 Database.Restore()
@@ -82,11 +88,7 @@ type Database =
                 { Version = CurrentVersion
                   Questions =
                     [| { Id = 0
-                         Author =
-                             { Id = 0
-                               Firstname = "Maxime"
-                               Surname = "Mangel"
-                               Avatar = "maxime_mangel.png" }
+                         AuthorId = 1
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """
@@ -94,17 +96,22 @@ type Database =
                              """
                          CreatedAt = DateTime.Parse "2017-09-14T17:44:28.103Z" }
                        { Id = 1
-                         Author =
-                             { Id = 0
-                               Firstname = "Robin"
-                               Surname = "Munn"
-                               Avatar = "robin_munn.png" }
+                         AuthorId = 0
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """
 
                              """
                          CreatedAt = DateTime.Parse "2017-09-12T09:27:28.103Z" } |]
+                  Users =
+                    [| { Id = 0
+                         Firstname = "Maxime"
+                         Surname = "Mangel"
+                         Avatar = "maxime_mangel.png" }
+                       { Id = 1
+                         Firstname = "Robin"
+                         Surname = "Munn"
+                         Avatar = "robin_munn.png" } |]
                 }
             ).write()
         Logger.debug "Database restored"

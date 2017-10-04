@@ -18,7 +18,7 @@ let loaderView isLoading =
         PageLoader.pageLoader [ ]
             [ ]
 
-let questionsView (question : Database.Question) =
+let questionsView (question : QuestionInfo) =
     let url =
         Router.QuestionPage.Show
         >> Router.Question

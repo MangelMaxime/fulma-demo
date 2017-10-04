@@ -1,13 +1,22 @@
 module Question.Index.Types
 
+open System
+
+type QuestionInfo =
+    { Id : int
+      Author : Database.User
+      Title : string
+      Description : string
+      CreatedAt : DateTime }
+
 type Model =
-    { Questions : Question list option }
+    { Questions : QuestionInfo list option }
 
     static member Empty =
         { Questions = None }
 
 type GetQuestionsRes =
-    | Success of Question list
+    | Success of QuestionInfo list
     | Error of exn
 
 type Msg =
