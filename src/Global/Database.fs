@@ -8,7 +8,7 @@ open System
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 5
+let [<Literal>] CurrentVersion = 6
 
 type User =
     { Id : int
@@ -16,12 +16,18 @@ type User =
       Surname: string
       Avatar : string }
 
+type Answer =
+    { CreatedAt : DateTime
+      AuthorId : User
+      Content : string }
+
 type Question =
     { Id : int
       AuthorId : int
       Title : string
       Description : string
-      CreatedAt : DateTime }
+      CreatedAt : DateTime
+      Answers : Answer [] }
 
 type DatabaseData =
     { Version : int
@@ -94,6 +100,7 @@ type Database =
                              """
 
                              """
+                         Answers = [||]
                          CreatedAt = DateTime.Parse "2017-09-14T17:44:28.103Z" }
                        { Id = 1
                          AuthorId = 0
@@ -102,6 +109,7 @@ type Database =
                              """
 
                              """
+                         Answers = [||]
                          CreatedAt = DateTime.Parse "2017-09-12T09:27:28.103Z" } |]
                   Users =
                     [| { Id = 0

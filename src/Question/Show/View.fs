@@ -11,4 +11,5 @@ open Fulma.Layouts
 open System
 
 let root model dispatch =
-    str "show"
+    Container.container [ ]
+        [ str "show" ]

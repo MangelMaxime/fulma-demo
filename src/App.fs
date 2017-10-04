@@ -43,8 +43,7 @@ let renderPage model dispatch =
 let root model dispatch =
     div [ ]
         [ navbarView
-          Container.container [ ]
-            [ renderPage model dispatch ] ]
+          renderPage model dispatch ]
 
 
 open Elmish.React
