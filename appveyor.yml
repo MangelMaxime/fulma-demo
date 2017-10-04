@@ -8,26 +8,3 @@ image: Visual Studio 2017
 
 build_script:
     - cmd: build.cmd Build
-
-environment:
-  access_token:
-    secure: E7ICW0SQ5sUtlviMxMnKx+gOAEjMXvrSpasDc9rSzAvByRRPfN73wnLWob2NptUc
-  github_email:
-    secure: mfE95dz/XsHZMK1r7Ch0dlk0pXaSEU7iHvKZuwg+29k=
-
-after_build:
-  - git config --global credential.helper store
-  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-  - git config --global user.email %github_email%
-  - git config --global user.name "MangelMaxime"
-
-for:
-
-# override settings for `master` branch
--
-  branches:
-    only:
-      - master
-
-  on_success:
-    build.cmd PublishDocsAppVeyor
