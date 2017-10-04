@@ -6,6 +6,9 @@ open Fable.Core.JsInterop
 
 /// Shared types between the Client and the Database part
 
+// If we update the database content or structure we need to increment this value
+let [<Literal>] CurrentVersion = 1
+
 type Author =
     { Id : int
       Firstname: string
@@ -20,14 +23,14 @@ type Question =
       CreatedAt : string }
 
 type DatabaseData =
-    { Questions : Question [] }
+    { Version : int
+      Questions : Question [] }
 
 /// Database helpers
 
 let private adapter = Lowdb.LocalStorageAdapter("database")
 
 let mutable private dbInstance : Lowdb.Lowdb option = Option.None
-
 
 type Database =
     static member Lowdb
@@ -42,10 +45,22 @@ type Database =
             Database.Lowdb
                 .get(!^"Questions")
 
+    static member Version
+        with get() : int =
+            Database.Lowdb
+                .get(!^"Version")
+                .value()
+
     static member Init () =
+        if Database.Version <> CurrentVersion then
+            Browser.localStorage.removeItem("database")
+            Database.Default()
+
+    static member Default () =
         Database.Lowdb
             .defaults(
-                { Questions =
+                { Version = CurrentVersion
+                  Questions =
                     [| { Id = 0
                          Author =
                              { Id = 0
