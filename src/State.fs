@@ -11,7 +11,7 @@ let urlUpdate (result: Option<Navigation.Page>) model =
     | None ->
 
         Browser.console.error("Error parsing url: " + Browser.window.location.href)
-        model, Navigation.modifyUrl (Navigation.toHash model.CurrentPage)
+        model, Navigation.newUrl (Navigation.toHash model.CurrentPage)
 
     | Some page ->
         let model = { model with CurrentPage = page }
