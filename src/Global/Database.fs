@@ -61,11 +61,20 @@ type Database =
         Logger.debug "Init database"
         Logger.debugfn "Database.Version: %i" Database.Version
         Logger.debugfn "CurrentVersion: %i" CurrentVersion
-        if Database.Version <> CurrentVersion then
-            Logger.debug "Migration detected, re-create the database"
-            Browser.localStorage.removeItem("database")
-            dbInstance <- None
-            Database.Default()
+        try
+            if Database.Version <> CurrentVersion then
+                Logger.debug "Migration detected"
+                Database.Restore()
+        with
+            | _ ->
+                Logger.debug "Failed to parse database from storage"
+                Database.Restore()
+
+    static member Restore () =
+        Logger.debug "Restore the database"
+        Browser.localStorage.removeItem("database")
+        dbInstance <- None
+        Database.Default()
 
     static member Default () =
         Database.Lowdb
@@ -98,3 +107,4 @@ type Database =
                          CreatedAt = DateTime.Parse "2017-09-12T09:27:28.103Z" } |]
                 }
             ).write()
+        Logger.debug "Database restored"
