@@ -15,9 +15,13 @@ environment:
   github_email:
     secure: mfE95dz/XsHZMK1r7Ch0dlk0pXaSEU7iHvKZuwg+29k=
 
-on_success:
-  - IF %APPVEYOR_REPO_BRANCH%==master git config --global credential.helper store
-  - IF %APPVEYOR_REPO_BRANCH%==master ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-  - IF %APPVEYOR_REPO_BRANCH%==master git config --global user.email %github_email%
-  - IF %APPVEYOR_REPO_BRANCH%==master git config --global user.name "MangelMaxime"
-  - IF %APPVEYOR_REPO_BRANCH%==master build.cmd PublishDocsAppVeyor
+for:
+  - branches:
+      only:
+        - master
+    on_success:
+      - git config --global credential.helper store
+      - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+      - git config --global user.email %github_email%
+      - git config --global user.name "MangelMaxime"
+      - build.cmd PublishDocsAppVeyor
