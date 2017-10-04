@@ -15,13 +15,19 @@ environment:
   github_email:
     secure: mfE95dz/XsHZMK1r7Ch0dlk0pXaSEU7iHvKZuwg+29k=
 
+after_build:
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+  - git config --global user.email %github_email%
+  - git config --global user.name "MangelMaxime"
+
 for:
-  - branches:
-      only:
-        - master
-    on_success:
-      - git config --global credential.helper store
-      - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-      - git config --global user.email %github_email%
-      - git config --global user.name "MangelMaxime"
-      - build.cmd PublishDocsAppVeyor
+
+# override settings for `master` branch
+-
+  branches:
+    only:
+      - master
+
+  on_success:
+    build.cmd PublishDocsAppVeyor
