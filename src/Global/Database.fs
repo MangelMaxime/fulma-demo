@@ -3,11 +3,12 @@ module Database
 
 open Fable.Import
 open Fable.Core.JsInterop
+open System
 
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 2
+let [<Literal>] CurrentVersion = 3
 
 type Author =
     { Id : int
@@ -20,7 +21,7 @@ type Question =
       Author : Author
       Title : string
       Description : string
-      CreatedAt : string }
+      CreatedAt : DateTime }
 
 type DatabaseData =
     { Version : int
@@ -28,7 +29,12 @@ type DatabaseData =
 
 /// Database helpers
 
-let private adapter = Lowdb.LocalStorageAdapter("database")
+let adapterOptions = jsOptions<Lowdb.AdapterOptions>(fun o ->
+    o.serialize <- Some toJson
+    o.deserialize <- ofJson<DatabaseData> >> box |> Some
+)
+
+let private adapter = Lowdb.LocalStorageAdapter("database", adapterOptions)
 
 let mutable private dbInstance : Lowdb.Lowdb option = Option.None
 
@@ -52,8 +58,6 @@ type Database =
                 .value()
 
     static member Init () =
-        Logger.debugfn "CurrentVersion: %i" CurrentVersion
-        Logger.debugfn "Database.Version: %i" Database.Version
         if Database.Version <> CurrentVersion then
             Browser.localStorage.removeItem("database")
             dbInstance <- None
@@ -75,20 +79,8 @@ type Database =
                              """
 
                              """
-                         CreatedAt = "" }
+                         CreatedAt = DateTime.Parse "2017-09-14T17:44:28.103Z" }
                        { Id = 1
-                         Author =
-                             { Id = 0
-                               Firstname = "Alfonso"
-                               Surname = "Garciacaro"
-                               Avatar = "alfonso_garciacaro.png" }
-                         Title = "What is the average wing speed of an unladen swallow?"
-                         Description =
-                             """
-
-                             """
-                         CreatedAt = "" }
-                       { Id = 2
                          Author =
                              { Id = 0
                                Firstname = "Robin"
@@ -99,6 +91,6 @@ type Database =
                              """
 
                              """
-                         CreatedAt = "" } |]
+                         CreatedAt = DateTime.Parse "2017-09-12T09:27:28.103Z" } |]
                 }
             ).write()

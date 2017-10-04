@@ -107,9 +107,9 @@ module Lowdb =
         abstract writeOnChange: bool option with get, set
 
     type [<AllowNullLiteral>] AdapterOptions =
-        abstract defaultValue : obj with get, set
-        abstract serialize : obj -> string with get, set
-        abstract deserialize : string -> obj with get, set
+        abstract defaultValue : obj option with get, set
+        abstract serialize : (obj -> string) option with get, set
+        abstract deserialize : (string -> obj) option with get, set
 
     and IAdapter(source: string, ?option: AdapterOptions) =
         class end

@@ -19,7 +19,6 @@ let loaderView isLoading =
             [ ]
 
 let questionsView (question : Database.Question) =
-    let createdAt = DateTime.Now// DateTime.Parse(question.CreatedAt).ToLocalTime()
     let url =
         Router.QuestionPage.Show
         >> Router.Question
@@ -42,7 +41,7 @@ let questionsView (question : Database.Question) =
                             [ str (sprintf "Asked by %s %s, %s"
                                                 question.Author.Firstname
                                                 question.Author.Surname
-                                                (createdAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ] ] ]
+                                                (question.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ] ] ]
 
 let questionsList questions =
     Columns.columns [ Columns.isCentered ]
