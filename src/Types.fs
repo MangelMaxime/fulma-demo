@@ -18,7 +18,9 @@ type Model =
       QuestionDispatcher : Question.Dispatcher.Types.Model }
 
     static member Empty =
-        { CurrentPage = Navigation.Home
+        { CurrentPage =
+            Navigation.QuestionPage.Index
+            |> Navigation.Question
           QuestionDispatcher = Question.Dispatcher.Types.Model.Empty }
 
 type Msg =

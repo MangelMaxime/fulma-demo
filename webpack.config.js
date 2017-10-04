@@ -61,7 +61,8 @@ module.exports = {
         ]
     },
     devServer: {
-        contentBase: resolve('./output/'),
+        contentBase: resolve('./public/'),
+        publicPath: "/",
         port: 8080,
         hot: true,
         inline: true

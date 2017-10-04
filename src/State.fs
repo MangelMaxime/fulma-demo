@@ -16,7 +16,6 @@ let urlUpdate (result: Option<Navigation.Page>) model =
     | Some page ->
         let model = { model with CurrentPage = page }
         match page with
-        | Navigation.Home -> model, Cmd.none
         | Navigation.Question questionPage ->
             let (subModel, subCmd) = Question.Dispatcher.State.init questionPage
             { model with QuestionDispatcher = subModel }, Cmd.map QuestionDispatcherMsg subCmd
