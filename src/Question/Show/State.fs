@@ -3,19 +3,19 @@ module Question.Show.State
 open Elmish
 open Types
 
-let init () =
-    Model.Empty, Cmd.ofMsg GetQuestions
+let init id =
+    Model.Empty id , Cmd.ofMsg (GetDetails id)
 
 let update msg (model: Model) =
     match msg with
-    | GetQuestions ->
-        model, Cmd.ofPromise Rest.getQuestions () GetQuestionsResult (GetQuestionsRes.Error >> GetQuestionsResult)
+    | GetDetails id ->
+        model, Cmd.ofPromise Rest.getDetails id GetDetailsResult (GetDetailsRes.Error >> GetDetailsResult)
 
-    | GetQuestionsResult result ->
+    | GetDetailsResult result ->
         match result with
-        | GetQuestionsRes.Success questions ->
-            { model with Questions = Some questions }, Cmd.none
+        | GetDetailsRes.Success data ->
+            { model with Data = Some data }, Cmd.none
 
-        | GetQuestionsRes.Error error ->
-            Logger.debugfn "[Question.Index.State] Error when fetch questions:\n %A" error
+        | GetDetailsRes.Error error ->
+            Logger.debugfn "[Question.Show.State] Error when fetching details: \n %A" error
             model, Cmd.none

@@ -51,6 +51,7 @@ Target "Watch" (fun _ ->
 )
 
 // Where to push generated documentation
+let githubLink = "git@github.com:MangelMaxime/fulma-demo.git"
 let publishBranch = "gh-pages"
 let fableRoot   = __SOURCE_DIRECTORY__
 let temp        = fableRoot </> "temp"
@@ -60,34 +61,14 @@ type CommitMessage = Printf.StringFormat<(string-> string)>
 
 // --------------------------------------------------------------------------------------
 // Release Scripts
-let publishDocs isAppVeyor githubLink =
-    let commitMessage : CommitMessage =
-        if isAppVeyor then
-            "Update site (%s) from AppVeyor"
-        else
-            "Update site (%s) from local"
-
+Target "PublishDocs" (fun _ ->
     CleanDir temp
     Repository.cloneSingleBranch "" githubLink publishBranch temp
 
     CopyRecursive docsOuput temp true |> tracefn "%A"
     StageAll temp
-    Git.Commit.Commit temp (sprintf commitMessage (DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")))
+    Git.Commit.Commit temp (sprintf "Update site (%s)" (DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")))
     Branches.push temp
-
-Target "PublishDocs" (fun _ ->
-    publishDocs false "git@github.com:MangelMaxime/fulma-demo.git"
-)
-
-Target "PublishDocsAppVeyor" (fun _ ->
-    let accessToken =
-        match environVarOrNone "access_token" with
-        | Some accessToken -> accessToken
-        | None -> failwith "The Nuget API key must be set in a NUGET_KEY environmental variable"
-
-    let githubLink = sprintf "https://%s:x-oauth-basic@github.com/MangelMaxime/fulma-demo.git" accessToken
-
-    publishDocs true githubLink
 )
 
 // Build order

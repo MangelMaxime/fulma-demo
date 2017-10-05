@@ -1,15 +1,33 @@
 module Question.Show.Types
 
-type Model =
-    { Questions : Question list option }
+type Data =
+    { Questions : Question option
+      Answers : Database.Answer list }
+
+type StringField =
+    { Value : string
+      Error : string option }
 
     static member Empty =
-        { Questions = None }
+        { Value = ""
+          Error = None }
 
-type GetQuestionsRes =
-    | Success of Question list
+type Model =
+    { QuestionId : int
+      Data : Data option
+      Reply : StringField
+      IsWaitingReply : bool }
+
+    static member Empty id =
+        { QuestionId = id
+          Data = None
+          Reply = StringField.Empty
+          IsWaitingReply = false }
+
+type GetDetailsRes =
+    | Success of Data
     | Error of exn
 
 type Msg =
-    | GetQuestions
-    | GetQuestionsResult of GetQuestionsRes
+    | GetDetails of int
+    | GetDetailsResult of GetDetailsRes

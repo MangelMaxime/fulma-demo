@@ -4,7 +4,7 @@ open Fable.PowerPack
 open Types
 open Database
 
-let getQuestions _ =
+let getDetails (id : int) =
     promise {
 
         let questions =
@@ -15,5 +15,5 @@ let getQuestions _ =
 
         do! Promise.sleep 1000
 
-        return GetQuestionsRes.Success questions
+        return GetDetailsRes.Success (failwith "")
     }

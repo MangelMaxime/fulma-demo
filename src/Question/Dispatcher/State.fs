@@ -2,6 +2,7 @@ module Question.Dispatcher.State
 
 open Elmish
 open Types
+open Fable.Import
 
 let init (questionPage: Router.QuestionPage) =
     // Store current page
@@ -10,18 +11,21 @@ let init (questionPage: Router.QuestionPage) =
     match questionPage with
     | Router.QuestionPage.Index ->
         let (subModel, subCmd) = Question.Index.State.init ()
-        { model with IndexModel = subModel }, Cmd.map IndexMsg subCmd
+        { model with IndexModel = Some subModel }, Cmd.map IndexMsg subCmd
 
     | Router.QuestionPage.Show id ->
-        let (subModel, subCmd) = Question.Show.State.init ()
-        { model with ShowModel = subModel }, Cmd.map ShowMsg subCmd
+        let (subModel, subCmd) = Question.Show.State.init id
+        { model with ShowModel = Some subModel }, Cmd.map ShowMsg subCmd
 
 let update msg (model: Model) =
-    match msg with
-    | IndexMsg msg ->
-        let (subModel, subCmd) = Question.Index.State.update msg model.IndexModel
-        { model with IndexModel = subModel }, Cmd.map IndexMsg subCmd
+    match msg, model with
+    | IndexMsg msg, { IndexModel = Some extractedModel } ->
+        let (subModel, subCmd) = Question.Index.State.update msg extractedModel
+        { model with IndexModel = Some subModel }, Cmd.map IndexMsg subCmd
 
-    | ShowMsg msg ->
-        let (subModel, subCmd) = Question.Show.State.update msg model.ShowModel
-        { model with ShowModel = subModel }, Cmd.map ShowMsg subCmd
+    | ShowMsg msg, { ShowModel = Some extractedModel } ->
+        let (subModel, subCmd) = Question.Show.State.update msg extractedModel
+        { model with ShowModel = Some subModel }, Cmd.map ShowMsg subCmd
+    | _ ->
+        Browser.console.log("[Question.Dispatcher.State] Discarded message")
+        model, Cmd.none

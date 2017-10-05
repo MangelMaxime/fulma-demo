@@ -51,12 +51,12 @@ let questionsList questions =
 let root model dispatch =
     match model.Questions with
     | Some questions ->
-        div [ ]
+        Container.container [ ]
             [ loaderView false
               Section.section [ ]
                 [ Heading.h3 [ ]
                     [ str "Latest questions" ] ]
               questionsList questions ]
     | None ->
-        div [ ]
+        Container.container [ ]
             [ loaderView true ]
