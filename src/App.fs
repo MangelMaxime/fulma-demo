@@ -59,7 +59,9 @@ Program.mkProgram init update root
 |> Program.toNavigable (parseHash Router.pageParser) urlUpdate
 #if DEBUG
 |> Program.withHMR
-|> Program.withDebugger
 #endif
 |> Program.withReact "elmish-app"
+#if DEBUG
+|> Program.withDebugger
+#endif
 |> Program.run

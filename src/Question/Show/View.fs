@@ -11,6 +11,7 @@ open Fulma.Elements
 open Fulma.Elements.Form
 open Fulma.Layouts
 open System
+open Fable.Core.JsInterop
 
 let converter = Showdown.Globals.Converter.Create()
 
@@ -31,6 +32,37 @@ let loaderView isLoading =
     else
         PageLoader.pageLoader [ ]
             [ ]
+
+let replyView (fieldValue: StringField) isWaiting dispatch =
+    Media.media [ ]
+        [ Media.left [ ]
+            [ Image.image [ Image.is64x64 ]
+                [ img [ Src ("/img/avatars/guess.png") ] ] ]
+          Media.content [ ]
+            [ Field.field_div [ ]
+                [ yield Control.control_div [ if isWaiting then yield Control.isLoading ]
+                    [ Textarea.textarea [ yield Textarea.props [
+                                            DefaultValue fieldValue.Value
+                                            OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
+                                            OnKeyDown (fun ev ->
+                                                if ev.ctrlKey && ev.key = "Enter" then
+                                                    dispatch Submit
+                                            ) ]
+                                          if isWaiting then yield Textarea.isDisabled ]
+                    [ ] ]
+                  if fieldValue.Error.IsSome then
+                    yield Help.help [ Help.isDanger ]
+                            [ str fieldValue.Error.Value ] ]
+              Level.level [ ]
+                [ Level.left [ ]
+                    [ Level.item [ ]
+                        [ Button.button [ yield Button.isPrimary
+                                          yield Button.onClick (fun _ -> dispatch Submit)
+                                          if isWaiting then yield Button.isDisabled ]
+                                        [ str "Submit" ] ] ]
+                  Level.right [ ]
+                    [ Level.item [ ]
+                        [ str "Press Ctrl + Enter to submit" ] ] ] ] ]
 
 let answerView (answer : AnswerInfo) =
     Media.media [ ]
@@ -69,15 +101,14 @@ let questionsView (question : QuestionInfo) =
                                                         (question.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ]
               yield! (List.map answerView question.Answers) ] ]
 
-let pageContent (question: QuestionInfo) =
+let pageContent (question: QuestionInfo) reply isWaitingReply dispatch =
     Section.section [ ]
         [ Heading.p [ Heading.is5 ]
             [ str question.Title ]
           Columns.columns [ Columns.isCentered ]
             [ Column.column [ Column.Width.isTwoThirds ]
                 [ questionsView question
-                 ]
-             ] ]
+                  replyView reply isWaitingReply dispatch ] ] ]
 
 let root model dispatch =
     match model.State with
@@ -85,7 +116,7 @@ let root model dispatch =
         str "Something went wrong", false
     | State.Loading -> div [ ] [ ], true
     | State.Success data ->
-        pageContent data, false
+        pageContent data model.Reply model.IsWaitingReply dispatch, false
     |> (fun (pageContent, isLoading) ->
         Container.container [ ]
             [ loaderView isLoading
