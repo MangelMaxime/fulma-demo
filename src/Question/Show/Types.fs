@@ -1,8 +1,22 @@
 module Question.Show.Types
 
+open System
+
+type AnswerInfo =
+    { CreatedAt : DateTime
+      Author : Database.User
+      Content : string }
+
+type QuestionInfo =
+    { Id : int
+      Author : Database.User
+      Title : string
+      Description : string
+      CreatedAt : DateTime }
+
 type Data =
-    { Questions : Question option
-      Answers : Database.Answer list }
+    { Question : QuestionInfo
+      Answers : AnswerInfo list }
 
 type StringField =
     { Value : string
@@ -12,15 +26,20 @@ type StringField =
         { Value = ""
           Error = None }
 
+type State =
+    | Loading
+    | Error
+    | Success of Data
+
 type Model =
     { QuestionId : int
-      Data : Data option
+      State : State
       Reply : StringField
       IsWaitingReply : bool }
 
     static member Empty id =
         { QuestionId = id
-          Data = None
+          State = State.Loading
           Reply = StringField.Empty
           IsWaitingReply = false }
 

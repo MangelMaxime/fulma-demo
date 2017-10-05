@@ -18,7 +18,7 @@ type User =
 
 type Answer =
     { CreatedAt : DateTime
-      AuthorId : User
+      AuthorId : int
       Content : string }
 
 type Question =
@@ -63,6 +63,14 @@ type Database =
             Database.Lowdb
                 .get(!^"Users")
 
+    static member GetUserById (userId: int) =
+        Database.Users
+            .find(createObj [ "Id" ==> userId])
+            .value()
+        |> function
+           | null -> None
+           | value -> unbox<User> value |> Some
+
     static member Version
         with get() : int =
             Database.Lowdb
@@ -98,7 +106,9 @@ type Database =
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """
+Hello, yesterday I saw a flight of swallows and was wondering what their **average wing speed** is.
 
+If you know the answer please share it.
                              """
                          Answers = [||]
                          CreatedAt = DateTime.Parse "2017-09-14T17:44:28.103Z" }
@@ -107,9 +117,35 @@ type Database =
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """
-
+Hello Alfonso,
+I wanted to know why did you create Fable. Did you always planned to use F# ? Or was you thinking to others languages ?
                              """
-                         Answers = [||]
+                         Answers =
+                            [| { CreatedAt = DateTime.Parse "2017-09-14T19:57:33.103Z"
+                                 AuthorId = 0
+                                 Content =
+                                    """
+> What do you mean, an African or European Swallow ?
+>
+> Monty Python’s: The Holy Grail
+
+Ok I must admit, I use google to search the question and found a post explaining the reference :).
+
+I thought you was asking it seriously well done.
+                                    """ }
+                               { CreatedAt = DateTime.Parse "2017-09-14T19:57:33.103Z"
+                                 AuthorId = 2
+                                 Content =
+                                    """
+Maxime,
+
+I believe you found [this blog post](http://www.saratoga.com/how-should-i-know/2013/07/what-is-the-average-air-speed-velocity-of-a-laden-swallow/).
+
+And so Robin, the conclusion of the post is:
+
+> In the end, it’s concluded that the airspeed velocity of a (European) unladen swallow is about 24 miles per hour or 11 meters per second.
+                                    """ }
+                            |]
                          CreatedAt = DateTime.Parse "2017-09-12T09:27:28.103Z" } |]
                   Users =
                     [| { Id = 0
@@ -119,7 +155,11 @@ type Database =
                        { Id = 1
                          Firstname = "Robin"
                          Surname = "Munn"
-                         Avatar = "robin_munn.png" } |]
+                         Avatar = "robin_munn.png" }
+                       { Id = 2
+                         Firstname = "Alfonso"
+                         Surname = "Garciacaro"
+                         Avatar = "alfonso_garciacaro.png" } |]
                 }
             ).write()
         Logger.debug "Database restored"

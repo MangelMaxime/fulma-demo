@@ -9,13 +9,13 @@ let init id =
 let update msg (model: Model) =
     match msg with
     | GetDetails id ->
-        model, Cmd.ofPromise Rest.getDetails id GetDetailsResult (GetDetailsRes.Error >> GetDetailsResult)
+        model, Cmd.ofPromise Rest.getDetails id (GetDetailsRes.Success >> GetDetailsResult) (GetDetailsRes.Error >> GetDetailsResult)
 
     | GetDetailsResult result ->
         match result with
         | GetDetailsRes.Success data ->
-            { model with Data = Some data }, Cmd.none
+            { model with State = State.Success data }, Cmd.none
 
         | GetDetailsRes.Error error ->
             Logger.debugfn "[Question.Show.State] Error when fetching details: \n %A" error
-            model, Cmd.none
+            { model with State = State.Error }, Cmd.none
