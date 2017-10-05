@@ -30,14 +30,13 @@ let getDetails (id : int) =
                           Author = user
                           Title = question.Title
                           Description = question.Description
-                          CreatedAt = question.CreatedAt }, Array.map buildAnswersInfo question.Answers
-            )
-            |> (fun (question, answers) ->
-                { Question = question
-                  Answers = Array.toList answers }
+                          CreatedAt = question.CreatedAt
+                          Answers =
+                            Array.map buildAnswersInfo question.Answers
+                            |> Array.toList }
             )
 
-        do! Promise.sleep 1000
+        do! Promise.sleep 500
 
         return data
     }

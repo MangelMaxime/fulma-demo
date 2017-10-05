@@ -106,19 +106,9 @@ type Database =
                          Title = "What is the average wing speed of an unladen swallow?"
                          Description =
                              """
-Hello, yesterday I saw a flight of swallows and was wondering what their **average wing speed** is.
+Hello, yesterday I saw a flight of swallows and was wondering what their **average wing speed** is ?
 
 If you know the answer please share it.
-                             """
-                         Answers = [||]
-                         CreatedAt = DateTime.Parse "2017-09-14T17:44:28.103Z" }
-                       { Id = 1
-                         AuthorId = 0
-                         Title = "What is the average wing speed of an unladen swallow?"
-                         Description =
-                             """
-Hello Alfonso,
-I wanted to know why did you create Fable. Did you always planned to use F# ? Or was you thinking to others languages ?
                              """
                          Answers =
                             [| { CreatedAt = DateTime.Parse "2017-09-14T19:57:33.103Z"
@@ -133,7 +123,7 @@ Ok I must admit, I use google to search the question and found a post explaining
 
 I thought you was asking it seriously well done.
                                     """ }
-                               { CreatedAt = DateTime.Parse "2017-09-14T19:57:33.103Z"
+                               { CreatedAt = DateTime.Parse "2017-09-14T20:07:27.103Z"
                                  AuthorId = 2
                                  Content =
                                     """
@@ -146,6 +136,17 @@ And so Robin, the conclusion of the post is:
 > In the end, it’s concluded that the airspeed velocity of a (European) unladen swallow is about 24 miles per hour or 11 meters per second.
                                     """ }
                             |]
+                         CreatedAt = DateTime.Parse "2017-09-14T17:44:28.103Z" }
+                       { Id = 1
+                         AuthorId = 0
+                         Title = "Why did you create Fable ?"
+                         Description =
+                             """
+Hello Alfonso,
+
+I wanted to know why did you create Fable. Did you always planned to use F# ? Or was you thinking to others languages ?
+                             """
+                         Answers = [| |]
                          CreatedAt = DateTime.Parse "2017-09-12T09:27:28.103Z" } |]
                   Users =
                     [| { Id = 0

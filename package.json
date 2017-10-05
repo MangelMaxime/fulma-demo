@@ -13,7 +13,8 @@
     "lowdb": "^1.0.0",
     "marked": "^0.3.6",
     "preact": "^8.2.5",
-    "preact-compat": "^3.17.0"
+    "preact-compat": "^3.17.0",
+    "showdown": "^1.7.5"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

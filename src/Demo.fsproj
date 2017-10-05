@@ -3,8 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Import/Fable.Import.Marked.fs" />
-    <Compile Include="Import/Fable.Import.PrismJS.fs" />
+    <Compile Include="Import/Fable.Import.Showdown.fs" />
     <Compile Include="Import/Fable.Import.Lowdb.fs" />
     <Compile Include="Global/Env.fs" />
     <Compile Include="Global/Logger.fs" />

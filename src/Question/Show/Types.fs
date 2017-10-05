@@ -12,10 +12,7 @@ type QuestionInfo =
       Author : Database.User
       Title : string
       Description : string
-      CreatedAt : DateTime }
-
-type Data =
-    { Question : QuestionInfo
+      CreatedAt : DateTime
       Answers : AnswerInfo list }
 
 type StringField =
@@ -29,7 +26,7 @@ type StringField =
 type State =
     | Loading
     | Error
-    | Success of Data
+    | Success of QuestionInfo
 
 type Model =
     { QuestionId : int
@@ -44,7 +41,7 @@ type Model =
           IsWaitingReply = false }
 
 type GetDetailsRes =
-    | Success of Data
+    | Success of QuestionInfo
     | Error of exn
 
 type Msg =
