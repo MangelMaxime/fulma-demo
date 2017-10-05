@@ -5,31 +5,25 @@ open Types
 open Database
 open Fable.Core.JsInterop
 
-let associateUser (question : Database.Question) =
-    Database.Users
-        .find(createObj [ "Id" ==> question.AuthorId])
-        .value()
-    |> (fun (user : Database.User) ->
-        { Id = question.Id
-          Author = user
-          Title = question.Title
-          Description = question.Description
-          CreatedAt = question.CreatedAt }
-    )
-
-
 let getQuestions _ =
     promise {
 
-        let questions : Database.Question [] =
+        let result =
             Database.Questions
                 .sortBy("Id")
                 .value()
-
-        let result =
-            questions
+            |> unbox<Database.Question []>
+            |> Array.map(fun question ->
+                match Database.GetUserById question.AuthorId with
+                | None -> failwithf "Unkown author of id#%i for the question#%i" question.AuthorId question.Id
+                | Some user ->
+                    { Id = question.Id
+                      Author = user
+                      Title = question.Title
+                      Description = question.Description
+                      CreatedAt = question.CreatedAt }
+            )
             |> Array.toList
-            |> List.map associateUser
 
         do! Promise.sleep 1000
 
