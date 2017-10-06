@@ -22,11 +22,11 @@ let update msg (model: Model) =
     | GetDetailsResult result ->
         match result with
         | GetDetailsRes.Success data ->
-            { model with State = State.Success data }, Cmd.none
+            { model with Data = Some data }, Cmd.none
 
         | GetDetailsRes.Error error ->
             Logger.debugfn "[Question.Show.State] Error when fetching details: \n %A" error
-            { model with State = State.Error }, Cmd.none
+            { model with Data = None }, Cmd.none
     | ChangeReply value ->
         model
         |> Lens.set (Model.ReplyLens >-> StringField.ValueLens) value
@@ -41,10 +41,25 @@ let update msg (model: Model) =
                 model
                 |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) (Some msg), Cmd.none
             | None ->
-                model, Cmd.none
+                { model with IsWaitingReply = true }, Cmd.ofPromise
+                                                        Rest.createAnswer
+                                                        (model.QuestionId, model.Session.Id, model.Reply.Value)
+                                                        (CreateAnswerRes.Success >> CreateAnswerResult)
+                                                        (CreateAnswerRes.Error >> CreateAnswerResult)
+    | CreateAnswerResult result ->
+        match result with
+        | CreateAnswerRes.Error error ->
+            Logger.debugfn "[Question.Show.State] Error when fetching details: \n %A" error
+            { model with IsWaitingReply = false }, Cmd.none
 
-            // if Validation.Show.verifyCreateAnswer createAnswerData then
-            //     { model with IsWaitingReply = true }, Cmd.ofPromise Rest.createAnswer (model.Question.Value.Id, createAnswerData) CreateAnswerSuccess NetworkError
-            // else
-            //     model
-            // |> Lens
+        | CreateAnswerRes.Success newAnswer ->
+            match model.Data with
+            | Some data ->
+                { model with IsWaitingReply = false
+                             Data = Some { data with Answers = List.append data.Answers [newAnswer] } }
+                |> Lens.set (Model.ReplyLens >-> StringField.ValueLens) ""
+                |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) None, Cmd.none
+            | None ->
+                Logger.debug "[Question.Show.State] Can't add answer when data isn't set"
+                { model with IsWaitingReply = false }
+                |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) (Some "An error occured please try again, if this error persist contact your admin"), Cmd.none

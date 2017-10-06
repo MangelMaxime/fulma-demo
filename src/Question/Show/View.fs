@@ -42,7 +42,7 @@ let replyView (user: User) (fieldValue: StringField) isWaiting dispatch =
             [ Field.field_div [ ]
                 [ yield Control.control_div [ if isWaiting then yield Control.isLoading ]
                     [ Textarea.textarea [ yield Textarea.props [
-                                            DefaultValue fieldValue.Value
+                                            Value fieldValue.Value
                                             OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
                                             OnKeyDown (fun ev ->
                                                 if ev.ctrlKey && ev.key = "Enter" then
@@ -111,12 +111,10 @@ let pageContent (user: User) (question: QuestionInfo) reply isWaitingReply dispa
                   replyView user reply isWaitingReply dispatch ] ] ]
 
 let root model dispatch =
-    match model.State with
-    | State.Error ->
-        str "Something went wrong", false
-    | State.Loading -> div [ ] [ ], true
-    | State.Success data ->
+    match model.Data with
+    | Some data ->
         pageContent model.Session data model.Reply model.IsWaitingReply dispatch, false
+    | None -> div [ ] [ ], true
     |> (fun (pageContent, isLoading) ->
         Container.container [ ]
             [ loaderView isLoading

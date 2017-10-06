@@ -4,6 +4,7 @@ open Fable.PowerPack
 open Types
 open Database
 open Fable.Core.JsInterop
+open System
 
 let buildAnswersInfo (answer : Database.Answer) =
     Database.GetUserById answer.AuthorId
@@ -39,4 +40,24 @@ let getDetails (id : int) =
         do! Promise.sleep 300
 
         return data
+    }
+
+let createAnswer (questionId : int, userId : int, content : string) =
+    promise {
+
+        let answer =
+            { CreatedAt = DateTime.Parse "2017-09-14T20:07:27.103Z"
+              AuthorId = userId
+              Content = content }
+
+        // Add the answer to the question
+        Database.Questions
+            .find(createObj [ "Id" ==> questionId])
+            .get(!^"Answers")
+            .push(answer)
+            .write()
+
+        do! Promise.sleep 500
+
+        return buildAnswersInfo answer
     }

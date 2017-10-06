@@ -32,21 +32,16 @@ type StringField =
         { Get = fun (r : StringField) -> r.Error
           Set = fun v (r : StringField) -> { r with Error = v } }
 
-type State =
-    | Loading
-    | Error
-    | Success of QuestionInfo
-
 type Model =
     { QuestionId : int
-      State : State
+      Data : QuestionInfo option
       Reply : StringField
       IsWaitingReply : bool
       Session : User }
 
     static member Empty user id =
         { QuestionId = id
-          State = State.Loading
+          Data = None
           Reply = StringField.Empty
           IsWaitingReply = false
           Session = user }
@@ -60,8 +55,13 @@ type GetDetailsRes =
     | Success of QuestionInfo
     | Error of exn
 
+type CreateAnswerRes =
+    | Success of AnswerInfo
+    | Error of exn
+
 type Msg =
     | GetDetails of int
     | GetDetailsResult of GetDetailsRes
     | ChangeReply of string
     | Submit
+    | CreateAnswerResult of CreateAnswerRes
