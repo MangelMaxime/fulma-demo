@@ -25,7 +25,7 @@ let getQuestions _ =
             )
             |> Array.toList
 
-        do! Promise.sleep 300
+        do! Promise.sleep 500
 
         return GetQuestionsRes.Success result
     }
