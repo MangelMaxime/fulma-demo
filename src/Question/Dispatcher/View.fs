@@ -14,9 +14,4 @@ let root model dispatch =
     | { CurrentPage = Router.QuestionPage.Show _
         ShowModel = Some extractedModel } -> Question.Show.View.root extractedModel (ShowMsg >> dispatch)
     | _ ->
-        Hero.hero [ Hero.isFullHeight
-                    Hero.isDanger ]
-            [ Hero.body [ ]
-                [ Container.container [ Container.customClass Bulma.Properties.Alignment.HasTextCentered ]
-                    [ Heading.h1 [ ]
-                        [ str "404" ] ] ] ]
+        Render.``404 page``

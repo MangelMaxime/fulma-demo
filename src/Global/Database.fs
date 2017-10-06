@@ -160,7 +160,12 @@ I wanted to know why did you create Fable. Did you always planned to use F# ? Or
                        { Id = 2
                          Firstname = "Alfonso"
                          Surname = "Garciacaro"
-                         Avatar = "alfonso_garciacaro.png" } |]
+                         Avatar = "alfonso_garciacaro.png" }
+                       { Id = 3
+                         Firstname = "Guess"
+                         Surname = ""
+                         Avatar = "guess.png" }
+                          |]
                 }
             ).write()
         Logger.debug "Database restored"

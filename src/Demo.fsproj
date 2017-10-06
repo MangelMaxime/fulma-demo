@@ -6,6 +6,7 @@
     <Compile Include="Import/Fable.Import.Showdown.fs" />
     <Compile Include="Import/Fable.Import.Lowdb.fs" />
     <Compile Include="Global/Okular.fs" />
+    <Compile Include="Global/Render.fs" />
     <Compile Include="Global/Logger.fs" />
     <Compile Include="Global/Router.fs" />
     <Compile Include="Global/Database.fs" />

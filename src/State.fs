@@ -17,14 +17,18 @@ let urlUpdate (result: Option<Router.Page>) model =
         let model = { model with CurrentPage = page }
         match page with
         | Router.Question questionPage ->
-            let (subModel, subCmd) = Question.Dispatcher.State.init questionPage
-            { model with QuestionDispatcher = subModel }, Cmd.map QuestionDispatcherMsg subCmd
+            let (subModel, subCmd) = Question.Dispatcher.State.init model.Session questionPage
+            { model with QuestionDispatcher = Some subModel }, Cmd.map QuestionDispatcherMsg subCmd
 
 let init result =
     urlUpdate result Model.Empty
 
 let update msg model =
-    match msg with
-    | QuestionDispatcherMsg msg ->
-        let (subModel, subCmd) = Question.Dispatcher.State.update msg model.QuestionDispatcher
-        { model with QuestionDispatcher = subModel }, Cmd.map QuestionDispatcherMsg subCmd
+    match (msg, model) with
+    | (QuestionDispatcherMsg msg, { QuestionDispatcher = Some extractedModel }) ->
+        let (subModel, subCmd) = Question.Dispatcher.State.update msg extractedModel
+        { model with QuestionDispatcher = Some subModel }, Cmd.map QuestionDispatcherMsg subCmd
+    | (capturedMsg, _) ->
+        Browser.console.log("[App.State] Discarded message")
+        printfn "%A" capturedMsg
+        model, Cmd.none

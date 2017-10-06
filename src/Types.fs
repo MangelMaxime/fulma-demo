@@ -15,13 +15,19 @@ type Question =
 
 type Model =
     { CurrentPage : Router.Page
-      QuestionDispatcher : Question.Dispatcher.Types.Model }
+      Session : User
+      QuestionDispatcher : Question.Dispatcher.Types.Model option }
 
     static member Empty =
         { CurrentPage =
             Router.QuestionPage.Index
             |> Router.Question
-          QuestionDispatcher = Question.Dispatcher.Types.Model.Empty }
+          Session =
+            let userId = 3
+            match Database.GetUserById userId with
+            | Some user -> user
+            | None -> failwithf "User#%i not found" userId
+          QuestionDispatcher = None }
 
 type Msg =
     | QuestionDispatcherMsg of Question.Dispatcher.Types.Msg

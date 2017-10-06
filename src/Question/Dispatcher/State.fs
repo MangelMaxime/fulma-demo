@@ -4,9 +4,9 @@ open Elmish
 open Types
 open Fable.Import
 
-let init (questionPage: Router.QuestionPage) =
+let init session (questionPage: Router.QuestionPage) =
     // Store current page
-    let model = { Model.Empty with CurrentPage = questionPage }
+    let model = { Model.Empty session with CurrentPage = questionPage }
     // Store model depending on the current page
     match questionPage with
     | Router.QuestionPage.Index ->
@@ -14,7 +14,7 @@ let init (questionPage: Router.QuestionPage) =
         { model with IndexModel = Some subModel }, Cmd.map IndexMsg subCmd
 
     | Router.QuestionPage.Show id ->
-        let (subModel, subCmd) = Question.Show.State.init id
+        let (subModel, subCmd) = Question.Show.State.init session id
         { model with ShowModel = Some subModel }, Cmd.map ShowMsg subCmd
 
 let update msg (model: Model) =

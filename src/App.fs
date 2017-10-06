@@ -1,6 +1,7 @@
 module App.View
 
 open Elmish
+open Fable.Import
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open State
@@ -36,9 +37,12 @@ let navbarView =
                   navbarEnd ] ] ]
 
 let renderPage model dispatch =
-    match model.CurrentPage with
-    | Router.Question questionPage ->
-        Question.Dispatcher.View.root model.QuestionDispatcher (QuestionDispatcherMsg >> dispatch)
+    match model with
+    | { CurrentPage = Router.Question questionPage
+        QuestionDispatcher = Some extractedModel } ->
+        Question.Dispatcher.View.root extractedModel (QuestionDispatcherMsg >> dispatch)
+    | _ ->
+        Render.``404 page``
 
 let root model dispatch =
     div [ ]

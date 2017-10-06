@@ -5,8 +5,8 @@ open Types
 open Okular
 open Okular.Operators
 
-let init id =
-    Model.Empty id , Cmd.ofMsg (GetDetails id)
+let init user id =
+    Model.Empty user id , Cmd.ofMsg (GetDetails id)
 
 let verifyReply reply =
     if reply.Value <> "" then

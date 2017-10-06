@@ -41,13 +41,15 @@ type Model =
     { QuestionId : int
       State : State
       Reply : StringField
-      IsWaitingReply : bool }
+      IsWaitingReply : bool
+      Session : User }
 
-    static member Empty id =
+    static member Empty user id =
         { QuestionId = id
           State = State.Loading
           Reply = StringField.Empty
-          IsWaitingReply = false }
+          IsWaitingReply = false
+          Session = user }
 
     static member ReplyLens =
         { Get = fun (r : Model) -> r.Reply

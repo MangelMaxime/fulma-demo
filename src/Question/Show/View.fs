@@ -33,11 +33,11 @@ let loaderView isLoading =
         PageLoader.pageLoader [ ]
             [ ]
 
-let replyView (fieldValue: StringField) isWaiting dispatch =
+let replyView (user: User) (fieldValue: StringField) isWaiting dispatch =
     Media.media [ ]
         [ Media.left [ ]
             [ Image.image [ Image.is64x64 ]
-                [ img [ Src ("/img/avatars/guess.png") ] ] ]
+                [ img [ Src ("avatars/" + user.Avatar) ] ] ]
           Media.content [ ]
             [ Field.field_div [ ]
                 [ yield Control.control_div [ if isWaiting then yield Control.isLoading ]
@@ -101,14 +101,14 @@ let questionsView (question : QuestionInfo) =
                                                         (question.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ]
               yield! (List.map answerView question.Answers) ] ]
 
-let pageContent (question: QuestionInfo) reply isWaitingReply dispatch =
+let pageContent (user: User) (question: QuestionInfo) reply isWaitingReply dispatch =
     Section.section [ ]
         [ Heading.p [ Heading.is5 ]
             [ str question.Title ]
           Columns.columns [ Columns.isCentered ]
             [ Column.column [ Column.Width.isTwoThirds ]
                 [ questionsView question
-                  replyView reply isWaitingReply dispatch ] ] ]
+                  replyView user reply isWaitingReply dispatch ] ] ]
 
 let root model dispatch =
     match model.State with
@@ -116,7 +116,7 @@ let root model dispatch =
         str "Something went wrong", false
     | State.Loading -> div [ ] [ ], true
     | State.Success data ->
-        pageContent data model.Reply model.IsWaitingReply dispatch, false
+        pageContent model.Session data model.Reply model.IsWaitingReply dispatch, false
     |> (fun (pageContent, isLoading) ->
         Container.container [ ]
             [ loaderView isLoading

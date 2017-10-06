@@ -36,7 +36,7 @@ let getDetails (id : int) =
                             |> Array.toList }
             )
 
-        do! Promise.sleep 500
+        do! Promise.sleep 300
 
         return data
     }
