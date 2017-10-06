@@ -1,7 +1,7 @@
 module Question.Show.Types
 
 open System
-open Okular.Lens
+open Okular
 
 type AnswerInfo =
     { CreatedAt : DateTime
@@ -25,16 +25,32 @@ type StringField =
           Error = None }
 
     static member ValueLens =
-        { Get = fun (r : StringField) -> r.Value
-          Set = fun v (r : StringField) -> { r with Value = v } }
+        let get = fun (r : StringField) -> r.Value
+        let set = fun v (r : StringField) -> { r with Value = v }
+        Sugar.Lens get set
 
-    static member ErrorLens =
-        { Get = fun (r : StringField) -> r.Error
-          Set = fun v (r : StringField) -> { r with Error = v } }
+    static member ErrorOptional =
+        let get = fun (r : StringField) -> r.Error
+        let set = fun v (r : StringField) -> { r with Error = Some v }
+        Sugar.Optional get set
+
+type Data =
+    { QuestionInfo : QuestionInfo
+      VoteModel : Vote.Types.Model }
+
+    static member QuestionInfoLens =
+        let get = fun (r : Data) -> r.QuestionInfo
+        let set = fun v (r : Data) -> { r with QuestionInfo = v }
+        Sugar.Lens get set
+
+    static member VoteModelLens =
+        let get = fun (r : Data) -> r.VoteModel
+        let set = fun v (r : Data) -> { r with VoteModel = v }
+        Sugar.Lens get set
 
 type Model =
     { QuestionId : int
-      Data : QuestionInfo option
+      Data : Data option
       Reply : StringField
       IsWaitingReply : bool
       Session : User }
@@ -47,9 +63,27 @@ type Model =
           Session = user }
 
     static member ReplyLens =
-        { Get = fun (r : Model) -> r.Reply
-          Set = fun v (r : Model) -> { r with Reply = v } }
+        let get = fun (r : Model) -> r.Reply
+        let set = fun v (r : Model) -> { r with Reply = v }
+        Sugar.Lens get set
 
+    static member DataOptional =
+        let get = fun (r : Model) -> r.Data
+        let set = fun v (r : Model) -> { r with Data = Some v }
+        Sugar.Optional get set
+
+let dataOfModel =
+    let get = fun (r : Model) -> r.Data
+    let set = fun v (r : Model) -> { r with Data = Some v }
+    Sugar.Optional get set
+
+let questionInfoOfdata =
+    let get = fun (r : Data) -> r.QuestionInfo
+    let set = fun v (r : Data) -> { r with QuestionInfo = v }
+    Sugar.Lens get set
+
+let questionInfoOfModel =
+    Okular.Optional.composeLens dataOfModel questionInfoOfdata
 
 type GetDetailsRes =
     | Success of QuestionInfo

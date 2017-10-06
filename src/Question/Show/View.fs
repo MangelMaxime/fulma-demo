@@ -113,9 +113,11 @@ let pageContent (user: User) (question: QuestionInfo) reply isWaitingReply dispa
 let root model dispatch =
     match model.Data with
     | Some data ->
-        pageContent model.Session data model.Reply model.IsWaitingReply dispatch, false
+        Logger.debug "some"
+        pageContent model.Session data.QuestionInfo model.Reply model.IsWaitingReply dispatch, false
     | None -> div [ ] [ ], true
     |> (fun (pageContent, isLoading) ->
+        Logger.debug "none"
         Container.container [ ]
             [ loaderView isLoading
               pageContent ]

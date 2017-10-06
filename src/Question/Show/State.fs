@@ -22,15 +22,23 @@ let update msg (model: Model) =
     | GetDetailsResult result ->
         match result with
         | GetDetailsRes.Success data ->
-            { model with Data = Some data }, Cmd.none
+            // let t = Okular.Optional.composeLens Model.DataOptional Data.QuestionInfoLens
+            // Logger.debug "1"
+            // let m = t.Set data model
+            // Logger.debug "2"
+            // Logger.debugfn "Model: %A" m
+
+            model, Cmd.none
 
         | GetDetailsRes.Error error ->
             Logger.debugfn "[Question.Show.State] Error when fetching details: \n %A" error
             { model with Data = None }, Cmd.none
     | ChangeReply value ->
-        model
-        |> Lens.set (Model.ReplyLens >-> StringField.ValueLens) value
-        |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) None, Cmd.none
+        let updateValue = Okular.Lens.compose Model.ReplyLens StringField.ValueLens
+        let p = Okular.Optional.modify StringField.ErrorOptional (fun _ -> "maxime") model.Reply
+
+        updateValue.Set value model
+        |> Model.ReplyLens.Set p, Cmd.none
 
     | Submit ->
         if model.IsWaitingReply then
@@ -38,8 +46,9 @@ let update msg (model: Model) =
         else
             match verifyReply model.Reply with
             | Some msg ->
+                let p = Okular.Optional.modify StringField.ErrorOptional (fun _ -> msg) model.Reply
                 model
-                |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) (Some msg), Cmd.none
+                |> Model.ReplyLens.Set p, Cmd.none
             | None ->
                 { model with IsWaitingReply = true }, Cmd.ofPromise
                                                         Rest.createAnswer
@@ -53,13 +62,14 @@ let update msg (model: Model) =
             { model with IsWaitingReply = false }, Cmd.none
 
         | CreateAnswerRes.Success newAnswer ->
-            match model.Data with
-            | Some data ->
-                { model with IsWaitingReply = false
-                             Data = Some { data with Answers = List.append data.Answers [newAnswer] } }
-                |> Lens.set (Model.ReplyLens >-> StringField.ValueLens) ""
-                |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) None, Cmd.none
-            | None ->
-                Logger.debug "[Question.Show.State] Can't add answer when data isn't set"
-                { model with IsWaitingReply = false }
-                |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) (Some "An error occured please try again, if this error persist contact your admin"), Cmd.none
+            // match model.Data with
+            // | Some data ->
+            //     { model with IsWaitingReply = false
+            //                  Data = Some { data with Answers = List.append data.Answers [newAnswer] } }
+            //     |> Lens.set (Model.ReplyLens >-> StringField.ValueLens) ""
+            //     |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) None, Cmd.none
+            // | None ->
+            //     Logger.debug "[Question.Show.State] Can't add answer when data isn't set"
+            //     { model with IsWaitingReply = false }
+            //     |> Lens.set (Model.ReplyLens >-> StringField.ErrorLens) (Some "An error occured please try again, if this error persist contact your admin"), Cmd.none
+            model, Cmd.none

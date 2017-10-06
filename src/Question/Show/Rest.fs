@@ -46,7 +46,7 @@ let createAnswer (questionId : int, userId : int, content : string) =
     promise {
 
         let answer =
-            { CreatedAt = DateTime.Parse "2017-09-14T20:07:27.103Z"
+            { CreatedAt = DateTime.Now
               AuthorId = userId
               Content = content }
 

@@ -18,12 +18,8 @@ let toHash page =
 
 open Elmish.Browser.UrlParser
 
-let defaultPage =
-    Browser.console.warn("Error parsing url: " + Browser.window.location.href)
-    (QuestionPage.Index |> Question)
-
 let pageParser: Parser<Page->Page,Page> =
     oneOf [
         map (QuestionPage.Index |> Question) (s "question" </> s "index")
         map (QuestionPage.Show >> Question) (s "question" </> i32)
-        map defaultPage top ]
+        map (QuestionPage.Index |> Question) top ]
