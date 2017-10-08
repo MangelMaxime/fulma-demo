@@ -31,3 +31,4 @@ type Model =
 
 type Msg =
     | QuestionDispatcherMsg of Question.Dispatcher.Types.Msg
+    | ResetDatabase

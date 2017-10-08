@@ -43,15 +43,16 @@ let adapterOptions = jsOptions<Lowdb.AdapterOptions>(fun o ->
     o.deserialize <- ofJson<DatabaseData> >> box |> Some
 )
 
-let private adapter = Lowdb.LocalStorageAdapter("database", adapterOptions)
-
 let mutable private dbInstance : Lowdb.Lowdb option = Option.None
 
 type Database =
     static member Lowdb
         with get() : Lowdb.Lowdb =
             if dbInstance.IsNone then
-                dbInstance <- Lowdb.Lowdb(adapter) |> Some
+                dbInstance <-
+                    Lowdb.LocalStorageAdapter("database", adapterOptions)
+                    |> Lowdb.Lowdb
+                    |> Some
 
             dbInstance.Value
 

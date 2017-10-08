@@ -28,7 +28,18 @@ let update msg model =
     | (QuestionDispatcherMsg msg, { QuestionDispatcher = Some extractedModel }) ->
         let (subModel, subCmd) = Question.Dispatcher.State.update msg extractedModel
         { model with QuestionDispatcher = Some subModel }, Cmd.map QuestionDispatcherMsg subCmd
-    | (capturedMsg, _) ->
+
+    | (QuestionDispatcherMsg capturedMsg, _) ->
         Browser.console.log("[App.State] Discarded message")
         printfn "%A" capturedMsg
         model, Cmd.none
+
+    | (ResetDatabase, _) ->
+        // Browser.localStorage.removeItem("database")
+        Database.Restore()
+        let redirect =
+            Router.QuestionPage.Index
+            |> Router.Question
+            |> Router.toHash
+
+        model, Navigation.newUrl redirect

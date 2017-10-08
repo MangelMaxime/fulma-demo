@@ -16,24 +16,35 @@ let navbarButton =
     Navbar.item_div [ ]
         [ Field.field_div [ Field.isGrouped ]
             [ Control.control_p [ ]
-                [ Button.button [ ]
+                [ Button.button [ Button.props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
                     [ Icon.faIcon [ ] Fa.Github
-                      span [ ] [ str "Fulma" ] ] ] ] ]
+                      span [ ] [ str "Source" ] ] ] ] ]
 
 let navbarEnd =
     Navbar.end_div [ ]
         [ navbarButton ]
 
-let navbarView =
+let navbarStart dispatch =
+    Navbar.start_div [ ]
+        [ Navbar.item_div [ Navbar.Item.hasDropdown
+                            Navbar.Item.isHoverable ]
+            [ Navbar.link_div [ ]
+                [ str "Options" ]
+              Navbar.dropdown_div [ ]
+                [ Navbar.item_a [ Navbar.Item.props [ OnClick (fun _ -> dispatch ResetDatabase)] ]
+                    [ str "Reset demo" ] ] ] ]
+
+let navbarView dispatch =
     div [ ClassName "navbar-bg" ]
         [ Container.container [ ]
-            [ Navbar.navbar [ ]
+            [ Navbar.navbar [ Navbar.customClass "is-primary" ]
                 [ Navbar.brand_a [ Fulma.Common.GenericOption.Props [ Href "#" ] ]
                     [ Navbar.item_div [ ]
                         [ Image.image [ Image.is32x32 ]
                             [ img [ Src "assets/mini_logo.svg" ] ]
                           Heading.p [ Heading.is4 ]
                             [ str "Fulma-demo" ] ] ]
+                  navbarStart dispatch
                   navbarEnd ] ] ]
 
 let renderPage model dispatch =
@@ -46,7 +57,7 @@ let renderPage model dispatch =
 
 let root model dispatch =
     div [ ]
-        [ navbarView
+        [ navbarView dispatch
           renderPage model dispatch ]
 
 

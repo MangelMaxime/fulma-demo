@@ -31,6 +31,7 @@ let replyView model dispatch =
                 [ Control.control_div [ if model.IsWaitingReply then yield Control.isLoading ]
                     [ Textarea.textarea [ yield Textarea.props [
                                             Value model.Reply
+                                            AutoFocus true
                                             OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
                                             OnKeyDown (fun ev ->
                                                 if ev.ctrlKey && ev.key = "Enter" then
