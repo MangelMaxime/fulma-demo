@@ -43,3 +43,6 @@ let update msg model =
             |> Router.toHash
 
         model, Navigation.newUrl redirect
+
+    | (ToggleBurger, _) ->
+        { model with IsBurgerOpen = not model.IsBurgerOpen }, Cmd.none
