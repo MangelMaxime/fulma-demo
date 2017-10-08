@@ -17,9 +17,11 @@ type User =
       Avatar : string }
 
 type Answer =
-    { CreatedAt : DateTime
+    { Id : int
+      CreatedAt : DateTime
       AuthorId : int
-      Content : string }
+      Content : string
+      Score : int }
 
 type Question =
     { Id : int
@@ -111,8 +113,10 @@ Hello, yesterday I saw a flight of swallows and was wondering what their **avera
 If you know the answer please share it.
                              """
                          Answers =
-                            [| { CreatedAt = DateTime.Parse "2017-09-14T19:57:33.103Z"
+                            [| { Id = 0
+                                 CreatedAt = DateTime.Parse "2017-09-14T19:57:33.103Z"
                                  AuthorId = 0
+                                 Score = 2
                                  Content =
                                     """
 > What do you mean, an African or European Swallow ?
@@ -123,8 +127,10 @@ Ok I must admit, I use google to search the question and found a post explaining
 
 I thought you was asking it seriously well done.
                                     """ }
-                               { CreatedAt = DateTime.Parse "2017-09-14T20:07:27.103Z"
+                               { Id = 1
+                                 CreatedAt = DateTime.Parse "2017-09-14T20:07:27.103Z"
                                  AuthorId = 2
+                                 Score = 1
                                  Content =
                                     """
 Maxime,

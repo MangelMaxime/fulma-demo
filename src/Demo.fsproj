@@ -5,7 +5,6 @@
   <ItemGroup>
     <Compile Include="Import/Fable.Import.Showdown.fs" />
     <Compile Include="Import/Fable.Import.Lowdb.fs" />
-    <Compile Include="Global/Okular.fs" />
     <Compile Include="Global/Render.fs" />
     <Compile Include="Global/Logger.fs" />
     <Compile Include="Global/Router.fs" />
@@ -14,10 +13,10 @@
     <Compile Include="Question/Index/Rest.fs" />
     <Compile Include="Question/Index/State.fs" />
     <Compile Include="Question/Index/View.fs" />
-    <Compile Include="Question/Show/Vote/Types.fs" />
-    <Compile Include="Question/Show/Vote/Rest.fs" />
-    <Compile Include="Question/Show/Vote/State.fs" />
-    <Compile Include="Question/Show/Vote/View.fs" />
+    <Compile Include="Question/Show/Answer/Types.fs" />
+    <Compile Include="Question/Show/Answer/Rest.fs" />
+    <Compile Include="Question/Show/Answer/State.fs" />
+    <Compile Include="Question/Show/Answer/View.fs" />
     <Compile Include="Question/Show/Types.fs" />
     <Compile Include="Question/Show/Rest.fs" />
     <Compile Include="Question/Show/State.fs" />

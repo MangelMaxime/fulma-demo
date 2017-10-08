@@ -6,13 +6,11 @@ open Database
 open Fable.Core.JsInterop
 open System
 
-let buildAnswersInfo (answer : Database.Answer) =
+let assiocateAuthor (answer : Database.Answer) =
     Database.GetUserById answer.AuthorId
     |> function
        | None -> failwith "Author of the answer unkown"
-       | Some user -> { CreatedAt = answer.CreatedAt
-                        Author = user
-                        Content = answer.Content }
+       | Some user -> answer, user
 
 let getDetails (id : int) =
     promise {
@@ -31,10 +29,7 @@ let getDetails (id : int) =
                           Author = user
                           Title = question.Title
                           Description = question.Description
-                          CreatedAt = question.CreatedAt
-                          Answers =
-                            Array.map buildAnswersInfo question.Answers
-                            |> Array.toList }
+                          CreatedAt = question.CreatedAt }, (Array.map assiocateAuthor question.Answers)
             )
 
         do! Promise.sleep 500
@@ -45,10 +40,21 @@ let getDetails (id : int) =
 let createAnswer (questionId : int, userId : int, content : string) =
     promise {
 
+        let nextId =
+            Database.Questions
+                .find(createObj [ "Id" ==> questionId])
+                .get(!^"Answers")
+                .size()
+                .value()
+            |> unbox<int>
+            |> (fun x -> x + 1)
+
         let answer =
-            { CreatedAt = DateTime.Now
+            { Id = nextId
+              CreatedAt = DateTime.Now
               AuthorId = userId
-              Content = content }
+              Content = content
+              Score = 0 }
 
         // Add the answer to the question
         Database.Questions
@@ -59,5 +65,5 @@ let createAnswer (questionId : int, userId : int, content : string) =
 
         do! Promise.sleep 500
 
-        return buildAnswersInfo answer
+        return assiocateAuthor answer
     }

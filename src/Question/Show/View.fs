@@ -13,18 +13,6 @@ open Fulma.Layouts
 open System
 open Fable.Core.JsInterop
 
-let converter = Showdown.Globals.Converter.Create()
-
-[<Pojo>]
-type DangerousInnerHtml =
-    { __html : string }
-
-let contentFromMarkdown options str =
-    Content.content
-        [ yield! options
-          yield Content.props [ DangerouslySetInnerHTML { __html =  converter.makeHtml str } ] ]
-        [ ]
-
 let loaderView isLoading =
     if isLoading then
         PageLoader.pageLoader [ PageLoader.isActive ]
@@ -33,62 +21,46 @@ let loaderView isLoading =
         PageLoader.pageLoader [ ]
             [ ]
 
-let replyView (user: User) (fieldValue: StringField) isWaiting dispatch =
+let replyView model dispatch =
     Media.media [ ]
         [ Media.left [ ]
             [ Image.image [ Image.is64x64 ]
-                [ img [ Src ("avatars/" + user.Avatar) ] ] ]
+                [ img [ Src ("avatars/" + model.Session.Avatar) ] ] ]
           Media.content [ ]
             [ Field.field_div [ ]
-                [ yield Control.control_div [ if isWaiting then yield Control.isLoading ]
+                [ Control.control_div [ if model.IsWaitingReply then yield Control.isLoading ]
                     [ Textarea.textarea [ yield Textarea.props [
-                                            Value fieldValue.Value
+                                            Value model.Reply
                                             OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
                                             OnKeyDown (fun ev ->
                                                 if ev.ctrlKey && ev.key = "Enter" then
                                                     dispatch Submit
                                             ) ]
-                                          if isWaiting then yield Textarea.isDisabled ]
+                                          if model.IsWaitingReply then yield Textarea.isDisabled ]
                     [ ] ]
-                  if fieldValue.Error.IsSome then
-                    yield Help.help [ Help.isDanger ]
-                            [ str fieldValue.Error.Value ] ]
+                  Help.help [ Help.isDanger ]
+                            [ str model.Error ] ]
               Level.level [ ]
                 [ Level.left [ ]
                     [ Level.item [ ]
                         [ Button.button [ yield Button.isPrimary
                                           yield Button.onClick (fun _ -> dispatch Submit)
-                                          if isWaiting then yield Button.isDisabled ]
+                                          if model.IsWaitingReply then yield Button.isDisabled ]
                                         [ str "Submit" ] ] ]
+                  Level.item [ Level.Item.hasTextCentered ]
+                    [ Help.help [ ]
+                        [ str "You can use markdown to format your answer" ] ]
                   Level.right [ ]
                     [ Level.item [ ]
                         [ str "Press Ctrl + Enter to submit" ] ] ] ] ]
 
-let answerView (answer : AnswerInfo) =
-    Media.media [ ]
-        [ Media.left [ ]
-            [ Image.image [ Image.is64x64 ]
-                [ img [ Src ("avatars/" + answer.Author.Avatar) ] ] ]
-          Media.content [ ]
-            [ contentFromMarkdown [ ] answer.Content
-              Level.level [ ]
-                [ Level.right [ ]
-                    [ ]
-                  Level.left [ ]
-                    [ Level.item [ ]
-                        [ Help.help [ ]
-                            [ str (sprintf "Answer by %s %s, %s"
-                                        answer.Author.Firstname
-                                        answer.Author.Surname
-                                        (answer.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ] ] ]
-
-let questionsView (question : QuestionInfo) =
+let questionsView (question : QuestionInfo) answers dispatch =
     Media.media [ ]
         [ Media.left [ ]
             [ Image.image [ Image.is64x64 ]
                 [ img [ Src ("avatars/" + question.Author.Avatar)  ] ] ]
           Media.content [ ]
-            [ yield contentFromMarkdown [ ]
+            [ yield Render.contentFromMarkdown [ ]
                         question.Description
               yield Level.level [ ]
                         [ Level.left [ ] [ ] // Needed to force the level right aligment
@@ -99,25 +71,25 @@ let questionsView (question : QuestionInfo) =
                                                         question.Author.Firstname
                                                         question.Author.Surname
                                                         (question.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ]
-              yield! (List.map answerView question.Answers) ] ]
+              yield! (
+                  answers
+                  |> List.mapi (fun index answer -> Answer.View.root answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch))) ] ]
 
-let pageContent (user: User) (question: QuestionInfo) reply isWaitingReply dispatch =
+let pageContent question model dispatch =
     Section.section [ ]
         [ Heading.p [ Heading.is5 ]
             [ str question.Title ]
           Columns.columns [ Columns.isCentered ]
             [ Column.column [ Column.Width.isTwoThirds ]
-                [ questionsView question
-                  replyView user reply isWaitingReply dispatch ] ] ]
+                [ questionsView question model.Answers dispatch
+                  replyView model dispatch ] ] ]
 
 let root model dispatch =
-    match model.Data with
-    | Some data ->
-        Logger.debug "some"
-        pageContent model.Session data.QuestionInfo model.Reply model.IsWaitingReply dispatch, false
+    match model.Question with
+    | Some question ->
+        pageContent question model dispatch, false
     | None -> div [ ] [ ], true
     |> (fun (pageContent, isLoading) ->
-        Logger.debug "none"
         Container.container [ ]
             [ loaderView isLoading
               pageContent ]

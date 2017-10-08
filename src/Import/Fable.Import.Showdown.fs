@@ -74,7 +74,7 @@ module Showdown =
     and [<AllowNullLiteral>] extensionsType =
         [<Emit("$0[$1]{{=$2}}")>] abstract Item: name: string -> ShowdownExtension with get, set
 
-    type [<Import("*","Showdown")>] Globals =
+    type [<Import("*","showdown")>] Globals =
         static member Converter with get(): ConverterStatic = jsNative and set(v: ConverterStatic): unit = jsNative
         static member extensions with get(): extensionsType = jsNative and set(v: extensionsType): unit = jsNative
         static member setOption(optionKey: string, value: string): unit = jsNative

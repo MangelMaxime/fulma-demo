@@ -17,5 +17,7 @@
         "**/bower_components": true,
         "**/packages": true,
         "**/paket-files": true
-    }
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true
 }
