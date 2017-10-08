@@ -48,9 +48,11 @@ let navbarView isBurgerOpen dispatch =
                             [ img [ Src "assets/mini_logo.svg" ] ]
                           Heading.p [ Heading.is4 ]
                             [ str "Fulma-demo" ] ]
+                      // Icon display only on mobile
                       Navbar.item_a [ Navbar.Item.props [ Href "https://github.com/MangelMaxime/fulma-demo" ]
                                       Navbar.Item.customClass "is-hidden-desktop" ]
                                     [ Icon.faIcon [ ] (unbox ("fa-lg " + string Fa.Github)) ] // TODO: Remove this hack to use the new icon API
+                      // Make sure to have the navbar burger as the last child of the brand
                       Navbar.burger [ Fulma.Common.CustomClass (if isBurgerOpen then "is-active" else "")
                                       Fulma.Common.Props [
                                         OnClick (fun _ -> dispatch ToggleBurger) ] ]
