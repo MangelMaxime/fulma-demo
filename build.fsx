@@ -67,7 +67,7 @@ Target "PublishDocs" (fun _ ->
 
     CopyRecursive docsOuput temp true |> tracefn "%A"
     StageAll temp
-    Git.Commit.Commit temp (sprintf "Update site (%s)" (DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")))
+    Git.Commit.Commit temp (sprintf "Update site (%s)" (DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
     Branches.push temp
 )
 
