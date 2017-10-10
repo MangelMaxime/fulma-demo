@@ -30,7 +30,12 @@ let replyView model dispatch =
             [ Field.field_div [ ]
                 [ Control.control_div [ if model.IsWaitingReply then yield Control.isLoading ]
                     [ Textarea.textarea [ yield Textarea.props [
-                                            Value model.Reply
+                                            DefaultValue model.Reply
+                                            Ref (fun element ->
+                                                if not (isNull element) && model.Reply = "" then
+                                                    let textarea = element :?> Browser.HTMLTextAreaElement
+                                                    textarea.value <- model.Reply
+                                            )
                                             OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
                                             OnKeyDown (fun ev ->
                                                 if ev.ctrlKey && ev.key = "Enter" then
