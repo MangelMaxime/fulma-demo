@@ -57,8 +57,6 @@ let fableRoot   = __SOURCE_DIRECTORY__
 let temp        = fableRoot </> "temp"
 let docsOuput = fableRoot </> "output"
 
-type CommitMessage = Printf.StringFormat<(string-> string)>
-
 // --------------------------------------------------------------------------------------
 // Release Scripts
 Target "PublishDocs" (fun _ ->

@@ -8,7 +8,7 @@ open System
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 6
+let [<Literal>] CurrentVersion = 7
 
 type User =
     { Id : int
