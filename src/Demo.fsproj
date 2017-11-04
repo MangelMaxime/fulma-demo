@@ -3,30 +3,22 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Import/Fable.Import.Showdown.fs" />
-    <Compile Include="Import/Fable.Import.Lowdb.fs" />
-    <Compile Include="Global/Render.fs" />
-    <Compile Include="Global/Logger.fs" />
-    <Compile Include="Global/Router.fs" />
-    <Compile Include="Global/Database.fs" />
-    <Compile Include="Question/Index/Types.fs" />
-    <Compile Include="Question/Index/Rest.fs" />
-    <Compile Include="Question/Index/State.fs" />
-    <Compile Include="Question/Index/View.fs" />
-    <Compile Include="Question/Show/Answer/Types.fs" />
-    <Compile Include="Question/Show/Answer/Rest.fs" />
-    <Compile Include="Question/Show/Answer/State.fs" />
-    <Compile Include="Question/Show/Answer/View.fs" />
-    <Compile Include="Question/Show/Types.fs" />
-    <Compile Include="Question/Show/Rest.fs" />
-    <Compile Include="Question/Show/State.fs" />
-    <Compile Include="Question/Show/View.fs" />
-    <Compile Include="Question/Dispatcher/Types.fs" />
-    <Compile Include="Question/Dispatcher/State.fs" />
-    <Compile Include="Question/Dispatcher/View.fs" />
-    <Compile Include="Types.fs" />
-    <Compile Include="State.fs" />
-    <Compile Include="App.fs" />
+    <Compile Include="Import\Fable.Import.Showdown.fs" />
+    <Compile Include="Import\Fable.Import.Lowdb.fs" />
+    <Compile Include="Global\Render.fs" />
+    <Compile Include="Global\Logger.fs" />
+    <Compile Include="Global\Json.fs" />
+    <Compile Include="Global\Router.fs" />
+    <Compile Include="Global\Database.fs" />
+    <Compile Include="Data\User.fs" />
+    <Compile Include="Data\Session.fs" />
+    <Compile Include="Data\Question\Author.fs" />
+    <Compile Include="Data\Question.fs" />
+    <Compile Include="Views\Page.fs" />
+    <Compile Include="Page\Index.fs" />
+    <Compile Include="Page\Errored.fs" />
+    <Compile Include="Page\Home.fs" />
+    <Compile Include="Main.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
