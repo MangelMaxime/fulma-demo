@@ -1,31 +1,16 @@
 namespace Page.Home
 
 open System
+open Data.Question
 
 [<AutoOpen>]
 module Types =
 
-    type QuestionInfo =
-        { Id : int
-          Author : Database.User
-          Title : string
-          Description : string
-          CreatedAt : DateTime }
-
     type Model =
-        { Questions : QuestionInfo list option }
-
-        static member Empty =
-            { Questions = None }
-
-    type GetQuestionsRes =
-        | Success of QuestionInfo list
-        | Error of exn
+        { Questions : Question list }
 
     type Msg =
         | GetQuestions
-        | GetQuestionsResult of GetQuestionsRes
-
 
 module Request =
 
@@ -47,62 +32,55 @@ module Request =
                     | None -> failwithf "Unkown author of id#%i for the question#%i" question.AuthorId question.Id
                     | Some user ->
                         { Id = question.Id
-                          Author = user
+                          Author =
+                            { Id = user.Id
+                              Firstname = user.Firstname
+                              Surname = user.Surname
+                              Avatar = user.Avatar }
                           Title = question.Title
                           Description = question.Description
                           CreatedAt = question.CreatedAt }
                 )
                 |> Array.toList
+                |> toJson
 
             do! Promise.sleep 500
 
-            return GetQuestionsRes.Success result
+            return result
         }
 
 module State =
 
     open Elmish
-
-init session slug =
-    let
-        maybeAuthToken =
-            Maybe.map .token session.user
-
-        loadArticle =
-            Request.Article.get maybeAuthToken slug
-                |> Http.toTask
-
-        loadComments =
-            Request.Article.Comments.list maybeAuthToken slug
-                |> Http.toTask
-
-        handleLoadError _ =
-            pageLoadError Page.Other "Article is currently unavailable."
-    in
-    Task.map2 (Model [] "" False) loadArticle loadComments
-        |> Task.mapError handleLoadError
-
-    open System
-    open Fable.Core
     open Fable.Import
-    open Fable.Core.JsInterop
+    open Fable.PowerPack
+    open Fable.PowerPack.Result
+    open Fable.PowerPack.Json
+    open Json.Parser
+    open Views
 
     let init session =
-        { Questions = [] }, Cmd.ofPromise Request.getQuestions () GetQuestionsResult (GetQuestionsRes.Error >> GetQuestionsResult)
+        Request.getQuestions ()
+        |> Promise.map (fun result ->
+            try
+                let json =
+                    result
+                    |> ofString
+                    |> Result.bind array
+                    |> unwrapResult
 
-    let update msg (model: Model) =
-        match msg with
-        | GetQuestions ->
-            model, Cmd.ofPromise Request.getQuestions () GetQuestionsResult (GetQuestionsRes.Error >> GetQuestionsResult)
+                { Questions = json
+                              |> Array.map (fun item -> object item |> unwrapResult |> Question.Decoder)
+                              |> Array.toList } |> Ok
+            with
+                | ex ->
+                    Browser.console.log ex.Message
+                    Page.Errored.State.pageLoadError Page.Other "Homepage is currently unavailable."
+                    |> Error
+        )
 
-        | GetQuestionsResult result ->
-            match result with
-            | GetQuestionsRes.Success questions ->
-                { model with Questions = Some questions }, Cmd.none
-
-            | GetQuestionsRes.Error error ->
-                Logger.debugfn "[Question.Index.State] Error when fetch questions:\n %A" error
-                model, Cmd.none
+    let update session msg model =
+        model, Cmd.none
 
 module View =
 
@@ -116,18 +94,14 @@ module View =
     open Fulma.Layouts
     open System
 
-    let loaderView isLoading =
-        if isLoading then
-            PageLoader.pageLoader [ PageLoader.isActive ]
-                [ ]
-        else
-            PageLoader.pageLoader [ ]
-                [ ]
-
-    let questionsView (question : QuestionInfo) =
+    let questionsView (question : Question) =
         let urlToQuestion =
             Router.QuestionPage.Show
             >> Router.Question //AuthenticatedPage.Question >> AuthPage >> toHash
+
+        let askedBy firstname surname (createdAt: DateTime) =
+            let createdAtStr = createdAt.ToString("yyyy-MM-dd HH:mm:ss")
+            "Asked by " + firstname + " " + surname + ", " + createdAtStr
 
         Media.media [ ]
             [ Media.left [ ]
@@ -143,25 +117,18 @@ module View =
                       Level.right [ ]
                         [ Level.item [ ]
                             [ Help.help [ ]
-                                [ str (sprintf "Asked by %s %s, %s"
-                                                    question.Author.Firstname
-                                                    question.Author.Surname
-                                                    (question.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ] ] ]
+                                [ str (askedBy question.Author.Firstname
+                                               question.Author.Surname
+                                               question.CreatedAt) ] ] ] ] ] ]
 
     let questionsList questions =
         Columns.columns [ Columns.isCentered ]
             [ Column.column [ Column.Width.isTwoThirds ]
                 (questions |> List.map questionsView) ]
 
-    let root model dispatch =
-        match model.Questions with
-        | Some questions ->
-            Container.container [ ]
-                [ loaderView false
-                  Section.section [ ]
-                    [ Heading.h3 [ ]
-                        [ str "Latest questions" ] ]
-                  questionsList questions ]
-        | None ->
-            Container.container [ ]
-                [ loaderView true ]
+    let root session model dispatch =
+        Container.container [ ]
+            [ Section.section [ ]
+                [ Heading.h3 [ ]
+                    [ str "Latest questions" ] ]
+              questionsList model.Questions ]

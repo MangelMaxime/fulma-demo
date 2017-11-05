@@ -7,24 +7,24 @@ open Elmish.Browser.Navigation
 open Elmish.Browser.UrlParser
 
 type QuestionPage =
-    | Home
     | Show of int
 
 type Route =
     | Question of QuestionPage
+    | Home
 
-let private toHash page =
+let  toHash page =
     match page with
+    | Home -> "#question/index"
     | Question questionPage ->
         match questionPage with
-        | Index -> "#question/index"
         | Show id -> sprintf "#question/%i" id
 
 let pageParser: Parser<Route->Route,Route> =
     oneOf [
-        map (QuestionPage.Index |> Question) (s "question" </> s "index")
+        map Home (s "question" </> s "index")
         map (QuestionPage.Show >> Question) (s "question" </> i32)
-        map (QuestionPage.Index |> Question) top ]
+        map Home top ]
 
 let inline href route =
     Href (toHash route)
