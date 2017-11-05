@@ -14,7 +14,9 @@
     <Compile Include="Data\Session.fs" />
     <Compile Include="Data\Question\Author.fs" />
     <Compile Include="Data\Question.fs" />
+    <Compile Include="Views\Assets.fs" />
     <Compile Include="Views\Page.fs" />
+    <Compile Include="Views\Question.fs" />
     <Compile Include="Page\Index.fs" />
     <Compile Include="Page\Errored.fs" />
     <Compile Include="Page\Home.fs" />

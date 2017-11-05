@@ -13,7 +13,7 @@ type Route =
     | Question of QuestionPage
     | Home
 
-let  toHash page =
+let private toHash page =
     match page with
     | Home -> "#question/index"
     | Question questionPage ->
@@ -26,14 +26,14 @@ let pageParser: Parser<Route->Route,Route> =
         map (QuestionPage.Show >> Question) (s "question" </> i32)
         map Home top ]
 
-let inline href route =
+let href route =
     Href (toHash route)
 
-let inline modifyUrl route =
+let modifyUrl route =
     route |> toHash |> Navigation.modifyUrl
 
-let inline newUrl route =
+let newUrl route =
     route |> toHash |> Navigation.newUrl
 
-let inline modifyLocation route =
+let modifyLocation route =
     Browser.window.location.href <- toHash route

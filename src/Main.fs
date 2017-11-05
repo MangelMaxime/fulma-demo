@@ -64,6 +64,9 @@ module State =
         | Some Router.Home ->
             transition Home.State.init model.Session HomeLoaded
 
+        | Some (Router.Question questionPage) ->
+            { model with PageState = Loaded NotFound }, Cmd.none
+
     let updatePage page msg model =
         let session = model.Session
         let toPage toModel toMsg subUpdate subMsg subModel =
@@ -136,7 +139,7 @@ module View =
 
         | Home subModel ->
             Home.View.root session subModel (HomeMsg >> dispatch)
-            |> frame Page.Other
+            |> frame Page.Home
 
     let root model dispatch =
         match model.PageState with

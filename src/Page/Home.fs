@@ -1,6 +1,5 @@
 namespace Page.Home
 
-open System
 open Data.Question
 
 [<AutoOpen>]
@@ -84,51 +83,17 @@ module State =
 
 module View =
 
-    open Types
     open Fable.Helpers.React
     open Fable.Helpers.React.Props
-    open Fulma.Extensions
-    open Fulma.Components
     open Fulma.Elements
-    open Fulma.Elements.Form
     open Fulma.Layouts
-    open System
-
-    let questionsView (question : Question) =
-        let urlToQuestion =
-            Router.QuestionPage.Show
-            >> Router.Question //AuthenticatedPage.Question >> AuthPage >> toHash
-
-        let askedBy firstname surname (createdAt: DateTime) =
-            let createdAtStr = createdAt.ToString("yyyy-MM-dd HH:mm:ss")
-            "Asked by " + firstname + " " + surname + ", " + createdAtStr
-
-        Media.media [ ]
-            [ Media.left [ ]
-                [ Image.image [ Image.is64x64 ]
-                    [ img [ Src ("avatars/" + question.Author.Avatar)  ] ] ]
-              Media.content [ ]
-                [ Heading.p [ Heading.isSubtitle
-                              Heading.is5 ]
-                    [ a [ Router.href (urlToQuestion question.Id) ]
-                        [ str question.Title ] ]
-                  Level.level [ ]
-                    [ Level.left [ ] [ ] // Needed to force the level right aligment
-                      Level.right [ ]
-                        [ Level.item [ ]
-                            [ Help.help [ ]
-                                [ str (askedBy question.Author.Firstname
-                                               question.Author.Surname
-                                               question.CreatedAt) ] ] ] ] ] ]
-
-    let questionsList questions =
-        Columns.columns [ Columns.isCentered ]
-            [ Column.column [ Column.Width.isTwoThirds ]
-                (questions |> List.map questionsView) ]
+    open Views
 
     let root session model dispatch =
         Container.container [ ]
             [ Section.section [ ]
                 [ Heading.h3 [ ]
                     [ str "Latest questions" ] ]
-              questionsList model.Questions ]
+              Columns.columns [ Columns.isCentered ]
+                [ Column.column [ Column.Width.isTwoThirds]
+                    (model.Questions |> List.map Question.viewSummary) ] ]
