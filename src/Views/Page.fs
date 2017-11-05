@@ -1,5 +1,7 @@
 namespace Views
 
+open Fable.Import
+open Fable.Core.JsInterop
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fulma.Components
@@ -16,8 +18,10 @@ module Page =
         | Home
         | Option
 
+    let toggleNavbarMenu (_: Browser.Element) : unit = importMember "./../js/bulma-utils.js"
+
     let viewMenu currentPage =
-        Navbar.menu [ ]
+        Navbar.menu [ Navbar.Menu.props [ Id "navMenu" ] ]
             [ Navbar.start_div [ ]
                 [ Navbar.item_a [ yield Navbar.Item.props [ OnClick (fun _ ->
                                                                 Router.Home
@@ -57,7 +61,8 @@ module Page =
                                           Navbar.Item.customClass "is-hidden-desktop" ]
                                         [ Icon.faIcon [ Icon.isLarge ] [ Fa.icon Fa.I.Github ] ]
                           // Make sure to have the navbar burger as the last child of the brand
-                          Navbar.burger [ ]
+                          Navbar.burger [ Fulma.Common.GenericOption.Props [ Data("target","navMenu")
+                                                                             Ref toggleNavbarMenu ] ]
                             [ span [ ] [ ]
                               span [ ] [ ]
                               span [ ] [ ] ] ]

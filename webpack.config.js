@@ -33,7 +33,7 @@ var commonPlugins = [
 ];
 
 module.exports = {
-    devtool: false,
+    devtool: undefined,
     entry: isProduction ? // We don't use the same entry for dev and production, to make HMR over style quicker for dev env
         {
             demo: [
