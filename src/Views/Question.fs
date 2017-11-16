@@ -6,10 +6,10 @@ open Fulma.Elements.Form
 open Fulma.Layouts
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
-open Data.Question
+open Data.Forum
 open System
 
-let viewFooter firstname surname (createdAt : DateTime) =
+let private viewFooter firstname surname (createdAt : DateTime) =
     let createdAtStr = createdAt.ToString("yyyy-MM-dd HH:mm:ss")
 
     Level.level [ ]
@@ -19,7 +19,7 @@ let viewFooter firstname surname (createdAt : DateTime) =
                 [ Help.help [ ]
                     [ str ("Asked by " + firstname + " " + surname + ", " + createdAtStr) ] ] ] ]
 
-let viewContent questionId questionTitle =
+let private viewContent questionId questionTitle =
     let urlToQuestion =
         Router.QuestionPage.Show
         >> Router.Question
@@ -36,3 +36,13 @@ let viewSummary (question : Question) =
           Media.content [ ]
             [ viewContent question.Id question.Title
               viewFooter question.Author.Firstname question.Author.Surname question.CreatedAt ] ]
+
+let viewThread (question : Question) content =
+    Media.media [ ]
+        [ Media.left [ ]
+            [ Assets.avatar64x64 question.Author.Avatar ]
+          Media.content [ ]
+            [ Render.contentFromMarkdown [ ]
+                question.Description
+              viewFooter question.Author.Firstname question.Author.Surname question.CreatedAt
+              content ] ]

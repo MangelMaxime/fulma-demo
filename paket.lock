@@ -1,28 +1,25 @@
 STORAGE: NONE
 NUGET
   remote: https://www.nuget.org/api/v2
-    dotnet-fable (1.2.4) - clitool: true
+    dotnet-fable (1.3) - clitool: true
       Dotnet.ProjInfo (>= 0.7.4) - restriction: >= netcoreapp2.0
-      Fable.Compiler (>= 1.2.4) - restriction: >= netcoreapp2.0
-      Fable.Core (>= 1.2.4) - restriction: >= netcoreapp2.0
+      Fable.Compiler (>= 1.3) - restriction: >= netcoreapp2.0
+      Fable.Core (>= 1.3) - restriction: >= netcoreapp2.0
       FSharp.Core (>= 4.2.3) - restriction: >= netcoreapp2.0
       Microsoft.NETCore.App (>= 2.0) - restriction: >= netcoreapp2.0
     Dotnet.ProjInfo (0.9) - restriction: >= netcoreapp2.0
       FSharp.Core (>= 4.2.3) - restriction: && (< net45) (>= netstandard2.0)
-    Fable.Compiler (1.2.4) - restriction: >= netcoreapp2.0
-      Fable.Core (>= 1.2.4) - restriction: >= netstandard1.6
-      FSharp.Compiler.Service (>= 14.0.2) - restriction: >= netstandard1.6
+    Fable.Compiler (1.3) - restriction: >= netcoreapp2.0
+      Fable.Core (>= 1.3) - restriction: >= netstandard1.6
+      Fable.FCS (>= 16.0.3) - restriction: >= netstandard1.6
       FSharp.Core (>= 4.2.3) - restriction: >= netstandard1.6
-      NETStandard.Library (>= 1.6.1) - restriction: >= netstandard1.6
       Newtonsoft.Json (>= 10.0.3) - restriction: >= netstandard1.6
       System.Collections.Immutable (>= 1.4) - restriction: >= netstandard1.6
       System.Reflection.Metadata (>= 1.5) - restriction: >= netstandard1.6
       System.Runtime.Loader (>= 4.3) - restriction: >= netstandard1.6
-      System.ValueTuple (>= 4.4) - restriction: >= netstandard1.6
-    Fable.Core (1.2.4)
+    Fable.Core (1.3)
       FSharp.Core (>= 4.2.3) - restriction: >= netstandard1.6
       NETStandard.Library (>= 1.6.1) - restriction: >= netstandard1.6
-      System.ValueTuple (>= 4.4) - restriction: >= netstandard1.6
     Fable.Elmish (1.0)
       Fable.Core (>= 1.2.4) - restriction: >= netstandard1.6
       Fable.PowerPack (>= 1.3) - restriction: >= netstandard1.6
@@ -46,6 +43,18 @@ NUGET
       Fable.PowerPack (>= 1.3) - restriction: >= netstandard1.6
       Fable.React (>= 1.2) - restriction: >= netstandard1.6
       FSharp.Core (>= 4.2.3) - restriction: >= netstandard1.6
+    Fable.FCS (16.0.3) - restriction: >= netcoreapp2.0
+      FSharp.Core (>= 4.1.18) - restriction: && (< net45) (>= netstandard1.6)
+      NETStandard.Library (>= 1.6.1) - restriction: && (< net45) (>= netstandard1.6)
+      System.Collections.Immutable (>= 1.3) - restriction: && (< net45) (>= netstandard1.6)
+      System.Diagnostics.Process (>= 4.1) - restriction: && (< net45) (>= netstandard1.6)
+      System.Diagnostics.TraceSource (>= 4.0) - restriction: && (< net45) (>= netstandard1.6)
+      System.Reflection.Emit (>= 4.3) - restriction: && (< net45) (>= netstandard1.6)
+      System.Reflection.Metadata (>= 1.4.1) - restriction: && (< net45) (>= netstandard1.6)
+      System.Reflection.TypeExtensions (>= 4.3) - restriction: && (< net45) (>= netstandard1.6)
+      System.Runtime.Loader (>= 4.0) - restriction: && (< net45) (>= netstandard1.6)
+      System.Security.Cryptography.Algorithms (>= 4.3) - restriction: && (< net45) (>= netstandard1.6)
+      System.ValueTuple (>= 4.4) - restriction: && (< net45) (>= netstandard1.6)
     Fable.Import.Browser (0.1.2) - restriction: >= netstandard1.6
       Fable.Core (>= 1.1.15) - restriction: >= netstandard1.6
       FSharp.Core (>= 4.2.3) - restriction: >= netstandard1.6
@@ -58,18 +67,6 @@ NUGET
       Fable.Core (>= 1.2.4) - restriction: >= netstandard1.6
       Fable.Import.Browser (>= 0.1) - restriction: >= netstandard1.6
       FSharp.Core (>= 4.2.3) - restriction: >= netstandard1.6
-    FSharp.Compiler.Service (16.0.2) - restriction: >= netcoreapp2.0
-      FSharp.Core (>= 4.1.18) - restriction: && (< net45) (>= netstandard1.6)
-      NETStandard.Library (>= 1.6.1) - restriction: && (< net45) (>= netstandard1.6)
-      System.Collections.Immutable (>= 1.3) - restriction: && (< net45) (>= netstandard1.6)
-      System.Diagnostics.Process (>= 4.1) - restriction: && (< net45) (>= netstandard1.6)
-      System.Diagnostics.TraceSource (>= 4.0) - restriction: && (< net45) (>= netstandard1.6)
-      System.Reflection.Emit (>= 4.3) - restriction: && (< net45) (>= netstandard1.6)
-      System.Reflection.Metadata (>= 1.4.1) - restriction: && (< net45) (>= netstandard1.6)
-      System.Reflection.TypeExtensions (>= 4.3) - restriction: && (< net45) (>= netstandard1.6)
-      System.Runtime.Loader (>= 4.0) - restriction: && (< net45) (>= netstandard1.6)
-      System.Security.Cryptography.Algorithms (>= 4.3) - restriction: && (< net45) (>= netstandard1.6)
-      System.ValueTuple (>= 4.4) - restriction: && (< net45) (>= netstandard1.6)
     FSharp.Core (4.2.3) - redirects: force
       System.Collections (>= 4.0.11) - restriction: && (< net45) (>= netstandard1.6)
       System.Console (>= 4.0) - restriction: && (< net45) (>= netstandard1.6)
@@ -103,10 +100,10 @@ NUGET
       Fable.PowerPack (>= 1.3) - restriction: >= netstandard1.6
       Fable.React (>= 1.2.1) - restriction: >= netstandard1.6
       Fulma.Extensions (>= 0.1.0-beta-004) - restriction: >= netstandard1.6
-    Fulma.Extensions (0.1.0-beta-007)
+    Fulma.Extensions (0.1.0-beta-009)
       Fable.Core (>= 1.2.4) - restriction: >= netstandard1.6
-      Fable.React (>= 1.2) - restriction: >= netstandard1.6
-      Fulma (>= 0.1.0-beta-007) - restriction: >= netstandard1.6
+      Fable.React (>= 1.2.1) - restriction: >= netstandard1.6
+      Fulma (>= 1.0.0-beta-005) - restriction: >= netstandard1.6
     Microsoft.CSharp (4.4) - restriction: >= netcoreapp2.0
     Microsoft.NETCore.App (2.0) - restriction: >= netcoreapp2.0
       Microsoft.NETCore.DotNetHostPolicy (>= 2.0) - restriction: >= netcoreapp2.0
@@ -723,8 +720,7 @@ NUGET
       Microsoft.NETCore.Platforms (>= 1.1) - restriction: || (&& (< monotouch) (< net451) (>= netstandard1.2) (< win81) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (< portable-net451+win81+wpa81)
       Microsoft.NETCore.Targets (>= 1.1) - restriction: || (&& (< monotouch) (< net451) (>= netstandard1.2) (< win81) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (< portable-net451+win81+wpa81)
       System.Runtime (>= 4.3) - restriction: || (&& (< monotouch) (< net451) (>= netstandard1.2) (< win81) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (< portable-net451+win81+wpa81)
-    System.ValueTuple (4.4) - restriction: >= netstandard1.6
-      NETStandard.Library (>= 1.6.1) - restriction: && (< monotouch) (< net461) (>= netstandard1.0) (< netstandard2.0) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)
+    System.ValueTuple (4.4) - restriction: >= netcoreapp2.0
     System.Xml.ReaderWriter (4.3) - restriction: || (&& (< monoandroid) (< net45) (< netstandard1.3) (>= netstandard1.6)) (&& (< monoandroid) (< net45) (< netstandard1.4) (>= netstandard1.6)) (&& (< monoandroid) (< net45) (< netstandard1.5) (>= netstandard1.6)) (&& (< monotouch) (< net45) (>= netstandard1.6) (< netstandard2.0) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (&& (< net45) (>= netstandard1.6) (< portable-net451+win81+wpa81)) (&& (>= net46) (< netstandard1.4) (>= netstandard1.6)) (>= netcoreapp2.0) (&& (>= netstandard1.6) (< portable-net45+win8+wpa81)) (&& (>= netstandard1.6) (>= uap10.0))
       System.Collections (>= 4.3) - restriction: || (&& (< monotouch) (< net45) (>= netstandard1.3) (< win8) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (< portable-net45+win8+wp8+wpa81)
       System.Diagnostics.Debug (>= 4.3) - restriction: || (&& (< monotouch) (< net45) (>= netstandard1.3) (< win8) (< wpa81) (< xamarinios) (< xamarinmac) (< xamarintvos) (< xamarinwatchos)) (< portable-net45+win8+wp8+wpa81)

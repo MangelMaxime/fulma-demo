@@ -1,0 +1,41 @@
+@import "./../../node_modules/bulma/sass/utilities/initial-variables";
+@import "./../../node_modules/bulma/sass/utilities/functions.sass";
+
+// Customize
+// Colors
+$primary: #2D3947;
+
+$fa-font-path: "./../../node_modules/font-awesome/fonts/";
+@import './../../node_modules/font-awesome/scss/font-awesome';
+
+@import './../../node_modules/bulma/bulma';
+@import './../../node_modules/bulma-calendar/calendar';
+@import './../../node_modules/bulma-pageloader/pageloader';
+@import './../../node_modules/bulma-tooltip/tooltip';
+
+html,
+body {
+    font-size: 14px;
+}
+
+
+.navbar-bg{
+    background-color: $primary;
+    .title{
+        color: $white;
+    }
+}
+
+
+.navbar {
+    .image {
+        img {
+            height: 100%;
+            max-height: inherit;
+        }
+    }
+}
+
+.vote-area > * {
+    margin-right: .5em;
+}

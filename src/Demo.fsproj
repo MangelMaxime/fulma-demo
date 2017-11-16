@@ -7,19 +7,19 @@
     <Compile Include="Import\Fable.Import.Lowdb.fs" />
     <Compile Include="Global\Render.fs" />
     <Compile Include="Global\Logger.fs" />
-    <Compile Include="Global\Json.fs" />
     <Compile Include="Global\Router.fs" />
     <Compile Include="Global\Database.fs" />
     <Compile Include="Data\User.fs" />
-    <Compile Include="Data\Session.fs" />
-    <Compile Include="Data\Question\Author.fs" />
-    <Compile Include="Data\Question.fs" />
+    <Compile Include="Data\Forum.fs" />
+    <Compile Include="Requests\Question.fs" />
+    <Compile Include="Requests\Answer.fs" />
     <Compile Include="Views\Assets.fs" />
     <Compile Include="Views\Page.fs" />
     <Compile Include="Views\Question.fs" />
-    <Compile Include="Page\Index.fs" />
     <Compile Include="Page\Errored.fs" />
     <Compile Include="Page\Home.fs" />
+    <Compile Include="Page\Question\Show\Answer.fs" />
+    <Compile Include="Page\Question\Show.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

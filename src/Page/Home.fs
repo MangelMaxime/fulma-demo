@@ -1,9 +1,8 @@
 namespace Page.Home
 
-open Data.Question
+module Component =
 
-[<AutoOpen>]
-module Types =
+    open Data.Forum
 
     type Model =
         { Questions : Question list }
@@ -11,85 +10,27 @@ module Types =
     type Msg =
         | GetQuestions
 
-module Request =
-
-    open Fable.PowerPack
-    open Types
-    open Database
-    open Fable.Core.JsInterop
-
-    let getQuestions _ =
-        promise {
-
-            let result =
-                Database.Questions
-                    .sortBy("Id")
-                    .value()
-                |> unbox<Database.Question []>
-                |> Array.map(fun question ->
-                    match Database.GetUserById question.AuthorId with
-                    | None -> failwithf "Unkown author of id#%i for the question#%i" question.AuthorId question.Id
-                    | Some user ->
-                        { Id = question.Id
-                          Author =
-                            { Id = user.Id
-                              Firstname = user.Firstname
-                              Surname = user.Surname
-                              Avatar = user.Avatar }
-                          Title = question.Title
-                          Description = question.Description
-                          CreatedAt = question.CreatedAt }
-                )
-                |> Array.toList
-                |> toJson
-
-            do! Promise.sleep 500
-
-            return result
-        }
-
-module State =
-
     open Elmish
-    open Fable.Import
-    open Fable.PowerPack
-    open Fable.PowerPack.Result
-    open Fable.PowerPack.Json
-    open Json.Parser
     open Views
+    open Fable.PowerPack
 
-    let init session =
-        Request.getQuestions ()
-        |> Promise.map (fun result ->
-            try
-                let json =
-                    result
-                    |> ofString
-                    |> Result.bind array
-                    |> unwrapResult
-
-                { Questions = json
-                              |> Array.map (fun item -> object item |> unwrapResult |> Question.Decoder)
-                              |> Array.toList } |> Ok
-            with
-                | ex ->
-                    Browser.console.log ex.Message
-                    Page.Errored.State.pageLoadError Page.Other "Homepage is currently unavailable."
-                    |> Error
+    let init _ =
+        Requests.Question.getSummary ()
+        |> Promise.map (fun questions ->
+            Ok { Questions = questions } )
+        |> Promise.catch (fun error ->
+            Error error.Message
         )
 
     let update session msg model =
         model, Cmd.none
 
-module View =
-
     open Fable.Helpers.React
     open Fable.Helpers.React.Props
     open Fulma.Elements
     open Fulma.Layouts
-    open Views
 
-    let root session model dispatch =
+    let view session (model : Model) dispatch =
         Container.container [ ]
             [ Section.section [ ]
                 [ Heading.h3 [ ]

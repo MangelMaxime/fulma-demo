@@ -39,7 +39,7 @@ module.exports = {
             demo: [
                 "babel-polyfill",
                 resolve('./src/Demo.fsproj'),
-                resolve('./src/sass/main.sass')
+                resolve('./src/scss/main.scss')
             ]
         } : {
             app: [
@@ -47,7 +47,7 @@ module.exports = {
                 resolve('./src/Demo.fsproj')
             ],
             style: [
-                resolve('./src/sass/main.sass')
+                resolve('./src/scss/main.scss')
             ]
         },
     output: {
@@ -66,10 +66,6 @@ module.exports = {
             new webpack.NamedModulesPlugin()
         ]),
     resolve: {
-        alias: {
-            "react": "preact-compat",
-            "react-dom": "preact-compat"
-        },
         modules: [
             "node_modules/",
             resolve("./node_modules/")
@@ -104,7 +100,7 @@ module.exports = {
                 },
             },
             {
-                test: /\.sass$/,
+                test: /\.s(a|c)ss$/,
                 use: isProduction ?
                     ExtractTextPlugin.extract({
                         fallback: 'style-loader',

@@ -1,4 +1,4 @@
-[<AutoOpen>]
+[<RequireQualifiedAccess>]
 module Database
 
 open Fable.Import
@@ -29,12 +29,12 @@ type Question =
       Title : string
       Description : string
       CreatedAt : DateTime
-      Answers : Answer [] }
+      Answers : Answer array }
 
 type DatabaseData =
     { Version : int
-      Questions : Question []
-      Users : User [] }
+      Questions : Question array
+      Users : User array }
 
 /// Database helpers
 
@@ -43,9 +43,9 @@ let adapterOptions = jsOptions<Lowdb.AdapterOptions>(fun o ->
     o.deserialize <- ofJson<DatabaseData> >> box |> Some
 )
 
-let mutable private dbInstance : Lowdb.Lowdb option = Option.None
+let mutable private dbInstance : Lowdb.Lowdb option = None
 
-type Database =
+type Engine =
     static member Lowdb
         with get() : Lowdb.Lowdb =
             if dbInstance.IsNone then
@@ -58,16 +58,16 @@ type Database =
 
     static member Questions
         with get() : Lowdb.Lowdb =
-            Database.Lowdb
+            Engine.Lowdb
                 .get(!^"Questions")
 
     static member Users
         with get() : Lowdb.Lowdb =
-            Database.Lowdb
+            Engine.Lowdb
                 .get(!^"Users")
 
     static member GetUserById (userId: int) =
-        Database.Users
+        Engine.Users
             .find(createObj [ "Id" ==> userId])
             .value()
         |> function
@@ -76,31 +76,31 @@ type Database =
 
     static member Version
         with get() : int =
-            Database.Lowdb
+            Engine.Lowdb
                 .get(!^"Version")
                 .value()
 
     static member Init () =
         Logger.debug "Init database"
         try
-            Logger.debugfn "Database.Version: %i" Database.Version
+            Logger.debugfn "Database.Version: %i" Engine.Version
             Logger.debugfn "CurrentVersion: %i" CurrentVersion
-            if Database.Version <> CurrentVersion then
+            if Engine.Version <> CurrentVersion then
                 Logger.debug "Migration detected"
-                Database.Restore()
+                Engine.Restore()
         with
             | _ ->
                 Logger.debug "Failed to parse database from storage"
-                Database.Restore()
+                Engine.Restore()
 
     static member Restore () =
         Logger.debug "Restore the database"
         Browser.localStorage.removeItem("database")
         dbInstance <- None
-        Database.Default()
+        Engine.Default()
 
     static member Default () =
-        Database.Lowdb
+        Engine.Lowdb
             .defaults(
                 { Version = CurrentVersion
                   Questions =

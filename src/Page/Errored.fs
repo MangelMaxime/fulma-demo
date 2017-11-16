@@ -1,26 +1,21 @@
 namespace Page.Errored
 
-open Views.Page
+module Component =
 
-[<AutoOpen>]
-module Types =
+    open Views.Page
 
     type Model =
         { ActivePage : ActivePage
           ErrorMessage : string }
 
-module State =
-
     let pageLoadError activePage errorMessage =
         { ActivePage = activePage
           ErrorMessage = errorMessage }
 
-module View =
-
     open Fable.Helpers.React
     open Fable.Helpers.React.Props
 
-    let root session model =
+    let view model =
         div [ ClassName "" ]
             [ h1 [ ] [ str "Error loading page" ]
               p [ ]
