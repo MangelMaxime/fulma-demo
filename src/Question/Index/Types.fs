@@ -1,1 +1,0 @@
-module Question.Index.Types
