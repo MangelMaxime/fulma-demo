@@ -47,3 +47,43 @@ let createAnswer (questionId : int, userId : int, content : string) =
                   Content = answer.Content
                   Score = answer.Score }
     }
+
+let voteUp (questionId, answerId) =
+    promise {
+        let answer =
+            Database.Engine.Questions
+                .find(createObj [ "Id" ==> questionId ])
+                .get(!^"Answers")
+                .find(createObj [ "Id" ==> answerId ])
+
+        let newScore =
+            answer.value()
+            |> unbox<Answer>
+            |> (fun answer -> answer.Score + 1)
+
+        answer
+            .assign(createObj [ "Score" ==> newScore])
+            .write()
+
+        return newScore
+    }
+
+let voteDown (questionId, answerId) =
+    promise {
+        let answer =
+            Database.Engine.Questions
+                .find(createObj [ "Id" ==> questionId ])
+                .get(!^"Answers")
+                .find(createObj [ "Id" ==> answerId ])
+
+        let newScore =
+            answer.value()
+            |> unbox<Answer>
+            |> (fun answer -> answer.Score - 1)
+
+        answer
+            .assign(createObj [ "Score" ==> newScore])
+            .write()
+
+        return newScore
+    }

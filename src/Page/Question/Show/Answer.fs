@@ -10,14 +10,11 @@ module Component =
           IsLoading : bool
           Error : string }
 
-    type VoteUpRes =
-        | Success of int
-        | Error of exn
-
     type Msg =
         | VoteUp
         | VoteDown
-        | VoteUpResult of VoteUpRes
+        | VoteSuccess of int
+        | VoteError of exn
 
     let init questionId answer =
         { QuestionId = questionId
@@ -36,12 +33,11 @@ module Component =
                 { model with Error = "You've already upvoted this answer 5 times, isn't that enough?" }, Cmd.none
             else
                 { model with Error = ""
-                             IsLoading = true }, Cmd.none
-                                                //  Cmd.ofPromise
-                                                //     Rest.voteUp
-                                                //     (model.QuestionId, model.Answer.Id)
-                                                //     (VoteUpRes.Success >> VoteUpResult)
-                                                //     (VoteUpRes.Error >> VoteUpResult)
+                             IsLoading = true }, Cmd.ofPromise
+                                                    Requests.Answer.voteUp
+                                                    (model.QuestionId, model.Answer.Id)
+                                                    VoteSuccess
+                                                    VoteError
 
         | VoteDown ->
             if model.IsLoading then
@@ -50,23 +46,19 @@ module Component =
                 { model with Error = "You've already downvoted this answer 5 times, isn't that enough?" }, Cmd.none
             else
                 { model with Error = ""
-                             IsLoading = true }, Cmd.none
-                                                // Cmd.ofPromise
-                                                //     Rest.voteDown
-                                                //     (model.QuestionId, model.Answer.Id)
-                                                //     (VoteUpRes.Success >> VoteUpResult)
-                                                //     (VoteUpRes.Error >> VoteUpResult)
+                             IsLoading = true }, Cmd.ofPromise
+                                                    Requests.Answer.voteDown
+                                                    (model.QuestionId, model.Answer.Id)
+                                                    VoteSuccess
+                                                    VoteError
 
-        | VoteUpResult result ->
-            match result with
-            | Success newScore ->
-                { model with IsLoading = false
-                             Answer =
-                                { model.Answer with Score = newScore } }, Cmd.none
-
-            | Error error ->
-                Logger.errorfn "[Question.Show.Answer.State] Error when upvoting the answer: \n%O" error
-                model, Cmd.none
+        | VoteSuccess newScore ->
+            { model with IsLoading = false
+                         Answer =
+                            { model.Answer with Score = newScore } }, Cmd.none
+        | VoteError error ->
+            Logger.errorfn "[Question.Show.Answer.State] Error when upvoting the answer: \n%O" error
+            model, Cmd.none
 
     open Fulma.Layouts
     open Fulma.Components
