@@ -8,14 +8,6 @@ open Fable.Helpers.React.Props
 open Fable.Import
 open Fable.Core
 
-let ``404 page`` =
-    Hero.hero [ Hero.isFullHeight
-                Hero.isDanger ]
-        [ Hero.body [ ]
-            [ Container.container [ Container.customClass Bulma.Properties.Alignment.HasTextCentered ]
-                [ Heading.h1 [ ]
-                    [ str "404" ] ] ] ]
-
 let converter = Showdown.Globals.Converter.Create()
 
 [<Pojo>]

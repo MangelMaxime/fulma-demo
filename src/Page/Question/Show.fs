@@ -91,7 +91,7 @@ module Component =
     open Fable.Import
     open Fable.Core.JsInterop
 
-    let replyView (currentUser : User) model dispatch =
+    let private replyView (currentUser : User) model dispatch =
         Media.media [ ]
             [ Media.left [ ]
                 [ Image.image [ Image.is64x64 ]
@@ -130,7 +130,7 @@ module Component =
                         [ Level.item [ Level.Item.props [ Key "test" ] ]
                             [ str "Press Ctrl + Enter to submit" ] ] ] ] ]
 
-    let viewAnswers answers dispatch =
+    let private viewAnswers answers dispatch =
         div [ ]
             ( answers
                 |> List.mapi (fun index answer -> Answer.view answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch)))

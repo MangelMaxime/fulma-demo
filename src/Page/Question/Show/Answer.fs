@@ -69,7 +69,7 @@ module Component =
     open Fable.Helpers.React.Props
     open System
 
-    let voteArea score =
+    let private voteArea score =
         let icon =
             if score > 0 then
                 Fa.I.ThumbsOUp
@@ -80,7 +80,7 @@ module Component =
             Math.Min(5, Math.Abs score - 1)
 
         span [ ]
-            [ for i = 0 to iterationCount do
+            [ for _ in 0 .. iterationCount do
                 yield Icon.faIcon [ ] [ Fa.icon icon ] ]
 
     let view (model : Model) dispatch =
