@@ -136,10 +136,11 @@ module Component =
                 |> List.mapi (fun index answer -> Answer.view answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch)))
 
     let view currentUser model dispatch =
-        Section.section [ ]
-            [ Heading.p [ Heading.is5 ]
-                [ str model.Question.Title ]
-              Columns.columns [ Columns.isCentered ]
-                [ Column.column [ Column.Width.isTwoThirds ]
-                    [ Views.Question.viewThread model.Question (viewAnswers model.Answers dispatch)
-                      replyView currentUser model dispatch ] ] ]
+        Container.container [ ]
+            [ Section.section [ ]
+                [ Heading.p [ Heading.is5 ]
+                    [ str model.Question.Title ]
+                  Columns.columns [ Columns.isCentered ]
+                    [ Column.column [ Column.Width.isTwoThirds ]
+                        [ Views.Question.viewThread model.Question (viewAnswers model.Answers dispatch)
+                          replyView currentUser model dispatch ] ] ] ]

@@ -81,20 +81,20 @@ type Engine =
                 .value()
 
     static member Init () =
-        Logger.debug "Init database"
+        Logger.log "Init database"
         try
-            Logger.debugfn "Database.Version: %i" Engine.Version
-            Logger.debugfn "CurrentVersion: %i" CurrentVersion
+            Logger.log "Database.Version: %i" Engine.Version
+            Logger.log "CurrentVersion: %i" CurrentVersion
             if Engine.Version <> CurrentVersion then
-                Logger.debug "Migration detected"
+                Logger.log "Migration detected"
                 Engine.Restore()
         with
             | _ ->
-                Logger.debug "Failed to parse database from storage"
+                Logger.log "Failed to parse database from storage"
                 Engine.Restore()
 
     static member Restore () =
-        Logger.debug "Restore the database"
+        Logger.log "Restore the database"
         Browser.localStorage.removeItem("database")
         dbInstance <- None
         Engine.Default()
@@ -175,4 +175,4 @@ I wanted to know why did you create Fable. Did you always planned to use F# ? Or
                           |]
                 }
             ).write()
-        Logger.debug "Database restored"
+        Logger.log "Database restored"
