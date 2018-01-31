@@ -14,4 +14,4 @@ let root model dispatch =
     | { CurrentPage = Router.QuestionPage.Show _
         ShowModel = Some extractedModel } -> Question.Show.View.root extractedModel (ShowMsg >> dispatch)
     | _ ->
-        Render.``404 page``
+        Render.pageNotFound

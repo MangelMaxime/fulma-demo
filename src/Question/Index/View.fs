@@ -8,15 +8,10 @@ open Fulma.Components
 open Fulma.Elements
 open Fulma.Elements.Form
 open Fulma.Layouts
-open System
 
 let loaderView isLoading =
-    if isLoading then
-        PageLoader.pageLoader [ PageLoader.isActive ]
-            [ ]
-    else
-        PageLoader.pageLoader [ ]
-            [ ]
+    PageLoader.pageLoader [ PageLoader.IsActive isLoading ]
+        [ ]
 
 let questionsView (question : QuestionInfo) =
     let url =
@@ -26,11 +21,11 @@ let questionsView (question : QuestionInfo) =
 
     Media.media [ ]
         [ Media.left [ ]
-            [ Image.image [ Image.is64x64 ]
+            [ Image.image [ Image.Is64x64 ]
                 [ img [ Src ("avatars/" + question.Author.Avatar)  ] ] ]
           Media.content [ ]
-            [ Heading.p [ Heading.isSubtitle
-                          Heading.is5 ]
+            [ Heading.p [ Heading.IsSubtitle
+                          Heading.Is5 ]
                 [ a [ Href (url question.Id) ]
                     [ str question.Title ] ]
               Level.level [ ]
@@ -44,11 +39,11 @@ let questionsView (question : QuestionInfo) =
                                                 (question.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ] ] ]
 
 let questionsList questions =
-    Columns.columns [ Columns.isCentered ]
-        [ Column.column [ Column.Width.isTwoThirds ]
+    Columns.columns [ Columns.IsCentered ]
+        [ Column.column [ Column.Width(Column.All, Column.IsTwoThirds) ]
             (questions |> List.map questionsView) ]
 
-let root model dispatch =
+let root model _ =
     match model.Questions with
     | Some questions ->
         Container.container [ ]

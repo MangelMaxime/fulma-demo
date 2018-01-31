@@ -4,11 +4,10 @@
 
 open System
 open Fake
-open Fake.ReleaseNotesHelper
 open Fake.Git
 open Fake.YarnHelper
 
-let dotnetcliVersion = "2.0.0"
+let dotnetcliVersion = "2.0.3"
 let mutable dotnetExePath = "dotnet"
 
 let runDotnet dir =

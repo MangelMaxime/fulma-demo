@@ -1,35 +1,30 @@
 module Question.Show.View
 
 open Types
-open Fable.Core
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.Import
+open Fulma
 open Fulma.Extensions
 open Fulma.Components
 open Fulma.Elements
 open Fulma.Elements.Form
 open Fulma.Layouts
-open System
 open Fable.Core.JsInterop
 
 let loaderView isLoading =
-    if isLoading then
-        PageLoader.pageLoader [ PageLoader.isActive ]
-            [ ]
-    else
-        PageLoader.pageLoader [ ]
-            [ ]
+    PageLoader.pageLoader [ PageLoader.IsActive isLoading ]
+        [ ]
 
 let replyView model dispatch =
     Media.media [ ]
         [ Media.left [ ]
-            [ Image.image [ Image.is64x64 ]
+            [ Image.image [ Image.Is64x64 ]
                 [ img [ Src ("avatars/" + model.Session.Avatar) ] ] ]
           Media.content [ ]
-            [ Field.field_div [ ]
-                [ Control.control_div [ if model.IsWaitingReply then yield Control.isLoading ]
-                    [ Textarea.textarea [ yield Textarea.props [
+            [ Field.div [ ]
+                [ Control.div [ Control.IsLoading model.IsWaitingReply ]
+                    [ Textarea.textarea [ Textarea.Props [
                                             DefaultValue model.Reply
                                             Ref (fun element ->
                                                 if not (isNull element) && model.Reply = "" then
@@ -41,18 +36,18 @@ let replyView model dispatch =
                                                 if ev.ctrlKey && ev.key = "Enter" then
                                                     dispatch Submit
                                             ) ]
-                                          if model.IsWaitingReply then yield Textarea.isDisabled ]
+                                          Textarea.Disabled model.IsWaitingReply ]
                     [ ] ]
-                  Help.help [ Help.isDanger ]
+                  Help.help [ Help.Color IsDanger ]
                             [ str model.Error ] ]
               Level.level [ ]
                 [ Level.left [ ]
                     [ Level.item [ ]
-                        [ Button.button [ yield Button.isPrimary
-                                          yield Button.onClick (fun _ -> dispatch Submit)
-                                          if model.IsWaitingReply then yield Button.isDisabled ]
+                        [ Button.button [ Button.Color IsPrimary
+                                          Button.OnClick (fun _ -> dispatch Submit)
+                                          Button.Disabled model.IsWaitingReply ]
                                         [ str "Submit" ] ] ]
-                  Level.item [ Level.Item.hasTextCentered ]
+                  Level.item [ Level.Item.HasTextCentered ]
                     [ Help.help [ ]
                         [ str "You can use markdown to format your answer" ] ]
                   Level.right [ ]
@@ -62,7 +57,7 @@ let replyView model dispatch =
 let questionsView (question : QuestionInfo) answers dispatch =
     Media.media [ ]
         [ Media.left [ ]
-            [ Image.image [ Image.is64x64 ]
+            [ Image.image [ Image.Is64x64 ]
                 [ img [ Src ("avatars/" + question.Author.Avatar)  ] ] ]
           Media.content [ ]
             [ yield Render.contentFromMarkdown [ ]
@@ -82,10 +77,10 @@ let questionsView (question : QuestionInfo) answers dispatch =
 
 let pageContent question model dispatch =
     Section.section [ ]
-        [ Heading.p [ Heading.is5 ]
+        [ Heading.p [ Heading.Is5 ]
             [ str question.Title ]
-          Columns.columns [ Columns.isCentered ]
-            [ Column.column [ Column.Width.isTwoThirds ]
+          Columns.columns [ Columns.IsCentered ]
+            [ Column.column [ Column.Width(Column.All, Column.IsTwoThirds) ]
                 [ questionsView question model.Answers dispatch
                   replyView model dispatch ] ] ]
 

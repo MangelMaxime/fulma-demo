@@ -11,47 +11,46 @@ open Fulma.Elements
 open Fulma.Elements.Form
 open Fulma.Extra.FontAwesome
 open Fulma.Layouts
-open Fulma.BulmaClasses
 
 let navbarEnd =
-    Navbar.end_div [ ]
-        [ Navbar.item_div [ ]
-            [ Field.field_div [ Field.isGrouped ]
-                [ Control.control_p [ ]
-                    [ Button.button [ Button.props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
-                        [ Icon.faIcon [ ] Fa.Github
+    Navbar.End.div [ ]
+        [ Navbar.Item.div [ ]
+            [ Field.div [ Field.IsGrouped ]
+                [ Control.p [ ]
+                    [ Button.button [ Button.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
+                        [ Icon.faIcon [ ] [ Fa.icon Fa.I.Github ]
                           span [ ] [ str "Source" ] ] ] ] ] ]
 
 let navbarStart dispatch =
-    Navbar.start_div [ ]
-        [ Navbar.item_a [ Navbar.Item.props [ OnClick (fun _ ->
+    Navbar.Start.div [ ]
+        [ Navbar.Item.a [ Navbar.Item.Props [ OnClick (fun _ ->
                                                         Router.QuestionPage.Index
                                                         |> Router.Question
                                                         |> Router.toHash
                                                         |> (fun url -> Browser.window.location.href <- url)) ] ]
             [ str "Home" ]
-          Navbar.item_div [ Navbar.Item.hasDropdown
-                            Navbar.Item.isHoverable ]
-            [ Navbar.link_div [ ]
+          Navbar.Item.div [ Navbar.Item.HasDropdown
+                            Navbar.Item.IsHoverable ]
+            [ Navbar.Link.div [ ]
                 [ str "Options" ]
-              Navbar.dropdown_div [ ]
-                [ Navbar.item_a [ Navbar.Item.props [ OnClick (fun _ -> dispatch ResetDatabase)] ]
+              Navbar.Dropdown.div [ ]
+                [ Navbar.Item.a [ Navbar.Item.Props [ OnClick (fun _ -> dispatch ResetDatabase)] ]
                     [ str "Reset demo" ] ] ] ]
 
 let navbarView isBurgerOpen dispatch =
     div [ ClassName "navbar-bg" ]
         [ Container.container [ ]
-            [ Navbar.navbar [ Navbar.customClass "is-primary" ]
-                [ Navbar.brand_div [ ]
-                    [ Navbar.item_a [ Navbar.Item.props [ Href "#" ] ]
-                        [ Image.image [ Image.is32x32 ]
+            [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
+                [ Navbar.Brand.div [ ]
+                    [ Navbar.Item.a [ Navbar.Item.Props [ Href "#" ] ]
+                        [ Image.image [ Image.Is32x32 ]
                             [ img [ Src "assets/mini_logo.svg" ] ]
-                          Heading.p [ Heading.is4 ]
+                          Heading.p [ Heading.Is4 ]
                             [ str "Fulma-demo" ] ]
                       // Icon display only on mobile
-                      Navbar.item_a [ Navbar.Item.props [ Href "https://github.com/MangelMaxime/fulma-demo" ]
-                                      Navbar.Item.customClass "is-hidden-desktop" ]
-                                    [ Icon.faIcon [ ] (unbox ("fa-lg " + string Fa.Github)) ] // TODO: Remove this hack to use the new icon API
+                      Navbar.Item.a [ Navbar.Item.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ]
+                                      Navbar.Item.CustomClass "is-hidden-desktop" ]
+                                    [ Icon.faIcon [ ] [ Fa.faLg; Fa.icon Fa.I.Github ] ]
                       // Make sure to have the navbar burger as the last child of the brand
                       Navbar.burger [ Fulma.Common.CustomClass (if isBurgerOpen then "is-active" else "")
                                       Fulma.Common.Props [
@@ -59,18 +58,17 @@ let navbarView isBurgerOpen dispatch =
                         [ span [ ] [ ]
                           span [ ] [ ]
                           span [ ] [ ] ] ]
-                  Navbar.menu [ if isBurgerOpen then
-                                    yield Navbar.Menu.isActive ]
+                  Navbar.menu [ Navbar.Menu.IsActive isBurgerOpen ]
                     [ navbarStart dispatch
                       navbarEnd ] ] ] ]
 
 let renderPage model dispatch =
     match model with
-    | { CurrentPage = Router.Question questionPage
+    | { CurrentPage = Router.Question _
         QuestionDispatcher = Some extractedModel } ->
         Question.Dispatcher.View.root extractedModel (QuestionDispatcherMsg >> dispatch)
     | _ ->
-        Render.``404 page``
+        Render.pageNotFound
 
 let root model dispatch =
     div [ ]

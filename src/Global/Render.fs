@@ -1,5 +1,6 @@
 module Render
 
+open Fulma
 open Fulma.Layouts
 open Fulma.Elements
 open Fulma.BulmaClasses
@@ -8,11 +9,11 @@ open Fable.Helpers.React.Props
 open Fable.Import
 open Fable.Core
 
-let ``404 page`` =
-    Hero.hero [ Hero.isFullHeight
-                Hero.isDanger ]
+let pageNotFound =
+    Hero.hero [ Hero.IsFullHeight
+                Hero.Color IsDanger ]
         [ Hero.body [ ]
-            [ Container.container [ Container.customClass Bulma.Properties.Alignment.HasTextCentered ]
+            [ Container.container [ Container.CustomClass Bulma.Properties.Alignment.HasTextCentered ]
                 [ Heading.h1 [ ]
                     [ str "404" ] ] ] ]
 
@@ -25,5 +26,5 @@ type DangerousInnerHtml =
 let contentFromMarkdown options str =
     Content.content
         [ yield! options
-          yield Content.props [ DangerouslySetInnerHTML { __html =  converter.makeHtml str } ] ]
+          yield Content.Props [ DangerouslySetInnerHTML { __html =  converter.makeHtml str } ] ]
         [ ]
