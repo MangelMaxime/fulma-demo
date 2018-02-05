@@ -17,7 +17,7 @@ let navbarEnd =
         [ Navbar.Item.div [ ]
             [ Field.div [ Field.IsGrouped ]
                 [ Control.p [ ]
-                    [ Button.button [ Button.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
+                    [ Button.a [ Button.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
                         [ Icon.faIcon [ ] [ Fa.icon Fa.I.Github ]
                           span [ ] [ str "Source" ] ] ] ] ] ]
 
