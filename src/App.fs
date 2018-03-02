@@ -12,7 +12,7 @@ open Fulma.Elements.Form
 open Fulma.Extra.FontAwesome
 open Fulma.Layouts
 
-let navbarEnd =
+let private navbarEnd =
     Navbar.End.div [ ]
         [ Navbar.Item.div [ ]
             [ Field.div [ Field.IsGrouped ]
@@ -21,13 +21,12 @@ let navbarEnd =
                         [ Icon.faIcon [ ] [ Fa.icon Fa.I.Github ]
                           span [ ] [ str "Source" ] ] ] ] ] ]
 
-let navbarStart dispatch =
+let private navbarStart dispatch =
     Navbar.Start.div [ ]
         [ Navbar.Item.a [ Navbar.Item.Props [ OnClick (fun _ ->
                                                         Router.QuestionPage.Index
                                                         |> Router.Question
-                                                        |> Router.toHash
-                                                        |> (fun url -> Browser.window.location.href <- url)) ] ]
+                                                        |> Router.modifyLocation) ] ]
             [ str "Home" ]
           Navbar.Item.div [ Navbar.Item.HasDropdown
                             Navbar.Item.IsHoverable ]
@@ -37,7 +36,7 @@ let navbarStart dispatch =
                 [ Navbar.Item.a [ Navbar.Item.Props [ OnClick (fun _ -> dispatch ResetDatabase)] ]
                     [ str "Reset demo" ] ] ] ]
 
-let navbarView isBurgerOpen dispatch =
+let private navbarView isBurgerOpen dispatch =
     div [ ClassName "navbar-bg" ]
         [ Container.container [ ]
             [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
@@ -62,7 +61,7 @@ let navbarView isBurgerOpen dispatch =
                     [ navbarStart dispatch
                       navbarEnd ] ] ] ]
 
-let renderPage model dispatch =
+let private renderPage model dispatch =
     match model with
     | { CurrentPage = Router.Question _
         QuestionDispatcher = Some extractedModel } ->
@@ -70,7 +69,7 @@ let renderPage model dispatch =
     | _ ->
         Render.pageNotFound
 
-let root model dispatch =
+let private root model dispatch =
     div [ ]
         [ navbarView model.IsBurgerOpen dispatch
           renderPage model dispatch ]

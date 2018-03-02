@@ -11,7 +11,7 @@ open Fulma.Elements.Form
 open Fulma.Layouts
 open System
 
-let voteArea score =
+let private voteArea score =
     let icon =
         if score > 0 then
             Fa.I.ThumbsOUp

@@ -12,11 +12,11 @@ open Fulma.Elements.Form
 open Fulma.Layouts
 open Fable.Core.JsInterop
 
-let loaderView isLoading =
+let private loaderView isLoading =
     PageLoader.pageLoader [ PageLoader.IsActive isLoading ]
         [ ]
 
-let replyView model dispatch =
+let private replyView model dispatch =
     Media.media [ ]
         [ Media.left [ ]
             [ Image.image [ Image.Is64x64 ]
@@ -54,7 +54,7 @@ let replyView model dispatch =
                     [ Level.item [ ]
                         [ str "Press Ctrl + Enter to submit" ] ] ] ] ]
 
-let questionsView (question : QuestionInfo) answers dispatch =
+let private questionsView (question : QuestionInfo) answers dispatch =
     Media.media [ ]
         [ Media.left [ ]
             [ Image.image [ Image.Is64x64 ]
@@ -75,7 +75,7 @@ let questionsView (question : QuestionInfo) answers dispatch =
                   answers
                   |> List.mapi (fun index answer -> Answer.View.root answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch))) ] ]
 
-let pageContent question model dispatch =
+let private pageContent question model dispatch =
     Section.section [ ]
         [ Heading.p [ Heading.Is5 ]
             [ str question.Title ]

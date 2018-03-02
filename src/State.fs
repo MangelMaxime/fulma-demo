@@ -11,7 +11,7 @@ let urlUpdate (result: Option<Router.Page>) model =
     | None ->
 
         Browser.console.error("Error parsing url: " + Browser.window.location.href)
-        model, Navigation.modifyUrl (Router.toHash model.CurrentPage)
+        model, Router.modifyUrl model.CurrentPage
 
     | Some page ->
         let model = { model with CurrentPage = page }
@@ -40,9 +40,9 @@ let update msg model =
         let redirect =
             Router.QuestionPage.Index
             |> Router.Question
-            |> Router.toHash
+            |> Router.newUrl
 
-        model, Navigation.newUrl redirect
+        model, redirect
 
     | (ToggleBurger, _) ->
         { model with IsBurgerOpen = not model.IsBurgerOpen }, Cmd.none
