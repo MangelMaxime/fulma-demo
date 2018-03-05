@@ -3,12 +3,11 @@ module Question.Show.Answer.State
 open Elmish
 open Types
 
-let init user questionId answer author =
+let init questionId answer author =
     { QuestionId = questionId
       Answer = answer
       Author = author
       IsLoading = false
-      Session = user
       Error = "" }, Cmd.none
 
 let update msg (model: Model) =

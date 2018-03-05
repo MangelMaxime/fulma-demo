@@ -3,21 +3,21 @@ module Question.Index.View
 open Types
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
+open Fulma
 open Fulma.Extensions
 open Fulma.Components
 open Fulma.Elements
 open Fulma.Elements.Form
 open Fulma.Layouts
 
-let loaderView isLoading =
+let private loaderView isLoading =
     PageLoader.pageLoader [ PageLoader.IsActive isLoading ]
         [ ]
 
-let questionsView (question : QuestionInfo) =
+let private questionsView (question : QuestionInfo) =
     let url =
         Router.QuestionPage.Show
         >> Router.Question
-        >> Router.toHash //AuthenticatedPage.Question >> AuthPage >> toHash
 
     Media.media [ ]
         [ Media.left [ ]
@@ -26,7 +26,7 @@ let questionsView (question : QuestionInfo) =
           Media.content [ ]
             [ Heading.p [ Heading.IsSubtitle
                           Heading.Is5 ]
-                [ a [ Href (url question.Id) ]
+                [ a [ Router.href (url question.Id) ]
                     [ str question.Title ] ]
               Level.level [ ]
                 [ Level.left [ ] [ ] // Needed to force the level right aligment
@@ -38,7 +38,7 @@ let questionsView (question : QuestionInfo) =
                                                 question.Author.Surname
                                                 (question.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"))) ] ] ] ] ] ]
 
-let questionsList questions =
+let private questionsList questions =
     Columns.columns [ Columns.IsCentered ]
         [ Column.column [ Column.Width(Column.All, Column.IsTwoThirds) ]
             (questions |> List.map questionsView) ]
@@ -49,8 +49,15 @@ let root model _ =
         Container.container [ ]
             [ loaderView false
               Section.section [ ]
-                [ Heading.h3 [ ]
-                    [ str "Latest questions" ] ]
+                [ Columns.columns [ ]
+                    [ Column.column [ Column.Width(Column.All, Column.IsNarrow) ]
+                        [ Heading.h3 [ ]
+                            [ str "Latest questions" ] ]
+                      Column.column [ ] [ ]
+                      Column.column [ Column.Width (Column.All, Column.IsNarrow) ]
+                        [ Button.a [ Button.Color IsPrimary
+                                     Button.Props [ Router.href (Router.Question Router.Create) ] ]
+                            [ str "Ask a new question" ] ] ] ]
               questionsList questions ]
     | None ->
         Container.container [ ]
