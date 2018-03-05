@@ -1,7 +1,6 @@
 module App.State
 
 open Elmish
-open Elmish.Browser.Navigation
 open Types
 open Fable.Import
 
@@ -17,7 +16,7 @@ let urlUpdate (result: Option<Router.Page>) model =
         let model = { model with CurrentPage = page }
         match page with
         | Router.Question questionPage ->
-            let (subModel, subCmd) = Question.Dispatcher.State.init model.Session questionPage
+            let (subModel, subCmd) = Question.Dispatcher.State.init questionPage
             { model with QuestionDispatcher = Some subModel }, Cmd.map QuestionDispatcherMsg subCmd
 
 let init result =
@@ -26,7 +25,7 @@ let init result =
 let update msg model =
     match (msg, model) with
     | (QuestionDispatcherMsg msg, { QuestionDispatcher = Some extractedModel }) ->
-        let (subModel, subCmd) = Question.Dispatcher.State.update msg extractedModel
+        let (subModel, subCmd) = Question.Dispatcher.State.update model.Session msg extractedModel
         { model with QuestionDispatcher = Some subModel }, Cmd.map QuestionDispatcherMsg subCmd
 
     | (QuestionDispatcherMsg capturedMsg, _) ->
@@ -35,7 +34,6 @@ let update msg model =
         model, Cmd.none
 
     | (ResetDatabase, _) ->
-        // Browser.localStorage.removeItem("database")
         Database.Restore()
         let redirect =
             Router.QuestionPage.Index

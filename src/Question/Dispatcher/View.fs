@@ -1,17 +1,17 @@
 module Question.Dispatcher.View
 
 open Types
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
-open Fulma.Layouts
-open Fulma.Elements
-open Fulma.BulmaClasses
 
-let root model dispatch =
+let root user model dispatch =
     match model with
     | { CurrentPage = Router.QuestionPage.Index
         IndexModel = Some extractedModel } -> Question.Index.View.root extractedModel (IndexMsg >> dispatch)
+
     | { CurrentPage = Router.QuestionPage.Show _
-        ShowModel = Some extractedModel } -> Question.Show.View.root extractedModel (ShowMsg >> dispatch)
+        ShowModel = Some extractedModel } -> Question.Show.View.root user extractedModel (ShowMsg >> dispatch)
+
+    | { CurrentPage = Router.QuestionPage.Create
+        CreateModel = Some extractedModel } -> Question.Create.View.root user extractedModel (CreateMsg >> dispatch)
+
     | _ ->
         Render.pageNotFound

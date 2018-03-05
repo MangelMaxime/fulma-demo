@@ -15,17 +15,15 @@ type Model =
       Answers : Answer.Types.Model list
       Reply : string
       Error : string
-      IsWaitingReply : bool
-      Session : User }
+      IsWaitingReply : bool }
 
-    static member Empty user id =
+    static member Empty id =
         { QuestionId = id
           Question = None
           Answers = []
           Reply = ""
           Error = ""
-          IsWaitingReply = false
-          Session = user }
+          IsWaitingReply = false }
 
 type GetDetailsRes =
     | Success of QuestionInfo * (Answer * User) []

@@ -3,10 +3,10 @@ module Question.Show.State
 open Elmish
 open Types
 
-let init user id =
-    Model.Empty user id , Cmd.ofMsg (GetDetails id)
+let init id =
+    Model.Empty id , Cmd.ofMsg (GetDetails id)
 
-let update msg (model: Model) =
+let update (user : Database.User) msg (model: Model) =
     match msg with
     | GetDetails id ->
         model, Cmd.ofPromise Rest.getDetails id (GetDetailsRes.Success >> GetDetailsResult) (GetDetailsRes.Error >> GetDetailsResult)
@@ -19,7 +19,7 @@ let update msg (model: Model) =
             let mutable answersCmd = []
 
             for (answer, author) in answers do
-                let (subModel, subCmd) = Answer.State.init model.Session question.Id answer author
+                let (subModel, subCmd) = Answer.State.init question.Id answer author
                 answersModel <- answersModel @ [subModel]
                 answersCmd <- answersCmd @ [Cmd.map AnswerMsg subCmd]
 
@@ -41,7 +41,7 @@ let update msg (model: Model) =
                 { model with IsWaitingReply = true
                              Error = "" }, Cmd.ofPromise
                                                 Rest.createAnswer
-                                                (model.QuestionId, model.Session.Id, model.Reply)
+                                                (model.QuestionId, user.Id, model.Reply)
                                                 (CreateAnswerRes.Success >> CreateAnswerResult)
                                                 (CreateAnswerRes.Error >> CreateAnswerResult)
             else
@@ -54,7 +54,7 @@ let update msg (model: Model) =
             { model with IsWaitingReply = false }, Cmd.none
 
         | CreateAnswerRes.Success (answer, author) ->
-            let (answerModel, answerCmd) = Answer.State.init model.Session model.QuestionId answer author
+            let (answerModel, answerCmd) = Answer.State.init model.QuestionId answer author
             { model with Reply = ""
                          Error = ""
                          IsWaitingReply = false

@@ -1,7 +1,6 @@
 module App.View
 
 open Elmish
-open Fable.Import
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open State
@@ -65,7 +64,7 @@ let private renderPage model dispatch =
     match model with
     | { CurrentPage = Router.Question _
         QuestionDispatcher = Some extractedModel } ->
-        Question.Dispatcher.View.root extractedModel (QuestionDispatcherMsg >> dispatch)
+        Question.Dispatcher.View.root model.Session extractedModel (QuestionDispatcherMsg >> dispatch)
     | _ ->
         Render.pageNotFound
 

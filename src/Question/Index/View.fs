@@ -49,14 +49,16 @@ let root model _ =
         Container.container [ ]
             [ loaderView false
               Section.section [ ]
-                [ Heading.h3 [ ]
-                    [ str "Latest questions" ] ]
-              questionsList questions
-              Columns.columns [ Columns.IsCentered ]
-                [ Column.column [ Column.Width (Column.All, Column.IsNarrow) ]
-                    [ Button.a [ Button.Color IsPrimary
-                                 Button.Props [ Router.href (Router.Question Router.Create) ] ]
-                        [ str "Ask a new question" ] ] ] ]
+                [ Columns.columns [ ]
+                    [ Column.column [ Column.Width(Column.All, Column.IsNarrow) ]
+                        [ Heading.h3 [ ]
+                            [ str "Latest questions" ] ]
+                      Column.column [ ] [ ]
+                      Column.column [ Column.Width (Column.All, Column.IsNarrow) ]
+                        [ Button.a [ Button.Color IsPrimary
+                                     Button.Props [ Router.href (Router.Question Router.Create) ] ]
+                            [ str "Ask a new question" ] ] ] ]
+              questionsList questions ]
     | None ->
         Container.container [ ]
             [ loaderView true ]

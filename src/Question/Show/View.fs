@@ -16,11 +16,11 @@ let private loaderView isLoading =
     PageLoader.pageLoader [ PageLoader.IsActive isLoading ]
         [ ]
 
-let private replyView model dispatch =
+let private replyView user model dispatch =
     Media.media [ ]
         [ Media.left [ ]
             [ Image.image [ Image.Is64x64 ]
-                [ img [ Src ("avatars/" + model.Session.Avatar) ] ] ]
+                [ img [ Src ("avatars/" + user.Avatar) ] ] ]
           Media.content [ ]
             [ Field.div [ ]
                 [ Control.div [ Control.IsLoading model.IsWaitingReply ]
@@ -75,19 +75,19 @@ let private questionsView (question : QuestionInfo) answers dispatch =
                   answers
                   |> List.mapi (fun index answer -> Answer.View.root answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch))) ] ]
 
-let private pageContent question model dispatch =
+let private pageContent user question model dispatch =
     Section.section [ ]
         [ Heading.p [ Heading.Is5 ]
             [ str question.Title ]
           Columns.columns [ Columns.IsCentered ]
             [ Column.column [ Column.Width(Column.All, Column.IsTwoThirds) ]
                 [ questionsView question model.Answers dispatch
-                  replyView model dispatch ] ] ]
+                  replyView user model dispatch ] ] ]
 
-let root model dispatch =
+let root user model dispatch =
     match model.Question with
     | Some question ->
-        pageContent question model dispatch, false
+        pageContent user question model dispatch, false
     | None -> div [ ] [ ], true
     |> (fun (pageContent, isLoading) ->
         Container.container [ ]

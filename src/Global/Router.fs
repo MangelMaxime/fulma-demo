@@ -21,8 +21,6 @@ let private toHash page =
         | Show id -> sprintf "#question/%i" id
         | Create -> "#question/create"
 
-open Elmish.Browser.UrlParser
-
 let pageParser: Parser<Page->Page,Page> =
     oneOf [
         map (QuestionPage.Index |> Question) (s "question" </> s "index")
