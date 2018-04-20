@@ -1,1 +1,3 @@
-dotnet-fable
+group netcorebuild
+    dotnet-fake
+    dotnet-fable

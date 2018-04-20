@@ -5,10 +5,6 @@ open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fulma
 open Fulma.Extensions
-open Fulma.Components
-open Fulma.Elements
-open Fulma.Elements.Form
-open Fulma.Layouts
 
 let private loaderView isLoading =
     PageLoader.pageLoader [ PageLoader.IsActive isLoading ]

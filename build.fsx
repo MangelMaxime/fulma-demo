@@ -1,52 +1,53 @@
-// include Fake libs
-#r "./packages/build/FAKE/tools/FakeLib.dll"
-#r "System.IO.Compression.FileSystem"
+#r "paket: groupref netcorebuild //"
+#load ".fake/build.fsx/intellisense.fsx"
+
+#nowarn "52"
 
 open System
-open Fake
-open Fake.Git
-open Fake.YarnHelper
+open Fake.Core
+open Fake.Core.TargetOperators
+open Fake.DotNet
+open Fake.IO
+open Fake.IO.Globbing.Operators
+open Fake.IO.FileSystemOperators
+open Fake.Tools.Git
+open Fake.JavaScript
 
-let dotnetcliVersion = "2.1.4"
-let mutable dotnetExePath = "dotnet"
-
-let runDotnet dir =
-    DotNetCli.RunCommand (fun p -> { p with ToolPath = dotnetExePath
-                                            WorkingDir = dir
-                                            TimeOut =  TimeSpan.FromHours 12. } )
-                                            // Extra timeout allow us to run watch mode
-                                            // Otherwise, the process is stopped every 30 minutes by default
-
-Target "InstallDotNetCore" (fun _ ->
-    dotnetExePath <- DotNetCli.InstallDotNetSDK dotnetcliVersion
-)
-
-Target "Clean" (fun _ ->
-    !! "/bin"
-    ++ "/obj"
-    ++ "src/bin"
+Target.create "Clean" (fun _ ->
+    !! "src/bin"
     ++ "src/obj"
     ++ "output"
-    |> Seq.iter(CleanDir)
+    |> Seq.iter Shell.CleanDir
 )
 
-Target "Install" (fun _ ->
-    runDotnet __SOURCE_DIRECTORY__ "restore Demo.sln"
+Target.create "Install" (fun _ ->
+    DotNet.restore
+        (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
+        "fulma-demo.sln"
 )
 
-Target "YarnInstall" (fun _ ->
-    Yarn (fun p ->
-    { p with
-        Command = Install Standard
-    })
+Target.create "YarnInstall" (fun _ ->
+    Yarn.install id
 )
 
-Target "Build" (fun _ ->
-    runDotnet __SOURCE_DIRECTORY__ "fable webpack --port free -- -p"
+Target.create "Build" (fun _ ->
+    let result =
+        DotNet.exec
+            (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
+            "fable"
+            "webpack --port free -- -p"
+
+    if not result.OK then failwithf "dotnet fable failed with code %i" result.ExitCode
 )
 
-Target "Watch" (fun _ ->
-    runDotnet __SOURCE_DIRECTORY__ "fable webpack-dev-server --port free"
+Target.create "Watch" (fun _ ->
+    let result =
+        DotNet.exec
+            (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
+            "fable"
+            "webpack-dev-server --port free"
+
+    if not result.OK then failwithf "dotnet fable failed with code %i" result.ExitCode
 )
 
 // Where to push generated documentation
@@ -58,19 +59,18 @@ let docsOuput = fableRoot </> "output"
 
 // --------------------------------------------------------------------------------------
 // Release Scripts
-Target "PublishDocs" (fun _ ->
-    CleanDir temp
+Target.create "PublishDocs" (fun _ ->
+    Shell.CleanDir temp
     Repository.cloneSingleBranch "" githubLink publishBranch temp
 
-    CopyRecursive docsOuput temp true |> tracefn "%A"
-    StageAll temp
-    Git.Commit.Commit temp (sprintf "Update site (%s)" (DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
+    Shell.CopyRecursive docsOuput temp true |> Trace.logfn "%A"
+    Staging.stageAll temp
+    Commit.exec temp (sprintf "Update site (%s)" (DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
     Branches.push temp
 )
 
 // Build order
 "Clean"
-    ==> "InstallDotNetCore"
     ==> "Install"
     ==> "YarnInstall"
     ==> "Build"
@@ -82,4 +82,4 @@ Target "PublishDocs" (fun _ ->
     <== [ "Build" ]
 
 // start build
-RunTargetOrDefault "Build"
+Target.runOrDefault "Build"

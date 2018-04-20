@@ -1,8 +1,6 @@
 module Render
 
 open Fulma
-open Fulma.Layouts
-open Fulma.Elements
 open Fulma.BulmaClasses
 open Fable.Helpers.React
 open Fable.Helpers.React.Props

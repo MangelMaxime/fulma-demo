@@ -6,10 +6,6 @@ open Fable.Helpers.React.Props
 open Fable.Import
 open Fulma
 open Fulma.Extensions
-open Fulma.Components
-open Fulma.Elements
-open Fulma.Elements.Form
-open Fulma.Layouts
 open Fable.Core.JsInterop
 
 let private loaderView isLoading =

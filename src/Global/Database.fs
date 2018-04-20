@@ -8,7 +8,7 @@ open System
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 7
+let [<Literal>] CurrentVersion = 8
 
 type User =
     { Id : int
@@ -169,9 +169,9 @@ I wanted to know why did you create Fable. Did you always planned to use F# ? Or
                          Surname = "Garciacaro"
                          Avatar = "alfonso_garciacaro.png" }
                        { Id = 3
-                         Firstname = "Guess"
+                         Firstname = "Guest"
                          Surname = ""
-                         Avatar = "guess.png" }
+                         Avatar = "guest.png" }
                           |]
                 }
             ).write()

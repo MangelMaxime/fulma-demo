@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const fableUtils = require("fable-utils");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 
@@ -27,19 +27,18 @@ console.log("Bundling for " + (isProduction ? "production" : "development") + ".
 var commonPlugins = [
     new HtmlWebpackPlugin({
         filename: resolve('./output/index.html'),
-        template: resolve('./src/index.html'),
-        minify: isProduction ? {} : false
+        template: resolve('./src/index.html')
     })
 ];
 
 module.exports = {
-    devtool: false,
+    devtool: undefined,
     entry: isProduction ? // We don't use the same entry for dev and production, to make HMR over style quicker for dev env
         {
             demo: [
                 "babel-polyfill",
                 resolve('./src/Demo.fsproj'),
-                resolve('./src/sass/main.sass')
+                resolve('./src/scss/main.scss')
             ]
         } : {
             app: [
@@ -47,16 +46,19 @@ module.exports = {
                 resolve('./src/Demo.fsproj')
             ],
             style: [
-                resolve('./src/sass/main.sass')
+                resolve('./src/scss/main.scss')
             ]
         },
+    mode: isProduction ? "production" : "development",
     output: {
         path: resolve('./output'),
         filename: isProduction ? '[name].[hash].js' : '[name].js'
     },
     plugins: isProduction ?
         commonPlugins.concat([
-            new ExtractTextPlugin('style.css'),
+            new MiniCssExtractPlugin({
+                filename: 'style.css'
+            }),
             new CopyWebpackPlugin([
                 { from: './public' }
             ])
@@ -66,10 +68,6 @@ module.exports = {
             new webpack.NamedModulesPlugin()
         ]),
     resolve: {
-        alias: {
-            "react": "preact-compat",
-            "react-dom": "preact-compat"
-        },
         modules: [
             "node_modules/",
             resolve("./node_modules/")
@@ -104,14 +102,12 @@ module.exports = {
                 },
             },
             {
-                test: /\.sass$/,
-                use: isProduction ?
-                    ExtractTextPlugin.extract({
-                        fallback: 'style-loader',
-                        //resolve-url-loader may be chained before sass-loader if necessary
-                        use: ['css-loader', 'sass-loader']
-                    })
-                    : ["style-loader", "css-loader", "sass-loader"]
+                test: /\.s?[ac]ss$/,
+                use: [
+                    isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+                    'css-loader',
+                    'sass-loader',
+                ],
             },
             {
                 test: /\.css$/,

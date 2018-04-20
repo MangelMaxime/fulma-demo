@@ -5,11 +5,8 @@ open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open State
 open Types
-open Fulma.Components
-open Fulma.Elements
-open Fulma.Elements.Form
-open Fulma.Extra.FontAwesome
-open Fulma.Layouts
+open Fulma
+open Fulma.FontAwesome
 
 let private navbarEnd =
     Navbar.End.div [ ]

@@ -15,8 +15,20 @@ nuget Fulma prerelease
 nuget Fulma.Extensions prerelease
 nuget Fulma.Elmish prerelease
 
-clitool dotnet-fable
+group netcorebuild
+    storage:none
+    source https://www.nuget.org/api/v2
+    framework: netstandard2.0
 
-group Build
-    source https://nuget.org/api/v2
-    nuget FAKE
+    clitool dotnet-fake
+    clitool dotnet-fable
+    nuget NETStandard.Library.NETFramework
+    nuget Fake.DotNet.Cli
+    nuget Fake.DotNet.Paket
+    nuget Fake.Core.Target
+    nuget Fake.Core.Process
+    nuget Fake.Core.String
+    nuget Fake.Core.ReleaseNotes
+    nuget Fake.IO.FileSystem
+    nuget Fake.Tools.Git
+    nuget Fake.JavaScript.Yarn

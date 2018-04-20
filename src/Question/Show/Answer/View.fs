@@ -4,11 +4,7 @@ open Types
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fulma
-open Fulma.Components
-open Fulma.Extra.FontAwesome
-open Fulma.Elements
-open Fulma.Elements.Form
-open Fulma.Layouts
+open Fulma.FontAwesome
 open System
 
 let private voteArea score =
