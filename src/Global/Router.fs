@@ -12,6 +12,7 @@ type QuestionPage =
 
 type Page =
     | Question of QuestionPage
+    | Home
 
 let private toHash page =
     match page with
@@ -20,6 +21,7 @@ let private toHash page =
         | Index -> "#question/index"
         | Show id -> sprintf "#question/%i" id
         | Create -> "#question/create"
+    | Home -> "#/"
 
 let pageParser: Parser<Page->Page,Page> =
     oneOf [

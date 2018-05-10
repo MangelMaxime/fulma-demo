@@ -17,7 +17,7 @@ Target.create "Clean" (fun _ ->
     !! "src/bin"
     ++ "src/obj"
     ++ "output"
-    |> Seq.iter Shell.CleanDir
+    |> Seq.iter Shell.cleanDir
 )
 
 Target.create "Install" (fun _ ->
@@ -60,10 +60,10 @@ let docsOuput = fableRoot </> "output"
 // --------------------------------------------------------------------------------------
 // Release Scripts
 Target.create "PublishDocs" (fun _ ->
-    Shell.CleanDir temp
+    Shell.cleanDir temp
     Repository.cloneSingleBranch "" githubLink publishBranch temp
 
-    Shell.CopyRecursive docsOuput temp true |> Trace.logfn "%A"
+    Shell.copyRecursive docsOuput temp true |> Trace.logfn "%A"
     Staging.stageAll temp
     Commit.exec temp (sprintf "Update site (%s)" (DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
     Branches.push temp

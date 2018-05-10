@@ -4,11 +4,30 @@ module Database
 open Fable.Import
 open Fable.Core.JsInterop
 open System
+open Thoth.Json
 
 /// Shared types between the Client and the Database part
 
 // If we update the database content or structure we need to increment this value
-let [<Literal>] CurrentVersion = 8
+let [<Literal>] CurrentVersion = 9
+
+
+module Encode =
+    let date (date : DateTime) =
+        date.ToString("O")
+        |> Encode.string
+
+module Decode =
+    let date : Decode.Decoder<DateTime> =
+        fun value ->
+            try
+                DateTime.Parse(unbox<string> value)
+                |> Ok
+            with
+                | ex ->
+                    "Error when decoding the date.\nOriginal error is `" + ex.Message + "`"
+                    |> Decode.FailMessage
+                    |> Error
 
 type User =
     { Id : int
@@ -16,12 +35,55 @@ type User =
       Surname: string
       Avatar : string }
 
+    static member Decoder =
+        Decode.decode
+            (fun id firsntame surname avatar ->
+                { Id = id
+                  Firstname = firsntame
+                  Surname = surname
+                  Avatar = avatar } : User)
+            |> Decode.required "id" Decode.int
+            |> Decode.required "firstname" Decode.string
+            |> Decode.required "surname" Decode.string
+            |> Decode.required "avatar" Decode.string
+
+    static member Encoder user =
+        Encode.object [
+            "id", Encode.int user.Id
+            "firstname", Encode.string user.Firstname
+            "surname", Encode.string user.Surname
+            "avatar", Encode.string user.Avatar
+        ]
+
 type Answer =
     { Id : int
       CreatedAt : DateTime
       AuthorId : int
       Content : string
       Score : int }
+
+    static member Decoder =
+        Decode.decode
+            (fun id createdAt authorId content score ->
+                { Id = id
+                  CreatedAt = createdAt
+                  AuthorId = authorId
+                  Content = content
+                  Score = score } : Answer)
+            |> Decode.required "id" Decode.int
+            |> Decode.required "created_at" Decode.date
+            |> Decode.required "author_id" Decode.int
+            |> Decode.required "content" Decode.string
+            |> Decode.required "score" Decode.int
+
+    static member Encoder answer =
+        Encode.object [
+            "id", Encode.int answer.Id
+            "created_at", Encode.date answer.CreatedAt
+            "author_id", Encode.int answer.AuthorId
+            "content", Encode.string answer.Content
+            "score", Encode.int answer.Score
+        ]
 
 type Question =
     { Id : int
@@ -31,16 +93,71 @@ type Question =
       CreatedAt : DateTime
       Answers : Answer [] }
 
+    static member Decoder =
+        Decode.decode
+            (fun id authorId title description createdAt answers ->
+                { Id = id
+                  AuthorId = authorId
+                  Title = title
+                  Description = description
+                  CreatedAt = createdAt
+                  Answers = answers } : Question)
+            |> Decode.required "id" Decode.int
+            |> Decode.required "author_id" Decode.int
+            |> Decode.required "title" Decode.string
+            |> Decode.required "description" Decode.string
+            |> Decode.required "created_at" Decode.date
+            |> Decode.required "answers" (Decode.array Answer.Decoder)
+
+    static member Encoder question =
+        Encode.object [
+            "id", Encode.int question.Id
+            "author_id", Encode.int question.AuthorId
+            "title", Encode.string question.Title
+            "description", Encode.string question.Description
+            "created_at", Encode.date question.CreatedAt
+            "answers", Encode.array (question.Answers |> Array.map Answer.Encoder)
+        ]
+
 type DatabaseData =
     { Version : int
       Questions : Question []
       Users : User [] }
 
+    static member Decoder =
+        Decode.decode
+            (fun version questions users ->
+                { Version = version
+                  Questions = questions
+                  Users = users } : DatabaseData)
+            |> Decode.required "version" Decode.int
+            |> Decode.required "questions" (Decode.array Question.Decoder)
+            |> Decode.required "users" (Decode.array User.Decoder)
+
+    static member Encoder databaseData =
+        try
+            Encode.object [
+                "version", Encode.int databaseData.Version
+                "questions", Encode.array (databaseData.Questions |> Array.map Question.Encoder)
+                "users", Encode.array (databaseData.Users |> Array.map User.Encoder)
+            ]
+        // If the database is empty we received the object: {}
+        // We catch the error to gracefully init the database
+        with
+            | _ -> Encode.object []
+
 /// Database helpers
 
 let adapterOptions = jsOptions<Lowdb.AdapterOptions>(fun o ->
-    o.serialize <- Some toJson
-    o.deserialize <- ofJson<DatabaseData> >> box |> Some
+    o.serialize <- (
+            unbox >> DatabaseData.Encoder >> Encode.encode 0
+        ) |> Some
+
+    o.deserialize <- (fun (data:string) ->
+        match Decode.decodeString DatabaseData.Decoder data with
+        | Ok databaseData -> box databaseData
+        | Error msg -> failwith msg
+    ) |> Some
 )
 
 let mutable private dbInstance : Lowdb.Lowdb option = Option.None

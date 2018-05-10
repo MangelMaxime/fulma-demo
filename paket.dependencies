@@ -14,6 +14,7 @@ nuget Fable.React
 nuget Fulma prerelease
 nuget Fulma.Extensions prerelease
 nuget Fulma.Elmish prerelease
+nuget Thoth.Json
 
 group netcorebuild
     storage:none

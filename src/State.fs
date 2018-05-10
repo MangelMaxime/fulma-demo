@@ -18,6 +18,9 @@ let urlUpdate (result: Option<Router.Page>) model =
         | Router.Question questionPage ->
             let (subModel, subCmd) = Question.Dispatcher.State.init questionPage
             { model with QuestionDispatcher = Some subModel }, Cmd.map QuestionDispatcherMsg subCmd
+        | Router.Home ->
+            let (subModel, subCmd) = Question.Dispatcher.State.init Router.QuestionPage.Index
+            { model with QuestionDispatcher = Some subModel }, Cmd.map QuestionDispatcherMsg subCmd
 
 let init result =
     urlUpdate result Model.Empty
@@ -36,8 +39,12 @@ let update msg model =
     | (ResetDatabase, _) ->
         Database.Restore()
         let redirect =
-            Router.QuestionPage.Index
-            |> Router.Question
+            match model.CurrentPage with
+            | Router.Question Router.QuestionPage.Index ->
+                Router.Home
+            | _ ->
+                Router.QuestionPage.Index
+                |> Router.Question
             |> Router.newUrl
 
         model, redirect

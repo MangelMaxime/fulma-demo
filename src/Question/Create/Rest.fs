@@ -14,8 +14,6 @@ let createQuestion (userId : int, title : string, description : string) =
             |> unbox<int>
             |> (fun x -> x + 1)
 
-        printfn "createUestion"
-
         let question : Database.Question =
             { Id = nextId
               AuthorId = userId
