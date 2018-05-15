@@ -30,6 +30,7 @@
     <Compile Include="Question/Dispatcher/View.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="State.fs" />
+    <Compile Include="LibB.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

@@ -18,6 +18,9 @@ var babelOptions = fableUtils.resolveBabelOptions({
             },
             "modules": false
         }]
+    ],
+    plugins: [
+        "syntax-dynamic-import"
     ]
 });
 
@@ -52,7 +55,19 @@ module.exports = {
     mode: isProduction ? "production" : "development",
     output: {
         path: resolve('./output'),
+        chunkFilename: isProduction ? '[name].[hash].js' : '[name].js',
         filename: isProduction ? '[name].[hash].js' : '[name].js'
+    },
+    optimization : {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: "vendors",
+                    chunks: "all"
+                }
+            }
+        },
     },
     plugins: isProduction ?
         commonPlugins.concat([
@@ -99,7 +114,7 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: babelOptions
-                },
+                }
             },
             {
                 test: /\.s?[ac]ss$/,

@@ -90,3 +90,21 @@ Program.mkProgram init update root
 |> Program.withDebugger
 #endif
 |> Program.run
+
+
+// LibA.sayHello "maxime"
+
+// Fable.Core.JsInterop.importSideEffects "./b.js"
+
+open Fable.PowerPack
+open Fable.Import
+
+let libB : JS.Promise<LibB.Exports> =  Fable.Core.JsInterop.import "importLibB" "./wrapper.js" ()
+
+libB
+|> Promise.bind (fun lib ->
+    promise {
+        lib.ShowInConsole "Hey I am working from inside a dynamic import"
+    }
+)
+|> Promise.start
