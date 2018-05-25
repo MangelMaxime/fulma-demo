@@ -38,6 +38,7 @@ module.exports = function (evn, argv) {
         path: path.join(__dirname, './output'),
         filename: isProduction ? '[name].[hash].js' : '[name].js'
     },
+    devtool: isProduction ? false : "eval-source-map",
     optimization : {
         splitChunks: {
             cacheGroups: {
