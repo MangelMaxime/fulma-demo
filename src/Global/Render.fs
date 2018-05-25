@@ -16,7 +16,6 @@ let pageNotFound =
 
 let converter = Showdown.Globals.Converter.Create()
 
-[<Pojo>]
 type DangerousInnerHtml =
     { __html : string }
 

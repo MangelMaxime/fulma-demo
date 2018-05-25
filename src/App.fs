@@ -87,6 +87,7 @@ Program.mkProgram init update root
 #endif
 |> Program.withReact "elmish-app"
 #if DEBUG
-|> Program.withDebugger
+// Debugger is not working for Fable 2 (uses reflection and inflate/deflate)
+// |> Program.withDebugger
 #endif
 |> Program.run
