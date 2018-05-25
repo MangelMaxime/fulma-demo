@@ -36,7 +36,7 @@ let private questionsView (question : QuestionInfo) =
 
 let private questionsList questions =
     Columns.columns [ Columns.IsCentered ]
-        [ Column.column [ Column.Width(Column.All, Column.IsTwoThirds) ]
+        [ Column.column [ Column.Width(Screen.All, Column.IsTwoThirds) ]
             (questions |> List.map questionsView) ]
 
 let root model _ =
@@ -46,11 +46,11 @@ let root model _ =
             [ loaderView false
               Section.section [ ]
                 [ Columns.columns [ ]
-                    [ Column.column [ Column.Width(Column.All, Column.IsNarrow) ]
+                    [ Column.column [ Column.Width(Screen.All, Column.IsNarrow) ]
                         [ Heading.h3 [ ]
                             [ str "Latest questions" ] ]
                       Column.column [ ] [ ]
-                      Column.column [ Column.Width (Column.All, Column.IsNarrow) ]
+                      Column.column [ Column.Width (Screen.All, Column.IsNarrow) ]
                         [ Button.a [ Button.Color IsPrimary
                                      Button.Props [ Router.href (Router.Question Router.Create) ] ]
                             [ str "Ask a new question" ] ] ] ]

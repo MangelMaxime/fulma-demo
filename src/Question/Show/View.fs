@@ -76,7 +76,7 @@ let private pageContent user question model dispatch =
         [ Heading.p [ Heading.Is5 ]
             [ str question.Title ]
           Columns.columns [ Columns.IsCentered ]
-            [ Column.column [ Column.Width(Column.All, Column.IsTwoThirds) ]
+            [ Column.column [ Column.Width(Screen.All, Column.IsTwoThirds) ]
                 [ questionsView question model.Answers dispatch
                   replyView user model dispatch ] ] ]
 

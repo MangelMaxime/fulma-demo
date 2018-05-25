@@ -1,7 +1,6 @@
 module Render
 
 open Fulma
-open Fulma.BulmaClasses
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.Import
@@ -11,7 +10,7 @@ let pageNotFound =
     Hero.hero [ Hero.IsFullHeight
                 Hero.Color IsDanger ]
         [ Hero.body [ ]
-            [ Container.container [ Container.CustomClass Bulma.Properties.Alignment.HasTextCentered ]
+            [ Container.container [ Container.Modifiers [ Modifier.TextAlignment(Screen.All, TextAlignment.Centered) ] ]
                 [ Heading.h1 [ ]
                     [ str "404" ] ] ] ]
 

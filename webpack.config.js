@@ -54,6 +54,22 @@ module.exports = {
         path: resolve('./output'),
         filename: isProduction ? '[name].[hash].js' : '[name].js'
     },
+    optimization : {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: "vendors",
+                    chunks: "all"
+                },
+                fable: {
+                    test: /[\\/]fable-core[\\/]/,
+                    name: "fable",
+                    chunks: "all"
+                }
+            }
+        },
+    },
     plugins: isProduction ?
         commonPlugins.concat([
             new MiniCssExtractPlugin({
