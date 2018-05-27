@@ -35,7 +35,7 @@ Target.create "Build" (fun _ ->
         DotNet.exec
             (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
             "fable"
-            "webpack --port free -- -p"
+            "webpack-cli -- --mode production"
 
     if not result.OK then failwithf "dotnet fable failed with code %i" result.ExitCode
 )
@@ -45,7 +45,7 @@ Target.create "Watch" (fun _ ->
         DotNet.exec
             (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
             "fable"
-            "webpack-dev-server --port free"
+            "webpack-dev-server"
 
     if not result.OK then failwithf "dotnet fable failed with code %i" result.ExitCode
 )
