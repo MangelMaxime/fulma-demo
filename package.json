@@ -8,7 +8,8 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "babel-polyfill": "^6.26.0",
+    "bulma": "^0.7.1",
+    "bulma-pageloader": "^1.0.1",
     "font-awesome": "^4.7.0",
     "lowdb": "^1.0.0",
     "marked": "^0.3.19",
@@ -17,13 +18,11 @@
     "showdown": "^1.8.6"
   },
   "devDependencies": {
-    "fable-loader": "^2.0.0-alpha-001",
+    "fable-loader": "^2.0.0-alpha-002",
     "@babel/core": "^7.0.0-beta.48",
     "@babel/preset-env": "^7.0.0-beta.48",
     "babel-loader": "^8.0.0-beta",
     "autoprefixer": "^8.4.1",
-    "bulma": "^0.7.1",
-    "bulma-pageloader": "^1.0.1",
     "copy-webpack-plugin": "^4.5.1",
     "css-loader": "^0.28.11",
     "cssnano": "^3.10.0",
