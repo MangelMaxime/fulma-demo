@@ -11,7 +11,17 @@ var CONFIG = {
     cssEntry: './src/scss/main.scss',
     outputDir: './output',
     assetsDir: './public',
-    devServerPort: 8080
+    devServerPort: 8080,
+    // Use babel-preset-env to generate JS compatible with most-used browsers.
+    // More info at https://github.com/babel/babel/blob/master/packages/babel-preset-env/README.md
+    babel: {
+        presets: [
+            ["@babel/preset-env", {
+                "modules": false,
+                "useBuiltIns": "usage",
+            }]
+        ]
+    }
 }
 
 // The HtmlWebpackPlugin allows us to use a template for the index.html page
@@ -32,12 +42,11 @@ module.exports = function (evn, argv) {
     // In development we put code and styles (CSS) in same bundle
     // to allow hot reloading (HMR) for styles too. But in production
     // mode we create two different bundles.
-    // NOTE we use a polyfill for old browser not compatible with latest native APIs.
     entry: isProduction ?
         {
-            app: ['fable-loader/polyfill', CONFIG.fsharpEntry, CONFIG.cssEntry]
+            app: [CONFIG.fsharpEntry, CONFIG.cssEntry]
         } : {
-            app: ['fable-loader/polyfill', CONFIG.fsharpEntry],
+            app: [CONFIG.fsharpEntry],
             style: [CONFIG.cssEntry]
         },
     // NOTE we add a hash to the output file name in production
@@ -63,7 +72,7 @@ module.exports = function (evn, argv) {
             }
         },
     },
-    // Besides the HtmlPlugin, we used the following plugins:
+    // Besides the HtmlPlugin, we use the following plugins:
     // PRODUCTION
     //      - MiniCssExtractPlugin: Extracts CSS from bundle to a different file
     //      - CopyWebpackPlugin: Copies static assets to output directory
@@ -87,12 +96,10 @@ module.exports = function (evn, argv) {
         hot: true,
         inline: true
     },
-    // These are the loaders
     // - fable-loader: transforms F# into JS
     // - babel-loader: transforms JS to old syntax (compatible with old browsers)
     // - sass-loaders: transforms SASS/SCSS into JS
-    // - file-loader: Moves files referenced in the code (fonts, images)
-    //   into output folder
+    // - file-loader: Moves files referenced in the code (fonts, images) into output folder
     module: {
         rules: [
             {
@@ -104,9 +111,7 @@ module.exports = function (evn, argv) {
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',
-                    options: { presets: [
-                        ["@babel/preset-env", { "modules": false }]
-                    ] }
+                    options: CONFIG.babel
                 },
             },
             {
