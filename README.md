@@ -15,4 +15,4 @@ Run: `./fake.sh build -t Watch`
 - Install NPM dependencies: `yarn`
 - Install Nuget dependencies: `dotnet restore build.proj`
 - Building for development: `dotnet fable webpack-dev-server`
-- Building for production: `dotnet fable webpack-cli -- --mode production`
+- Building for production: `dotnet fable webpack-cli`
