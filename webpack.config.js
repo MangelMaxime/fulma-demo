@@ -1,10 +1,9 @@
-const path = require("path");
-const webpack = require("webpack");
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+// Template for webpack.config.js in Fable projects
+// Find latest version in https://github.com/fable-compiler/webpack-config-template
 
-// Update these values when your project's structure changes.
+// In most cases, you'll only need to edit the CONFIG object
+// See below if you need better fine-tuning of Webpack options
+
 var CONFIG = {
     indexHtmlTemplate: './src/index.html',
     fsharpEntry: './src/Demo.fsproj',
@@ -12,17 +11,29 @@ var CONFIG = {
     outputDir: './output',
     assetsDir: './public',
     devServerPort: 8080,
+    devServerProxy: undefined,
     // Use babel-preset-env to generate JS compatible with most-used browsers.
     // More info at https://github.com/babel/babel/blob/master/packages/babel-preset-env/README.md
     babel: {
         presets: [
-            ["@babel/preset-env", {
+            ["env", {
                 "modules": false,
                 "useBuiltIns": "usage",
             }]
-        ]
+        ],
     }
 }
+
+// If we're running the webpack-dev-server, assume we're in development mode
+var isProduction = !process.argv.find(v => v.indexOf('webpack-dev-server') !== -1);
+console.log("Bundling for " + (isProduction ? "production" : "development") + "...");
+
+var path = require("path");
+var webpack = require("webpack");
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+var MiniCssExtractPlugin = require("mini-css-extract-plugin");
+var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 // The HtmlWebpackPlugin allows us to use a template for the index.html page
 // and automatically injects <script> or <link> tags for generated bundles.
@@ -33,12 +44,7 @@ var commonPlugins = [
     })
 ];
 
-module.exports = function (evn, argv) {
-  var mode = argv.mode || "development";
-  var isProduction = mode === "production";
-  console.log("Webpack mode: " + mode);
-
-  return {
+module.exports = {
     // In development we put code and styles (CSS) in same bundle
     // to allow hot reloading (HMR) for styles too. But in production
     // mode we create two different bundles.
@@ -55,13 +61,11 @@ module.exports = function (evn, argv) {
         path: path.join(__dirname, CONFIG.outputDir),
         filename: isProduction ? '[name].[hash].js' : '[name].js'
     },
-    mode: mode,
-    devtool: isProduction ? false : "eval-source-map",
-    // This splits the code coming from npm packages into a different file.
-    // This is because 3rd party dependencies usually change less often than
-    // our own code, so putting them in a different file increases the chances
-    // that the browser caches it.
-    optimization : {
+    mode: isProduction ? "production" : "development",
+    devtool: isProduction ? "source-map" : "eval-source-map",
+    optimization: {
+        // Split the code coming from npm packages into a different file.
+        // 3rd party dependencies change less often, let the browser cache them.
         splitChunks: {
             cacheGroups: {
                 commons: {
@@ -78,21 +82,27 @@ module.exports = function (evn, argv) {
     //      - CopyWebpackPlugin: Copies static assets to output directory
     // DEVELOPMENT
     //      - HotModuleReplacementPlugin: Enables hot reloading when code changes without refreshing
-    //      - NamedModulesPlugin: Shows relative path of modules when HMR is enabled
     plugins: isProduction ?
         commonPlugins.concat([
             new MiniCssExtractPlugin({ filename: 'style.css' }),
-            new CopyWebpackPlugin([ { from: CONFIG.assetsDir } ])
+            new CopyWebpackPlugin([{ from: CONFIG.assetsDir }]),
+            // Inlining is causing problems in minified code
+            // See https://github.com/mishoo/UglifyJS2/issues/2842#issuecomment-359527962
+            new UglifyJSPlugin({
+                uglifyOptions: {
+                    compress: { inline: false }
+                }
+            }),
         ])
         : commonPlugins.concat([
             new webpack.HotModuleReplacementPlugin(),
-            new webpack.NamedModulesPlugin()
         ]),
     // Configuration for webpack-dev-server
     devServer: {
         publicPath: "/",
         contentBase: CONFIG.assetsDir,
         port: CONFIG.devServerPort,
+        proxy: CONFIG.devServerProxy,
         hot: true,
         inline: true
     },
@@ -103,8 +113,8 @@ module.exports = function (evn, argv) {
     module: {
         rules: [
             {
-                test: /\.fs(proj)?$/,
-                use: { loader: "fable-loader" }
+                test: /\.fs(x|proj)?$/,
+                use: "fable-loader"
             },
             {
                 test: /\.js$/,
@@ -128,5 +138,4 @@ module.exports = function (evn, argv) {
             }
         ]
     }
-  };
-}
+};

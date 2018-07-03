@@ -39,7 +39,7 @@ Target.create "Build" (fun _ ->
         DotNet.exec
             (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
             "fable"
-            "webpack-cli -- --mode production"
+            "webpack-cli"
 
     if not result.OK then failwithf "dotnet fable failed with code %i" result.ExitCode
 )
