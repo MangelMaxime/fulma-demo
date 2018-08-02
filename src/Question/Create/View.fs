@@ -18,7 +18,7 @@ let private form (user : Database.User) (model : Model) dispatch =
                     [ Label.label [ ]
                         [ str "Title" ]
                       Control.div [ Control.IsLoading model.IsWaitingServer ]
-                        [ Input.text [ Input.Placeholder "Ex: Who created F# ?"
+                        [ Input.text [ Input.Placeholder "Ex: Who created F#?"
                                        Input.Value model.Title
                                        Input.Disabled model.IsWaitingServer
                                        Input.Props [ OnChange (fun ev -> !!ev.target?value |> ChangeTitle |> dispatch ) ] ] ]

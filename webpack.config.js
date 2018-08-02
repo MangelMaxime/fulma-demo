@@ -1,136 +1,139 @@
-const path = require("path");
-const webpack = require("webpack");
-const fableUtils = require("fable-utils");
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+// Template for webpack.config.js in Fable projects
+// Find latest version in https://github.com/fable-compiler/webpack-config-template
 
+// In most cases, you'll only need to edit the CONFIG object
+// See below if you need better fine-tuning of Webpack options
 
-function resolve(filePath) {
-    return path.join(__dirname, filePath)
+var CONFIG = {
+    indexHtmlTemplate: './src/index.html',
+    fsharpEntry: './src/Demo.fsproj',
+    cssEntry: './src/scss/main.scss',
+    outputDir: './output',
+    assetsDir: './public',
+    devServerPort: 8080,
+    // When using webpack-dev-server, you may need to redirect some calls
+    // to a external API server. See https://webpack.js.org/configuration/dev-server/#devserver-proxy
+    devServerProxy: undefined,
+    // Use babel-preset-env to generate JS compatible with most-used browsers.
+    // More info at https://github.com/babel/babel/blob/master/packages/babel-preset-env/README.md
+    babel: {
+        presets: [
+            ["env", {
+                "modules": false,
+                "useBuiltIns": true,
+            }]
+        ],
+    }
 }
 
-var babelOptions = fableUtils.resolveBabelOptions({
-    presets: [
-        ["env", {
-            "targets": {
-                "browsers": ["last 2 versions"]
-            },
-            "modules": false
-        }]
-    ]
-});
-
-var isProduction = process.argv.indexOf("-p") >= 0;
+// If we're running the webpack-dev-server, assume we're in development mode
+var isProduction = !process.argv.find(v => v.indexOf('webpack-dev-server') !== -1);
 console.log("Bundling for " + (isProduction ? "production" : "development") + "...");
 
+var path = require("path");
+var webpack = require("webpack");
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+var MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+// The HtmlWebpackPlugin allows us to use a template for the index.html page
+// and automatically injects <script> or <link> tags for generated bundles.
 var commonPlugins = [
     new HtmlWebpackPlugin({
-        filename: resolve('./output/index.html'),
-        template: resolve('./src/index.html')
+        filename: 'index.html',
+        template: CONFIG.indexHtmlTemplate
     })
 ];
 
 module.exports = {
-    devtool: undefined,
-    entry: isProduction ? // We don't use the same entry for dev and production, to make HMR over style quicker for dev env
-        {
-            demo: [
-                "babel-polyfill",
-                resolve('./src/Demo.fsproj'),
-                resolve('./src/scss/main.scss')
-            ]
-        } : {
-            app: [
-                "babel-polyfill",
-                resolve('./src/Demo.fsproj')
-            ],
-            style: [
-                resolve('./src/scss/main.scss')
-            ]
+    // In development, bundle styles together with the code so they can also
+    // trigger hot reloads. In production, put them in a separate CSS file.
+
+    // core-js is a polyfill. If you only need to support modern browsers, you can remove it.
+    entry: isProduction ? {
+        app: ["core-js", CONFIG.fsharpEntry, CONFIG.cssEntry]
+    } : {
+            app: ["core-js", CONFIG.fsharpEntry],
+            style: [CONFIG.cssEntry]
         },
-    mode: isProduction ? "production" : "development",
+    // Add a hash to the output file name in production
+    // to prevent browser caching if code changes
     output: {
-        path: resolve('./output'),
+        path: path.join(__dirname, CONFIG.outputDir),
         filename: isProduction ? '[name].[hash].js' : '[name].js'
     },
-    optimization : {
+    mode: isProduction ? "production" : "development",
+    devtool: isProduction ? "source-map" : "eval-source-map",
+    optimization: {
+        // Split the code coming from npm packages into a different file.
+        // 3rd party dependencies change less often, let the browser cache them.
         splitChunks: {
             cacheGroups: {
                 commons: {
-                    test: /[\\/]node_modules[\\/]/,
+                    test: /node_modules/,
                     name: "vendors",
-                    chunks: "all"
-                },
-                fable: {
-                    test: /[\\/]fable-core[\\/]/,
-                    name: "fable",
                     chunks: "all"
                 }
             }
         },
     },
+    // Besides the HtmlPlugin, we use the following plugins:
+    // PRODUCTION
+    //      - MiniCssExtractPlugin: Extracts CSS from bundle to a different file
+    //      - CopyWebpackPlugin: Copies static assets to output directory
+    // DEVELOPMENT
+    //      - HotModuleReplacementPlugin: Enables hot reloading when code changes without refreshing
     plugins: isProduction ?
         commonPlugins.concat([
-            new MiniCssExtractPlugin({
-                filename: 'style.css'
-            }),
-            new CopyWebpackPlugin([
-                { from: './public' }
-            ])
+            new MiniCssExtractPlugin({ filename: 'style.css' }),
+            new CopyWebpackPlugin([{ from: CONFIG.assetsDir }]),
         ])
         : commonPlugins.concat([
             new webpack.HotModuleReplacementPlugin(),
-            new webpack.NamedModulesPlugin()
         ]),
     resolve: {
-        modules: [
-            "node_modules/",
-            resolve("./node_modules/")
-        ]
+        // See https://github.com/fable-compiler/Fable/issues/1490
+        symlinks: false
     },
+    // Configuration for webpack-dev-server
     devServer: {
-        contentBase: resolve('./public/'),
         publicPath: "/",
-        port: 8080,
+        contentBase: CONFIG.assetsDir,
+        port: CONFIG.devServerPort,
+        proxy: CONFIG.devServerProxy,
         hot: true,
         inline: true
     },
+    // - fable-loader: transforms F# into JS
+    // - babel-loader: transforms JS to old syntax (compatible with old browsers)
+    // - sass-loaders: transforms SASS/SCSS into JS
+    // - file-loader: Moves files referenced in the code (fonts, images) into output folder
     module: {
         rules: [
             {
                 test: /\.fs(x|proj)?$/,
-                use: {
-                    loader: "fable-loader",
-                    options: {
-                        babel: babelOptions,
-                        define: isProduction ? [] : ["DEBUG"],
-                        extra: { optimizeWatch: true }
-                    }
-                }
+                use: "fable-loader"
             },
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',
-                    options: babelOptions
+                    options: CONFIG.babel
                 },
             },
             {
-                test: /\.s?[ac]ss$/,
+                test: /\.(sass|scss|css)$/,
                 use: [
-                    isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+                    isProduction
+                        ? MiniCssExtractPlugin.loader
+                        : 'style-loader',
                     'css-loader',
                     'sass-loader',
                 ],
             },
             {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader']
-            },
-            {
-                test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)(\?.*$|$)/,
+                test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)(\?.*)?$/,
                 use: ["file-loader"]
             }
         ]

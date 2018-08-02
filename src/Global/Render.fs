@@ -4,7 +4,6 @@ open Fulma
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.Import
-open Fable.Core
 
 let pageNotFound =
     Hero.hero [ Hero.IsFullHeight
@@ -16,7 +15,6 @@ let pageNotFound =
 
 let converter = Showdown.Globals.Converter.Create()
 
-[<Pojo>]
 type DangerousInnerHtml =
     { __html : string }
 
