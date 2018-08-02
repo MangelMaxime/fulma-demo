@@ -62,7 +62,7 @@ STORAGE: NONE
 RESTRICTION: == netstandard2.0
 NUGET
   remote: https://www.nuget.org/api/v2
-    dotnet-fable (2.0.0-alpha-028) - clitool: true
+    dotnet-fable (2.0.0-beta-001) - clitool: true
     dotnet-fake (5.1) - clitool: true
     Fake.Core.CommandLineParsing (5.1)
       FParsec (>= 1.0.3)

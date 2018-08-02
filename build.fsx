@@ -78,5 +78,8 @@ Target.create "PublishDocs" (fun _ ->
 "YarnInstall"
     ==> "Watch"
 
+"Build"
+    ==> "PublishDocs"
+
 // start build
 Target.runOrDefault "Build"
