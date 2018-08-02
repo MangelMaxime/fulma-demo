@@ -17,6 +17,14 @@ open Fake.IO.FileSystemOperators
 open Fake.Tools.Git
 open Fake.JavaScript
 
+let runFable args =
+    let result =
+        DotNet.exec
+            (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
+            "fable" args
+    if not result.OK then
+        failwithf "dotnet fable failed with code %i" result.ExitCode
+
 Target.create "Clean" (fun _ ->
     !! "src/bin"
     ++ "src/obj"
@@ -24,7 +32,7 @@ Target.create "Clean" (fun _ ->
     |> Seq.iter Shell.cleanDir
 )
 
-Target.create "Install" (fun _ ->
+Target.create "DotnetRestore" (fun _ ->
     DotNet.restore
         (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
         "fulma-demo.sln"
@@ -35,23 +43,11 @@ Target.create "YarnInstall" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-    let result =
-        DotNet.exec
-            (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
-            "fable"
-            "webpack-cli"
-
-    if not result.OK then failwithf "dotnet fable failed with code %i" result.ExitCode
+    runFable "webpack-cli"
 )
 
 Target.create "Watch" (fun _ ->
-    let result =
-        DotNet.exec
-            (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
-            "fable"
-            "webpack-dev-server"
-
-    if not result.OK then failwithf "dotnet fable failed with code %i" result.ExitCode
+    runFable "webpack-dev-server"
 )
 
 // Where to push generated documentation
@@ -75,15 +71,12 @@ Target.create "PublishDocs" (fun _ ->
 
 // Build order
 "Clean"
-    ==> "Install"
+    ==> "DotnetRestore"
     ==> "YarnInstall"
     ==> "Build"
 
-"Watch"
-    <== [ "YarnInstall" ]
-
-"PublishDocs"
-    <== [ "Build" ]
+"YarnInstall"
+    ==> "Watch"
 
 // start build
 Target.runOrDefault "Build"

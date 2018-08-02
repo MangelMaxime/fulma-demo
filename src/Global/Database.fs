@@ -8,26 +8,13 @@ open Thoth.Json
 
 /// Shared types between the Client and the Database part
 
-// If we update the database content or structure we need to increment this value
+/// If we update the database content or structure we need to increment this value
 let [<Literal>] CurrentVersion = 9
 
 
 module Encode =
-    let date (date : DateTime) =
-        date.ToString("O")
-        |> Encode.string
-
-module Decode =
-    let date : Decode.Decoder<DateTime> =
-        fun value ->
-            try
-                DateTime.Parse(unbox<string> value)
-                |> Ok
-            with
-                | ex ->
-                    "Error when decoding the date.\nOriginal error is `" + ex.Message + "`"
-                    |> Decode.FailMessage
-                    |> Error
+    let datetime (date : DateTime) =
+        date.ToString("O") |> Encode.string
 
 type User =
     { Id : int
@@ -36,16 +23,11 @@ type User =
       Avatar : string }
 
     static member Decoder =
-        Decode.decode
-            (fun id firsntame surname avatar ->
-                { Id = id
-                  Firstname = firsntame
-                  Surname = surname
-                  Avatar = avatar } : User)
-            |> Decode.required "id" Decode.int
-            |> Decode.required "firstname" Decode.string
-            |> Decode.required "surname" Decode.string
-            |> Decode.required "avatar" Decode.string
+        Decode.object (fun get ->
+            { Id        = get.Required.Field "id" Decode.int
+              Firstname = get.Required.Field "firstname" Decode.string
+              Surname   = get.Required.Field "surname" Decode.string
+              Avatar    = get.Required.Field "avatar" Decode.string } : User)
 
     static member Encoder user =
         Encode.object [
@@ -63,23 +45,17 @@ type Answer =
       Score : int }
 
     static member Decoder =
-        Decode.decode
-            (fun id createdAt authorId content score ->
-                { Id = id
-                  CreatedAt = createdAt
-                  AuthorId = authorId
-                  Content = content
-                  Score = score } : Answer)
-            |> Decode.required "id" Decode.int
-            |> Decode.required "created_at" Decode.date
-            |> Decode.required "author_id" Decode.int
-            |> Decode.required "content" Decode.string
-            |> Decode.required "score" Decode.int
+        Decode.object (fun get ->
+            { Id        = get.Required.Field "id" Decode.int
+              CreatedAt = get.Required.Field "created_at" Decode.datetime
+              AuthorId  = get.Required.Field "author_id" Decode.int
+              Content   = get.Required.Field "content" Decode.string
+              Score     = get.Required.Field "score" Decode.int } : Answer)
 
     static member Encoder answer =
         Encode.object [
             "id", Encode.int answer.Id
-            "created_at", Encode.date answer.CreatedAt
+            "created_at", Encode.datetime answer.CreatedAt
             "author_id", Encode.int answer.AuthorId
             "content", Encode.string answer.Content
             "score", Encode.int answer.Score
@@ -94,20 +70,13 @@ type Question =
       Answers : Answer [] }
 
     static member Decoder =
-        Decode.decode
-            (fun id authorId title description createdAt answers ->
-                { Id = id
-                  AuthorId = authorId
-                  Title = title
-                  Description = description
-                  CreatedAt = createdAt
-                  Answers = answers } : Question)
-            |> Decode.required "id" Decode.int
-            |> Decode.required "author_id" Decode.int
-            |> Decode.required "title" Decode.string
-            |> Decode.required "description" Decode.string
-            |> Decode.required "created_at" Decode.date
-            |> Decode.required "answers" (Decode.array Answer.Decoder)
+        Decode.object (fun get ->
+            { Id          = get.Required.Field "id" Decode.int
+              AuthorId    = get.Required.Field "author_id" Decode.int
+              Title       = get.Required.Field "title" Decode.string
+              Description = get.Required.Field "description" Decode.string
+              CreatedAt   = get.Required.Field "created_at" Decode.datetime
+              Answers     = get.Required.Field "answers" (Decode.array Answer.Decoder) } : Question)
 
     static member Encoder question =
         Encode.object [
@@ -115,7 +84,7 @@ type Question =
             "author_id", Encode.int question.AuthorId
             "title", Encode.string question.Title
             "description", Encode.string question.Description
-            "created_at", Encode.date question.CreatedAt
+            "created_at", Encode.datetime question.CreatedAt
             "answers", Encode.array (question.Answers |> Array.map Answer.Encoder)
         ]
 
@@ -125,14 +94,10 @@ type DatabaseData =
       Users : User [] }
 
     static member Decoder =
-        Decode.decode
-            (fun version questions users ->
-                { Version = version
-                  Questions = questions
-                  Users = users } : DatabaseData)
-            |> Decode.required "version" Decode.int
-            |> Decode.required "questions" (Decode.array Question.Decoder)
-            |> Decode.required "users" (Decode.array User.Decoder)
+        Decode.object (fun get ->
+            { Version   = get.Required.Field "version" Decode.int
+              Questions = get.Required.Field "questions" (Decode.array Question.Decoder)
+              Users     = get.Required.Field "users" (Decode.array User.Decoder) } : DatabaseData)
 
     static member Encoder databaseData =
         try
@@ -149,15 +114,13 @@ type DatabaseData =
 /// Database helpers
 
 let adapterOptions = jsOptions<Lowdb.AdapterOptions>(fun o ->
-    o.serialize <- (
-            unbox >> DatabaseData.Encoder >> Encode.encode 0
-        ) |> Some
+    o.serialize <- Some(DatabaseData.Encoder >> Encode.toString 0)
 
-    o.deserialize <- (fun (data:string) ->
-        match Decode.decodeString DatabaseData.Decoder data with
-        | Ok databaseData -> box databaseData
+    o.deserialize <- Some(fun (data:string) ->
+        match Decode.fromString DatabaseData.Decoder data with
+        | Ok databaseData -> databaseData
         | Error msg -> failwith msg
-    ) |> Some
+    )
 )
 
 let mutable private dbInstance : Lowdb.Lowdb option = Option.None
