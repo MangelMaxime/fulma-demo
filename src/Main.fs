@@ -2,6 +2,12 @@ module Main
 
 open Data.User
 
+open Fable.Helpers.React
+open Elmish
+open Elmish.Browser.Navigation
+
+open Views
+
 module Home = Page.Home.Component
 module Errored = Page.Errored.Component
 module Show = Page.Question.Show.Component
@@ -28,9 +34,6 @@ type Msg =
     | SomethingWentWrong of exn
     | HomeMsg of Home.Msg
     | ShowMsg of Show.Msg
-
-open Elmish
-open Elmish.Browser.Navigation
 
 let getPage pageState =
     match pageState with
@@ -107,9 +110,6 @@ let pageErrored model activePage errorMessage =
     let error = Errored.pageLoadError activePage errorMessage
 
     { model with PageState = Loaded (Errored error) }, Cmd.none
-
-open Fable.Helpers.React
-open Views
 
 let viewPage session isLoading page dispatch =
     let frame =

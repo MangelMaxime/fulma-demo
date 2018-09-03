@@ -1,12 +1,21 @@
 namespace Page.Question.Show
 
-open Fable.Import
 module Component =
 
     open Data.Forum
     open Data.User
+
+    open Fable.Core.JsInterop
+    open Fable.Helpers.React
+    open Fable.Helpers.React.Props
+    open Fable.Import
     open Fable.PowerPack
+    open Fulma.Components
+    open Fulma.Elements
+    open Fulma.Elements.Form
+    open Fulma.Layouts
     open Elmish
+
     module Answer = Answer.Component
 
     type Model =
@@ -81,15 +90,6 @@ module Component =
                 )
 
             { model with Answers = newAnswers }, newCmd
-
-    open Fulma.Elements
-    open Fulma.Elements.Form
-    open Fulma.Components
-    open Fulma.Layouts
-    open Fable.Helpers.React
-    open Fable.Helpers.React.Props
-    open Fable.Import
-    open Fable.Core.JsInterop
 
     let private replyView (currentUser : User) model dispatch =
         Media.media [ ]
