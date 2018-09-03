@@ -4,15 +4,20 @@ module Component =
 
     open Data.Forum
 
+    open Fable.Helpers.React
+    open Fable.Helpers.React.Props
+    open Fable.PowerPack
+    open Fulma.Elements
+    open Fulma.Layouts
+    open Elmish
+
+    open Views
+
     type Model =
         { Questions : Question list }
 
     type Msg =
         | GetQuestions
-
-    open Elmish
-    open Views
-    open Fable.PowerPack
 
     let init _ =
         Requests.Question.getSummary ()
@@ -24,11 +29,6 @@ module Component =
 
     let update session msg model =
         model, Cmd.none
-
-    open Fable.Helpers.React
-    open Fable.Helpers.React.Props
-    open Fulma.Elements
-    open Fulma.Layouts
 
     let view session (model : Model) dispatch =
         Container.container [ ]
