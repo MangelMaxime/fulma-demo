@@ -2,7 +2,17 @@ namespace Page.Question.Show.Answer
 
 module Component =
 
+    open System
     open Data.Forum
+
+    open Fable.Helpers.React
+    open Fable.Helpers.React.Props
+    open Fulma.Components
+    open Fulma.Elements
+    open Fulma.Elements.Form
+    open Fulma.Extra.FontAwesome
+    open Fulma.Layouts
+    open Elmish
 
     type Model =
         { QuestionId : int
@@ -22,7 +32,6 @@ module Component =
           IsLoading = false
           Error = "" }
 
-    open Elmish
 
     let update msg (model: Model) =
         match msg with
@@ -59,15 +68,6 @@ module Component =
         | VoteError error ->
             Logger.error "[Question.Show.Answer.State] Error when upvoting the answer: \n%O" error
             model, Cmd.none
-
-    open Fulma.Layouts
-    open Fulma.Components
-    open Fulma.Elements
-    open Fulma.Elements.Form
-    open Fulma.Extra.FontAwesome
-    open Fable.Helpers.React
-    open Fable.Helpers.React.Props
-    open System
 
     let private voteArea score =
         let icon =
