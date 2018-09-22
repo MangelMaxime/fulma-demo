@@ -4,12 +4,9 @@ open Fable.Import
 open Fable.Core.JsInterop
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
-open Fulma.Components
-open Fulma.Elements
-open Fulma.Elements.Form
-open Fulma.Extra.FontAwesome
-open Fulma.Layouts
+open Fulma
 open Fulma.Extensions
+open Fulma.FontAwesome
 
 type ActivePage =
     | Other
@@ -20,45 +17,43 @@ type ActivePage =
 let private toggleNavbarMenu (_: Browser.Element) : unit = importMember "./../js/bulma-utils.js"
 
 let private viewMenu currentPage =
-    Navbar.menu [ Navbar.Menu.props [ Id "navMenu" ] ]
-        [ Navbar.start_div [ ]
-            [ Navbar.item_a [ yield Navbar.Item.props [ OnClick (fun _ ->
-                                                            Router.Home
-                                                            |> Router.modifyLocation ) ]
+    Navbar.menu [ Navbar.Menu.Props [ Id "navMenu" ] ]
+        [ Navbar.Start.div [ ]
+            [ Navbar.Item.a [ yield Navbar.Item.Props [ OnClick (fun _ -> Router.Home |> Router.modifyLocation ) ]
                               if currentPage = Home then
-                                    yield Navbar.Item.isActive ]
+                                    yield Navbar.Item.IsActive true ]
                 [ str "Home" ]
-              Navbar.item_div [ yield Navbar.Item.hasDropdown
-                                yield Navbar.Item.isHoverable
+              Navbar.Item.div [ yield Navbar.Item.HasDropdown
+                                yield Navbar.Item.IsHoverable
                                 if currentPage = Option then
-                                    yield Navbar.Item.isActive ]
-                [ Navbar.link_div [ ]
+                                    yield Navbar.Item.IsActive true ]
+                [ Navbar.Link.div [ ]
                     [ str "Options" ]
-                  Navbar.dropdown_div [ ]
-                    [ Navbar.item_a [ Navbar.Item.props [ ] ]
+                  Navbar.Dropdown.div [ ]
+                    [ Navbar.Item.a [ Navbar.Item.Props [ ] ]
                         [ str "Reset demo" ] ] ] ]
-          Navbar.end_div [ ]
-            [ Navbar.item_div [ ]
-                [ Field.field_div [ Field.isGrouped ]
-                    [ Control.control_p [ ]
-                        [ Button.button_a [ Button.props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
+          Navbar.End.div [ ]
+            [ Navbar.Item.div [ ]
+                [ Field.div [ Field.IsGrouped ]
+                    [ Control.p [ ]
+                        [ Button.a [ Button.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
                             [ Icon.faIcon [ ] [ Fa.icon Fa.I.Github ]
                               span [ ] [ str "Source" ] ] ] ] ] ] ]
 
 let private viewHeader user currentPage =
     div [ ClassName "navbar-bg" ]
         [ Container.container [ ]
-            [ Navbar.navbar [ Navbar.customClass "is-primary" ]
-                [ Navbar.brand_div [ ]
-                    [ Navbar.item_a [ Navbar.Item.props [ Href "#" ] ]
-                        [ Image.image [ Image.is32x32 ]
+            [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
+                [ Navbar.Brand.div [ ]
+                    [ Navbar.Item.a [ Navbar.Item.Props [ Href "#" ] ]
+                        [ Image.image [ Image.Is32x32 ]
                             [ img [ Src "assets/mini_logo.svg" ] ]
-                          Heading.p [ Heading.is4 ]
+                          Heading.p [ Heading.Is4 ]
                             [ str "Fulma-demo" ] ]
                       // Icon display only on mobile
-                      Navbar.item_a [ Navbar.Item.props [ Href "https://github.com/MangelMaxime/fulma-demo" ]
-                                      Navbar.Item.customClass "is-hidden-desktop" ]
-                                    [ Icon.faIcon [ Icon.isLarge ] [ Fa.icon Fa.I.Github ] ]
+                      Navbar.Item.a [ Navbar.Item.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ]
+                                      Navbar.Item.CustomClass "is-hidden-desktop" ]
+                                    [ Icon.faIcon [ Icon.Size IsLarge ] [ Fa.icon Fa.I.Github ] ]
                       // Make sure to have the navbar burger as the last child of the brand
                       Navbar.burger [ Fulma.Common.GenericOption.Props [ Data("target","navMenu")
                                                                          Ref toggleNavbarMenu ] ]
@@ -70,7 +65,7 @@ let private viewHeader user currentPage =
 let frame isLoading user page content =
     div [ ]
         [ PageLoader.pageLoader [ if isLoading then
-                                    yield PageLoader.isActive ]
+                                    yield PageLoader.IsActive true ]
             [ ]
           viewHeader user page
           content ]
