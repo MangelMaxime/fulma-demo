@@ -63,7 +63,7 @@ module Component =
                             { model.Answer with Score = newScore } }, Cmd.none
 
         | VoteError error ->
-            Logger.error "[Question.Show.Answer.State] Error when upvoting the answer: \n%O" error
+            Logger.errorfn "[Question.Show.Answer.State] Error when upvoting the answer: \n%O" error
             model, Cmd.none
 
     let private voteArea score =

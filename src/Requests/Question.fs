@@ -8,12 +8,12 @@ let getSummary _ =
     promise {
 
         let result =
-            Database.Engine.Questions
+            Database.Questions
                 .sortBy("Id")
                 .value()
             |> unbox<Database.Question []>
             |> Array.map(fun question ->
-                match Database.Engine.GetUserById question.AuthorId with
+                match Database.GetUserById question.AuthorId with
                 | None -> failwithf "Unkown author of id#%i for the question#%i" question.AuthorId question.Id
                 | Some user ->
                     { Id = question.Id
@@ -37,19 +37,19 @@ let getDetails (id : int) =
     promise {
 
         let data =
-            Database.Engine.Questions
+            Database.Questions
                 .find(createObj [ "Id" ==> id])
                 .value()
             |> unbox<Database.Question>
             |> (fun question ->
-                Database.Engine.GetUserById question.AuthorId
+                Database.GetUserById question.AuthorId
                 |> function
                    | None -> failwith "Author of the question unkown"
                    | Some user ->
                         let anwsers =
                             question.Answers
                             |> Array.map (fun answer ->
-                                Database.Engine.GetUserById answer.AuthorId
+                                Database.GetUserById answer.AuthorId
                                 |> function
                                 | None -> failwith "Author of the answer unkown"
                                 | Some user ->

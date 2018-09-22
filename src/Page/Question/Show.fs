@@ -127,8 +127,8 @@ module Component =
 
     let private viewAnswers answers dispatch =
         div [ ]
-            ( answers
-              |> List.mapi (fun index answer -> Answer.view answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch)))
+            (answers
+             |> List.mapi (fun index answer -> Answer.view answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch)))
 
     let view currentUser model dispatch =
         Container.container [ ]

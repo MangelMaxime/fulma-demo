@@ -147,7 +147,7 @@ open Elmish.HMR
 open Elmish.Browser.UrlParser
 
 // Init the first datas into the database
-Database.Engine.Init()
+Database.Init()
 
 Program.mkProgram init update view
 |> Program.toNavigable (parseHash Router.pageParser) setRoute
