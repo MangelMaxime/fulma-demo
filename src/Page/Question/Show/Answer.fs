@@ -62,6 +62,7 @@ module Component =
             { model with IsLoading = false
                          Answer =
                             { model.Answer with Score = newScore } }, Cmd.none
+
         | VoteError error ->
             Logger.error "[Question.Show.Answer.State] Error when upvoting the answer: \n%O" error
             model, Cmd.none
