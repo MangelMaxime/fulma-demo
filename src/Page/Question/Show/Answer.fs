@@ -5,14 +5,11 @@ module Component =
     open System
     open Data.Forum
 
+    open Elmish
     open Fable.Helpers.React
     open Fable.Helpers.React.Props
-    open Fulma.Components
-    open Fulma.Elements
-    open Fulma.Elements.Form
-    open Fulma.Extra.FontAwesome
-    open Fulma.Layouts
-    open Elmish
+    open Fulma
+    open Fulma.FontAwesome
 
     type Model =
         { QuestionId : int
@@ -86,26 +83,26 @@ module Component =
     let view (model : Model) dispatch =
         Media.media [ ]
             [ Media.left [ ]
-                [ Image.image [ Image.is64x64 ]
+                [ Image.image [ Image.Is64x64 ]
                     [ img [ Src ("avatars/" + model.Answer.Author.Avatar) ] ] ]
               Media.content [ ]
                 [ Render.contentFromMarkdown [ ] model.Answer.Content
                   Level.level [ ]
-                    [ Level.right [ Level.customClass "vote-area" ]
-                        [ Button.button_btn [ if model.IsLoading then
-                                                yield Button.isLoading
-                                              yield Button.isSmall
-                                              yield Button.isDanger
-                                              yield Button.onClick (fun _ -> dispatch VoteDown) ]
+                    [ Level.right [ GenericOption.CustomClass "vote-area" ]
+                        [ Button.button [ if model.IsLoading then
+                                            yield Button.IsLoading true
+                                          yield Button.Size IsSmall
+                                          yield Button.Color IsDanger
+                                          yield Button.OnClick (fun _ -> dispatch VoteDown) ]
                             [ str "-1" ]
-                          Button.button_btn [ if model.IsLoading then
-                                                yield Button.isLoading
-                                              yield Button.isSmall
-                                              yield Button.isSuccess
-                                              yield Button.onClick (fun _ -> dispatch VoteUp) ]
+                          Button.button [ if model.IsLoading then
+                                              yield Button.IsLoading true
+                                          yield Button.Size IsSmall
+                                          yield Button.Color IsSuccess
+                                          yield Button.OnClick (fun _ -> dispatch VoteUp) ]
                             [ str "+1" ]
                           voteArea model.Answer.Score
-                          Help.help [ Help.isDanger ]
+                          Help.help [ Help.Color IsDanger ]
                             [ str model.Error ] ]
                       Level.left [ ]
                         [ Level.item [ ]
