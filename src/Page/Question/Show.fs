@@ -5,13 +5,13 @@ module Component =
     open Data.Forum
     open Data.User
 
+    open Elmish
     open Fable.Core.JsInterop
     open Fable.Helpers.React
     open Fable.Helpers.React.Props
     open Fable.Import
     open Fable.PowerPack
     open Fulma
-    open Elmish
 
     module Answer = Answer.Component
 
