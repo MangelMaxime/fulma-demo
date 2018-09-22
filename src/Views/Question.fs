@@ -1,13 +1,11 @@
 module Views.Question
 
-open Fulma.Components
-open Fulma.Elements
-open Fulma.Elements.Form
-open Fulma.Layouts
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
 open Data.Forum
 open System
+
+open Fable.Helpers.React
+open Fable.Helpers.React.Props
+open Fulma
 
 let private viewFooter firstname surname (createdAt : DateTime) =
     let createdAtStr = createdAt.ToString("yyyy-MM-dd HH:mm:ss")
@@ -24,8 +22,8 @@ let private viewContent questionId questionTitle =
         Router.QuestionPage.Show
         >> Router.Question
 
-    Heading.p [ Heading.isSubtitle
-                Heading.is5 ]
+    Heading.p [ Heading.IsSubtitle
+                Heading.Is5 ]
             [ a [ Router.href (urlToQuestion questionId) ]
                 [ str questionTitle ] ]
 
