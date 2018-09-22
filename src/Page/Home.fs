@@ -4,12 +4,11 @@ module Component =
 
     open Data.Forum
 
+    open Elmish
     open Fable.Helpers.React
     open Fable.Helpers.React.Props
     open Fable.PowerPack
-    open Fulma.Elements
-    open Fulma.Layouts
-    open Elmish
+    open Fulma
 
     open Views
 
@@ -35,6 +34,6 @@ module Component =
             [ Section.section [ ]
                 [ Heading.h3 [ ]
                     [ str "Latest questions" ] ]
-              Columns.columns [ Columns.isCentered ]
-                [ Column.column [ Column.Width.isTwoThirds]
+              Columns.columns [ Columns.IsCentered ]
+                [ Column.column [ Column.Width (Screen.All, Column.Is8) ]
                     (model.Questions |> List.map Question.viewSummary) ] ]
