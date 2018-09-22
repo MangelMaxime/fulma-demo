@@ -4,8 +4,8 @@ open System
 
 type Author =
     { Id : int
-      Firstname: string
-      Surname: string
+      Firstname : string
+      Surname : string
       Avatar : string }
 
 type Question =
