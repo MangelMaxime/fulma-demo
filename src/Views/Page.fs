@@ -14,19 +14,17 @@ type ActivePage =
     | Show
     | Option
 
-let private toggleNavbarMenu (_: Browser.Element) : unit = importMember "./../js/bulma-utils.js"
+let private toggleNavbarMenu (_ : Browser.Element) : unit = importMember "./../js/bulma-utils.js"
 
 let private viewMenu currentPage =
     Navbar.menu [ Navbar.Menu.Props [ Id "navMenu" ] ]
         [ Navbar.Start.div [ ]
             [ Navbar.Item.a [ yield Navbar.Item.Props [ OnClick (fun _ -> Router.Home |> Router.modifyLocation ) ]
-                              if currentPage = Home then
-                                    yield Navbar.Item.IsActive true ]
+                              yield Navbar.Item.IsActive (currentPage = Home) ]
                 [ str "Home" ]
               Navbar.Item.div [ yield Navbar.Item.HasDropdown
                                 yield Navbar.Item.IsHoverable
-                                if currentPage = Option then
-                                    yield Navbar.Item.IsActive true ]
+                                yield Navbar.Item.IsActive (currentPage = Option) ]
                 [ Navbar.Link.div [ ]
                     [ str "Options" ]
                   Navbar.Dropdown.div [ ]
@@ -64,8 +62,7 @@ let private viewHeader user currentPage =
 
 let frame isLoading user page content =
     div [ ]
-        [ PageLoader.pageLoader [ if isLoading then
-                                    yield PageLoader.IsActive true ]
+        [ PageLoader.pageLoader [ yield PageLoader.IsActive isLoading ]
             [ ]
           viewHeader user page
           content ]
