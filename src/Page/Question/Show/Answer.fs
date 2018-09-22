@@ -29,8 +29,7 @@ module Component =
           IsLoading = false
           Error = "" }
 
-
-    let update msg (model: Model) =
+    let update msg (model : Model) =
         match msg with
         | VoteUp ->
             if model.IsLoading then
@@ -90,14 +89,12 @@ module Component =
                 [ Render.contentFromMarkdown [ ] model.Answer.Content
                   Level.level [ ]
                     [ Level.right [ GenericOption.CustomClass "vote-area" ]
-                        [ Button.button [ if model.IsLoading then
-                                            yield Button.IsLoading true
+                        [ Button.button [ yield Button.IsLoading model.IsLoading
                                           yield Button.Size IsSmall
                                           yield Button.Color IsDanger
                                           yield Button.OnClick (fun _ -> dispatch VoteDown) ]
                             [ str "-1" ]
-                          Button.button [ if model.IsLoading then
-                                              yield Button.IsLoading true
+                          Button.button [ yield Button.IsLoading model.IsLoading
                                           yield Button.Size IsSmall
                                           yield Button.Color IsSuccess
                                           yield Button.OnClick (fun _ -> dispatch VoteUp) ]
