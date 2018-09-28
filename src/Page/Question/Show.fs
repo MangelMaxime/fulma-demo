@@ -5,16 +5,13 @@ module Component =
     open Data.Forum
     open Data.User
 
+    open Elmish
     open Fable.Core.JsInterop
     open Fable.Helpers.React
     open Fable.Helpers.React.Props
     open Fable.Import
     open Fable.PowerPack
-    open Fulma.Components
-    open Fulma.Elements
-    open Fulma.Elements.Form
-    open Fulma.Layouts
-    open Elmish
+    open Fulma
 
     module Answer = Answer.Component
 
@@ -94,53 +91,51 @@ module Component =
     let private replyView (currentUser : User) model dispatch =
         Media.media [ ]
             [ Media.left [ ]
-                [ Image.image [ Image.is64x64 ]
+                [ Image.image [ Image.Is64x64 ]
                     [ img [ Src ("avatars/" + currentUser.Avatar) ] ] ]
               Media.content [ ]
-                [ Field.field_div [ ]
-                    [ Control.control_div [ if model.IsWaitingReply then yield Control.isLoading ]
-                        [ Textarea.textarea [ yield Textarea.props [
+                [ Field.div [ ]
+                    [ Control.div [ yield Control.IsLoading model.IsWaitingReply ]
+                        [ Textarea.textarea [ yield Textarea.Props [
                                                 DefaultValue model.Reply
                                                 Ref (fun element ->
                                                     if not (isNull element) && model.Reply = "" then
                                                         let textarea = element :?> Browser.HTMLTextAreaElement
-                                                        textarea.value <- model.Reply
-                                                )
+                                                        textarea.value <- model.Reply)
                                                 OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
                                                 OnKeyDown (fun ev ->
                                                     if ev.ctrlKey && ev.key = "Enter" then
-                                                        dispatch Submit
-                                                )
+                                                        dispatch Submit)
                                                 ]
-                                              if model.IsWaitingReply then yield Textarea.isDisabled ]
+                                              yield Textarea.Disabled model.IsWaitingReply ]
                         [ ] ]
-                      Help.help [ Help.isDanger ]
+                      Help.help [ Help.Color IsDanger ]
                                 [ str model.Error ] ]
                   Level.level [ ]
                     [ Level.left [ ]
                         [ Level.item [ ]
-                            [ Button.button_a [ yield Button.isPrimary
-                                                yield Button.onClick (fun _ -> dispatch Submit)
-                                                if model.IsWaitingReply then yield Button.isDisabled ]
-                                            [ str "Submit" ] ] ]
-                      Level.item [ Level.Item.hasTextCentered ]
+                            [ Button.a [ yield Button.Color IsPrimary
+                                         yield Button.OnClick (fun _ -> dispatch Submit)
+                                         yield Button.Disabled model.IsWaitingReply ]
+                                       [ str "Submit" ] ] ]
+                      Level.item [ Level.Item.HasTextCentered ]
                         [ Help.help [ ]
                             [ str "You can use markdown to format your answer" ] ]
                       Level.right [ ]
-                        [ Level.item [ Level.Item.props [ Key "test" ] ]
+                        [ Level.item [ Level.Item.Props [ Key "test" ] ]
                             [ str "Press Ctrl + Enter to submit" ] ] ] ] ]
 
     let private viewAnswers answers dispatch =
         div [ ]
-            ( answers
-                |> List.mapi (fun index answer -> Answer.view answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch)))
+            (answers
+             |> List.mapi (fun index answer -> Answer.view answer ((fun msg -> AnswerMsg (index, msg)) >> dispatch)))
 
     let view currentUser model dispatch =
         Container.container [ ]
             [ Section.section [ ]
-                [ Heading.p [ Heading.is5 ]
+                [ Heading.p [ Heading.Is5 ]
                     [ str model.Question.Title ]
-                  Columns.columns [ Columns.isCentered ]
-                    [ Column.column [ Column.Width.isTwoThirds ]
+                  Columns.columns [ Columns.IsCentered ]
+                    [ Column.column [ Column.Width (Screen.All, Column.Is8) ]
                         [ Views.Question.viewThread model.Question (viewAnswers model.Answers dispatch)
                           replyView currentUser model dispatch ] ] ] ]

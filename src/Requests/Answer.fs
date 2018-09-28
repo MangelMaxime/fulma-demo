@@ -9,7 +9,7 @@ let createAnswer (questionId : int, userId : int, content : string) =
     promise {
 
         let nextId =
-            Database.Engine.Questions
+            Database.Questions
                 .find(createObj [ "Id" ==> questionId])
                 .get(!^"Answers")
                 .size()
@@ -25,7 +25,7 @@ let createAnswer (questionId : int, userId : int, content : string) =
               Score = 0 } : Database.Answer
 
         // Add the answer to the question
-        Database.Engine.Questions
+        Database.Questions
             .find(createObj [ "Id" ==> questionId])
             .get(!^"Answers")
             .push(answer)
@@ -34,7 +34,7 @@ let createAnswer (questionId : int, userId : int, content : string) =
         do! Promise.sleep 500
 
         return
-            Database.Engine.GetUserById answer.AuthorId
+            Database.GetUserById answer.AuthorId
             |> function
             | None -> failwith "Author of the answer unkown"
             | Some user ->
@@ -51,7 +51,7 @@ let createAnswer (questionId : int, userId : int, content : string) =
 let voteUp (questionId, answerId) =
     promise {
         let answer =
-            Database.Engine.Questions
+            Database.Questions
                 .find(createObj [ "Id" ==> questionId ])
                 .get(!^"Answers")
                 .find(createObj [ "Id" ==> answerId ])
@@ -71,7 +71,7 @@ let voteUp (questionId, answerId) =
 let voteDown (questionId, answerId) =
     promise {
         let answer =
-            Database.Engine.Questions
+            Database.Questions
                 .find(createObj [ "Id" ==> questionId ])
                 .get(!^"Answers")
                 .find(createObj [ "Id" ==> answerId ])
