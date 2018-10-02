@@ -2,6 +2,9 @@ namespace Page.Errored
 
 module Component =
 
+    open Fable.Helpers.React
+    open Fable.Helpers.React.Props
+
     open Views.Page
 
     type Model =
@@ -12,12 +15,8 @@ module Component =
         { ActivePage = activePage
           ErrorMessage = errorMessage }
 
-    open Fable.Helpers.React
-    open Fable.Helpers.React.Props
-
     let view model =
         div [ ClassName "" ]
             [ h1 [ ] [ str "Error loading page" ]
               p [ ]
-                [ str model.ErrorMessage ]
-            ]
+                [ str model.ErrorMessage ] ]
