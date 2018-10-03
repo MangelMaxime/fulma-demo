@@ -89,15 +89,15 @@ module Component =
                 [ Render.contentFromMarkdown [ ] model.Answer.Content
                   Level.level [ ]
                     [ Level.right [ GenericOption.CustomClass "vote-area" ]
-                        [ Button.button [ yield Button.IsLoading model.IsLoading
-                                          yield Button.Size IsSmall
-                                          yield Button.Color IsDanger
-                                          yield Button.OnClick (fun _ -> dispatch VoteDown) ]
+                        [ Button.button [ Button.IsLoading model.IsLoading
+                                          Button.Size IsSmall
+                                          Button.Color IsDanger
+                                          Button.OnClick (fun _ -> dispatch VoteDown) ]
                             [ str "-1" ]
-                          Button.button [ yield Button.IsLoading model.IsLoading
-                                          yield Button.Size IsSmall
-                                          yield Button.Color IsSuccess
-                                          yield Button.OnClick (fun _ -> dispatch VoteUp) ]
+                          Button.button [ Button.IsLoading model.IsLoading
+                                          Button.Size IsSmall
+                                          Button.Color IsSuccess
+                                          Button.OnClick (fun _ -> dispatch VoteUp) ]
                             [ str "+1" ]
                           voteArea model.Answer.Score
                           Help.help [ Help.Color IsDanger ]

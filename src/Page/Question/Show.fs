@@ -95,28 +95,28 @@ module Component =
                     [ img [ Src ("avatars/" + currentUser.Avatar) ] ] ]
               Media.content [ ]
                 [ Field.div [ ]
-                    [ Control.div [ yield Control.IsLoading model.IsWaitingReply ]
-                        [ Textarea.textarea [ yield Textarea.Props [
-                                                DefaultValue model.Reply
-                                                Ref (fun element ->
-                                                    if not (isNull element) && model.Reply = "" then
-                                                        let textarea = element :?> Browser.HTMLTextAreaElement
-                                                        textarea.value <- model.Reply)
-                                                OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
-                                                OnKeyDown (fun ev ->
-                                                    if ev.ctrlKey && ev.key = "Enter" then
-                                                        dispatch Submit)
+                    [ Control.div [ Control.IsLoading model.IsWaitingReply ]
+                        [ Textarea.textarea [ Textarea.Props [
+                                              DefaultValue model.Reply
+                                              Ref (fun element ->
+                                                  if not (isNull element) && model.Reply = "" then
+                                                      let textarea = element :?> Browser.HTMLTextAreaElement
+                                                      textarea.value <- model.Reply)
+                                              OnChange (fun ev -> !!ev.target?value |> ChangeReply |> dispatch)
+                                              OnKeyDown (fun ev ->
+                                                  if ev.ctrlKey && ev.key = "Enter" then
+                                                      dispatch Submit)
                                                 ]
-                                              yield Textarea.Disabled model.IsWaitingReply ]
+                                              Textarea.Disabled model.IsWaitingReply ]
                         [ ] ]
                       Help.help [ Help.Color IsDanger ]
                                 [ str model.Error ] ]
                   Level.level [ ]
                     [ Level.left [ ]
                         [ Level.item [ ]
-                            [ Button.a [ yield Button.Color IsPrimary
-                                         yield Button.OnClick (fun _ -> dispatch Submit)
-                                         yield Button.Disabled model.IsWaitingReply ]
+                            [ Button.a [ Button.Color IsPrimary
+                                         Button.OnClick (fun _ -> dispatch Submit)
+                                         Button.Disabled model.IsWaitingReply ]
                                        [ str "Submit" ] ] ]
                       Level.item [ Level.Item.HasTextCentered ]
                         [ Help.help [ ]
