@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This project file, together with paket.references, just holds references to Fable and Fake tools -->
+<!-- This project file, together with paket.references and the fake.cmd and fake.sh scripts,
+     is used to bootstrap Fable and Fake tools using Paket to lock the versions. -->
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
