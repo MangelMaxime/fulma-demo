@@ -10,12 +10,7 @@
         "**/.fake": true,
         "**/packages": true,
         "**/node_modules": true,
-        "**/paket-files": true
-    },
-    "search.exclude": {
-        "**/node_modules": true,
         "**/bower_components": true,
-        "**/packages": true,
         "**/paket-files": true
     },
     "files.trimTrailingWhitespace": true,
