@@ -62,7 +62,9 @@ module.exports = {
     // to prevent browser caching if code changes
     output: {
         path: path.join(__dirname, CONFIG.outputDir),
-        filename: isProduction ? '[name].[hash].js' : '[name].js'
+        filename: isProduction ? '[name].[hash].js' : '[name].js',
+        devtoolModuleFilenameTemplate: info =>
+          path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
     },
     mode: isProduction ? "production" : "development",
     devtool: isProduction ? "source-map" : "eval-source-map",

@@ -1,0 +1,40 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+      {
+          "command": "./fake.sh",
+          "args": ["build", "-t", "Watch"],
+          "type": "shell",
+          "label": "Start",
+          "group": "build",
+          "isBackground": true,
+          "windows": {
+            "command": "./fake.cmd"
+          },
+          "problemMatcher": {
+              "fileLocation": "absolute",
+              "background": {
+                  "activeOnStart": true,
+                  "beginsPattern":{
+                      "regexp": "dotnet restore build.proj"
+                  },
+                  "endsPattern":{
+                      "regexp": "(Compiled successfully|Failed to compile)"
+                  }
+              },
+              "pattern": {
+                  "regexp": "^(.*)\\((\\d+),(\\d+)\\): \\((\\d+),(\\d+)\\) (warning|error) FABLE: (.*)$",
+                  "file": 1,
+                  "line": 2,
+                  "column": 3,
+                  "endLine": 4,
+                  "endColumn": 5,
+                  "severity": 6,
+                  "message": 7
+              }
+          }
+      }
+  ]
+}
