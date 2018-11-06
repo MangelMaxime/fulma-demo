@@ -23,6 +23,6 @@ Run: `./fake.sh build -t Watch`
 * Press F5 in vscode
 * After all the .fs files are compiled, the browser will be launched
 * Set a breakpoint in F#
-* Restart with Ctrl+Shift+F5 (Cmd+Shift+F5 on macOS)
+* Either press F5 in Chrome or restart debugging in VS Code with Ctrl+Shift+F5 (Cmd+Shift+F5 on macOS)
 * The breakpoint will be caught in vscode
 
