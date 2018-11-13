@@ -17,7 +17,7 @@ NUGET
       Fable.Core (>= 2.0)
       Fable.Elmish (>= 2.0)
       FSharp.Core (>= 4.5.2)
-    Fable.Elmish.HMR (3.0.1)
+    Fable.Elmish.HMR (3.0.2)
       Fable.Core (>= 2.0.1)
       Fable.Elmish (>= 2.0.3)
       Fable.Elmish.Browser (>= 2.1)
