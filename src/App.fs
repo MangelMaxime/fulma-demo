@@ -73,21 +73,17 @@ let private root model dispatch =
 
 open Elmish.React
 open Elmish.Debug
-open Elmish.HMR
 open Elmish.Browser.Navigation
 open Elmish.Browser.UrlParser
+open Elmish.HMR
 
 // Init the first datas into the database
 Database.Init()
 
 Program.mkProgram init update root
 |> Program.toNavigable (parseHash Router.pageParser) urlUpdate
-#if DEBUG
-|> Program.withHMR
-#endif
 |> Program.withReact "elmish-app"
 #if DEBUG
-// Debugger is not working for Fable 2 (uses reflection and inflate/deflate)
-// |> Program.withDebugger
+|> Program.withDebugger
 #endif
 |> Program.run
