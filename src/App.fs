@@ -82,6 +82,9 @@ Database.Init()
 
 Program.mkProgram init update root
 |> Program.toNavigable (parseHash Router.pageParser) urlUpdate
+#if DEBUG
+|> Program.withConsoleTrace
+#endif
 |> Program.withReact "elmish-app"
 #if DEBUG
 |> Program.withDebugger

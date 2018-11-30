@@ -25,4 +25,3 @@ Run: `./fake.sh build -t Watch`
 * Set a breakpoint in F#
 * Either press F5 in Chrome or restart debugging in VS Code with Ctrl+Shift+F5 (Cmd+Shift+F5 on macOS)
 * The breakpoint will be caught in vscode
-

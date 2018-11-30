@@ -17,14 +17,6 @@ open Fake.IO.FileSystemOperators
 open Fake.Tools.Git
 open Fake.JavaScript
 
-let runFable args =
-    let result =
-        DotNet.exec
-            (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
-            "fable" args
-    if not result.OK then
-        failwithf "dotnet fable failed with code %i" result.ExitCode
-
 Target.create "Clean" (fun _ ->
     !! "src/bin"
     ++ "src/obj"
@@ -43,11 +35,11 @@ Target.create "YarnInstall" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-    runFable "webpack-cli"
+    Yarn.exec "webpack" id
 )
 
 Target.create "Watch" (fun _ ->
-    runFable "webpack-dev-server"
+    Yarn.exec "webpack-dev-server" id
 )
 
 // Where to push generated documentation

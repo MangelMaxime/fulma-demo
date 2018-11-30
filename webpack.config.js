@@ -121,7 +121,7 @@ module.exports = {
                     options: {
                         babel: CONFIG.babel
                     }
-                }
+                },
             },
             {
                 test: /\.js$/,
