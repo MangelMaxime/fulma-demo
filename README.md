@@ -13,9 +13,8 @@ Run: `./fake.sh build -t Watch`
 # Running Fable without FAKE
 
 - Install NPM dependencies: `yarn`
-- Install Nuget dependencies: `dotnet restore build.proj`
-- Building for development: `dotnet fable webpack-dev-server`
-- Building for production: `dotnet fable webpack-cli`
+- Building for development: `yarn run webpack-dev-server`
+- Building for production: `yarn run webpack`
 
 # Debugging in VS Code
 
