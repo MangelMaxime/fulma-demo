@@ -7,6 +7,7 @@ Fable.Elmish.HMR
 Fable.PowerPack
 Fable.React
 Fulma
-Fulma.Extensions
+Fulma.Extensions.Wikiki.PageLoader
 Fulma.Elmish
+Fable.FontAwesome.Free
 Thoth.Json

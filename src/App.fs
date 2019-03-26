@@ -6,7 +6,8 @@ open Fable.Helpers.React.Props
 open State
 open Types
 open Fulma
-open Fulma.FontAwesome
+open Fable.FontAwesome
+open Fable.FontAwesome.Free
 
 let private navbarEnd =
     Navbar.End.div [ ]
@@ -14,7 +15,8 @@ let private navbarEnd =
             [ Field.div [ Field.IsGrouped ]
                 [ Control.p [ ]
                     [ Button.a [ Button.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
-                        [ Icon.faIcon [ ] [ Fa.icon Fa.I.Github ]
+                        [ Icon.icon [ ]
+                            [ Fa.i [ Fa.Brand.Github ] [ ] ]
                           span [ ] [ str "Source" ] ] ] ] ] ]
 
 let private navbarStart dispatch =
@@ -45,7 +47,9 @@ let private navbarView isBurgerOpen dispatch =
                       // Icon display only on mobile
                       Navbar.Item.a [ Navbar.Item.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ]
                                       Navbar.Item.CustomClass "is-hidden-desktop" ]
-                                    [ Icon.faIcon [ ] [ Fa.faLg; Fa.icon Fa.I.Github ] ]
+                                    [ Icon.icon [ ]
+                                        [ Fa.i [ Fa.Brand.Github
+                                                 Fa.Size Fa.FaLarge ] [ ] ] ]
                       // Make sure to have the navbar burger as the last child of the brand
                       Navbar.burger [ Fulma.Common.CustomClass (if isBurgerOpen then "is-active" else "")
                                       Fulma.Common.Props [

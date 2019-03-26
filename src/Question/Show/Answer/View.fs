@@ -4,22 +4,24 @@ open Types
 open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fulma
-open Fulma.FontAwesome
+open Fable.FontAwesome
+open Fable.FontAwesome.Free
 open System
 
 let private voteArea score =
     let icon =
         if score > 0 then
-            Fa.I.ThumbsOUp
+            Fa.Regular.ThumbsUp
         else
-            Fa.I.ThumbsODown
+            Fa.Regular.ThumbsDown
 
     let iterationCount =
         Math.Min(5, Math.Abs score - 1)
 
     span [ ]
         [ for i = 0 to iterationCount do
-            yield Icon.faIcon [ ] [ Fa.icon icon ] ]
+            yield Icon.icon [ ]
+                    [ Fa.i [ icon ] [ ] ] ]
 
 let root model dispatch =
     Media.media [ ]

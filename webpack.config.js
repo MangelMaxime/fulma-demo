@@ -21,6 +21,7 @@ var CONFIG = {
             ["@babel/preset-env", {
                 "modules": false,
                 "useBuiltIns": "usage",
+                "corejs": 3,
                 // This saves around 4KB in minified bundle (not gzipped)
                 // "loose": true,
             }]
@@ -48,14 +49,12 @@ var commonPlugins = [
 ];
 
 module.exports = {
-    // In development, bundle styles together with the code so they can also
-    // trigger hot reloads. In production, put them in a separate CSS file.
-
-    // @babel/polyfill is a polyfill. If you only need to support modern browsers, you can remove it.
+    // In development, have two different entries to speed up hot reloading.
+    // In production, have a single entry but use mini-css-extract-plugin to move the styles to a separate file.
     entry: isProduction ? {
-        app: ["@babel/polyfill", CONFIG.fsharpEntry, CONFIG.cssEntry]
+        app: [CONFIG.fsharpEntry, CONFIG.cssEntry]
     } : {
-            app: ["@babel/polyfill", CONFIG.fsharpEntry],
+            app: [CONFIG.fsharpEntry],
             style: [CONFIG.cssEntry]
         },
     // Add a hash to the output file name in production

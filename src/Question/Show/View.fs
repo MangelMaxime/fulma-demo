@@ -5,7 +5,7 @@ open Fable.Helpers.React
 open Fable.Helpers.React.Props
 open Fable.Import
 open Fulma
-open Fulma.Extensions
+open Fulma.Extensions.Wikiki
 open Fable.Core.JsInterop
 
 let private loaderView isLoading =

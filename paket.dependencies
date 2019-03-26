@@ -12,8 +12,9 @@ nuget Fable.Elmish.HMR
 nuget Fable.PowerPack
 nuget Fable.React
 nuget Fulma
-nuget Fulma.Extensions
+nuget Fulma.Extensions.Wikiki.PageLoader
 nuget Fulma.Elmish
+nuget Fable.FontAwesome.Free
 nuget Thoth.Json
 
 group netcorebuild
