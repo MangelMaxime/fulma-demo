@@ -3,19 +3,18 @@ storage:none
 framework: netstandard2.0
 
 nuget FSharp.Core redirects:force
-nuget Fable.Core
-nuget Fable.Elmish
-nuget Fable.Elmish.React
-nuget Fable.Elmish.Browser
-nuget Fable.Elmish.Debugger
-nuget Fable.Elmish.HMR
-nuget Fable.PowerPack
-nuget Fable.React
-nuget Fulma
-nuget Fulma.Extensions.Wikiki.PageLoader
-nuget Fulma.Elmish
-nuget Fable.FontAwesome.Free
-nuget Thoth.Json
+nuget Fable.Core prerelease
+nuget Fable.Elmish prerelease
+nuget Fable.Elmish.React prerelease
+nuget Fable.Elmish.Browser prerelease
+nuget Fable.Elmish.Debugger prerelease
+nuget Fable.Elmish.HMR prerelease
+nuget Fable.React prerelease
+nuget Fable.Promise prerelease
+nuget Fulma prerelease
+nuget Fulma.Extensions.Wikiki.PageLoader prerelease
+nuget Fable.FontAwesome.Free prerelease
+nuget Thoth.Json prerelease
 
 group netcorebuild
     storage:none

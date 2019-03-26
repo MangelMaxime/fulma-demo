@@ -1,10 +1,8 @@
-namespace Fable.Import
-open System
-open System.Text.RegularExpressions
-open Fable.Core
-open Fable.Import.JS
+module Lowdb
 
-module Lowdb =
+open System
+open Fable.Core
+
     type [<AllowNullLiteral>] PromiseLike<'T> =
         abstract ``then``: ?onfulfilled: Func<'T, U2<'TResult, PromiseLike<'TResult>>> * ?onrejected: Func<obj, U2<'TResult, PromiseLike<'TResult>>> -> PromiseLike<'TResult>
         abstract ``then``: ?onfulfilled: Func<'T, U2<'TResult, PromiseLike<'TResult>>> * ?onrejected: Func<obj, unit> -> PromiseLike<'TResult>

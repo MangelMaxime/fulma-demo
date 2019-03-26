@@ -1,8 +1,8 @@
 module App.View
 
 open Elmish
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
+open Fable.React
+open Fable.React.Props
 open State
 open Types
 open Fulma
@@ -89,7 +89,7 @@ Program.mkProgram init update root
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
-|> Program.withReact "elmish-app"
+|> Program.withReactSynchronous "elmish-app"
 #if DEBUG
 |> Program.withDebugger
 #endif

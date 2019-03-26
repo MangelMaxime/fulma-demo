@@ -1,9 +1,10 @@
 [<AutoOpen>]
 module Database
 
-open Fable.Import
-open Fable.Core.JsInterop
 open System
+open Browser
+open Fable.Core
+open Fable.Core.JsInterop
 open Thoth.Json
 
 /// Shared types between the Client and the Database part
@@ -175,7 +176,7 @@ type Database =
 
     static member Restore () =
         Logger.debug "Restore the database"
-        Browser.localStorage.removeItem("database")
+        localStorage.removeItem("database")
         dbInstance <- None
         Database.Default()
 

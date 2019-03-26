@@ -1,11 +1,9 @@
-namespace Fable.Import
+module Showdown
 
 open System
 open System.Text.RegularExpressions
 open Fable.Core
-open Fable.Import.JS
 
-module Showdown =
     type [<AllowNullLiteral>] Extension =
         abstract ``type``: string with get, set
 
