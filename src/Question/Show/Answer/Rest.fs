@@ -1,6 +1,5 @@
 module Question.Show.Answer.Rest
 
-open Fable.PowerPack
 open Database
 open Fable.Core.JsInterop
 

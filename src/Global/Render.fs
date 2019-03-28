@@ -1,9 +1,8 @@
 module Render
 
 open Fulma
-open Fable.Helpers.React
-open Fable.Helpers.React.Props
-open Fable.Import
+open Fable.React
+open Fable.React.Props
 
 let pageNotFound =
     Hero.hero [ Hero.IsFullHeight

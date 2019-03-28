@@ -19,7 +19,7 @@ let update msg (model: Model) =
             { model with Error = "You've already upvoted this answer 5 times, isn't that enough?" }, Cmd.none
         else
             { model with Error = ""
-                         IsLoading = true }, Cmd.ofPromise
+                         IsLoading = true }, Cmd.OfPromise.either
                                                 Rest.voteUp
                                                 (model.QuestionId, model.Answer.Id)
                                                 (VoteUpRes.Success >> VoteUpResult)
@@ -32,7 +32,7 @@ let update msg (model: Model) =
             { model with Error = "You've already downvoted this answer 5 times, isn't that enough?" }, Cmd.none
         else
             { model with Error = ""
-                         IsLoading = true }, Cmd.ofPromise
+                         IsLoading = true }, Cmd.OfPromise.either
                                                 Rest.voteDown
                                                 (model.QuestionId, model.Answer.Id)
                                                 (VoteUpRes.Success >> VoteUpResult)

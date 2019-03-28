@@ -43,7 +43,7 @@ let update (user : Database.User) msg (model: Model) =
             newModel, Cmd.none
 
         | newModel, false ->
-            { newModel with IsWaitingServer = true }, Cmd.ofPromise Rest.createQuestion
+            { newModel with IsWaitingServer = true }, Cmd.OfPromise.either Rest.createQuestion
                                  (user.Id, model.Title, model.Content)
                                  (CreateQuestionRes.Success >> CreateQuestionResult)
                                  (CreateQuestionRes.Error >> CreateQuestionResult)

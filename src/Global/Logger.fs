@@ -1,6 +1,6 @@
 module Logger
 
-    open Fable.Import.JS
+    open Fable.Core.JS
 
     let inline error msg = console.error msg
 
