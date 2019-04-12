@@ -77,10 +77,12 @@ let private pageContent user question model dispatch =
           questionsView question model.Answers dispatch
           replyView user model dispatch ]
 
-let root user model dispatch =
-    match model.Question with
+let root (props: {| user: User
+                    model: Model
+                    dispatch: Msg->unit |}) =
+    match props.model.Question with
     | Some question ->
-        pageContent user question model dispatch, false
+        pageContent props.user question props.model props.dispatch, false
     | None -> div [ ] [ ], true
     |> (fun (pageContent, isLoading) ->
         Container.container [ ]

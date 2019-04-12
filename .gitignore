@@ -9,3 +9,4 @@ bin/
 output/
 .fake/
 temp/
+.idea/

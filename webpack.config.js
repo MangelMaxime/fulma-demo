@@ -68,16 +68,8 @@ module.exports = {
     mode: isProduction ? "production" : "development",
     devtool: isProduction ? "source-map" : "eval-source-map",
     optimization: {
-        // Split the code coming from npm packages into a different file.
-        // 3rd party dependencies change less often, let the browser cache them.
         splitChunks: {
-            cacheGroups: {
-                commons: {
-                    test: /node_modules/,
-                    name: "vendors",
-                    chunks: "all"
-                }
-            }
+            chunks: "all"
         },
     },
     // Besides the HtmlPlugin, we use the following plugins:
