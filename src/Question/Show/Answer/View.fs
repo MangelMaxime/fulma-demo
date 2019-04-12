@@ -8,6 +8,17 @@ open Fable.FontAwesome
 open Fable.FontAwesome.Free
 open System
 
+let converter = Showdown.Globals.Converter.Create()
+
+type DangerousInnerHtml =
+    { __html : string }
+
+let contentFromMarkdown options str =
+    Content.content
+        [ yield! options
+          yield Content.Props [ DangerouslySetInnerHTML { __html =  converter.makeHtml str } ] ]
+        [ ]
+
 let private voteArea score =
     let icon =
         if score > 0 then
@@ -29,7 +40,7 @@ let root model dispatch =
             [ Image.image [ Image.Is64x64 ]
                 [ img [ Src ("avatars/" + model.Author.Avatar) ] ] ]
           Media.content [ ]
-            [ Render.contentFromMarkdown [ ] model.Answer.Content
+            [ contentFromMarkdown [ ] model.Answer.Content
               Level.level [ ]
                 [ Level.right [ CustomClass "vote-area" ]
                     [ Button.button [ Button.IsLoading model.IsLoading

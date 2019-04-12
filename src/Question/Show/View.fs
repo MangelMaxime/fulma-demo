@@ -55,7 +55,7 @@ let private questionsView (question : QuestionInfo) answers dispatch =
             [ Image.image [ Image.Is64x64 ]
                 [ img [ Src ("avatars/" + question.Author.Avatar)  ] ] ]
           Media.content [ ]
-            [ yield Render.contentFromMarkdown [ ]
+            [ yield Answer.View.contentFromMarkdown [ ]
                         question.Description
               yield Level.level [ ]
                         [ Level.left [ ] [ ] // Needed to force the level right aligment
