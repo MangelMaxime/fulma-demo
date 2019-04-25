@@ -2,8 +2,8 @@ module Router
 
 open Browser
 open Fable.React.Props
-open Elmish.Browser.Navigation
-open Elmish.Browser.UrlParser
+open Elmish.Navigation
+open Elmish.UrlParser
 
 type QuestionPage =
     | Index
