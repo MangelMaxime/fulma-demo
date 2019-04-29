@@ -75,10 +75,9 @@ let private root model dispatch =
           renderPage model dispatch ]
 
 
-open Elmish.React
 open Elmish.Debug
-open Elmish.Browser.Navigation
-open Elmish.Browser.UrlParser
+open Elmish.Navigation
+open Elmish.UrlParser
 open Elmish.HMR
 
 // Init the first datas into the database
