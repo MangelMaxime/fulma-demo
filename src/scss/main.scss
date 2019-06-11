@@ -2,10 +2,7 @@
 @import "~bulma/sass/utilities/functions";
 
 // Customize
-// Colors
-$primary: #2D3947;
-// Links
-$link-hover: #00D1B2;
+$body-size: 14px;
 
 $fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
 @import '~@fortawesome/fontawesome-free/scss/fontawesome.scss';
@@ -16,32 +13,8 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
 @import '~bulma/bulma.sass';
 @import '~bulma-pageloader/dist/css/bulma-pageloader.sass';
 
-html,
-body {
-    font-size: 14px;
-}
-
-.navbar-bg {
-    background-color: $primary;
-    .title {
-        color: $white;
+.columns {
+    &.is-inbox {
+        height: calc(100vh - #{$navbar-height});
     }
-}
-
-.navbar {
-    .image {
-        img {
-            height: 100%;
-            max-height: inherit;
-        }
-    }
-    .button {
-        i {
-            margin-right: 5px;
-        }
-    }
-}
-
-.vote-area > * {
-    margin-right: .5em;
 }

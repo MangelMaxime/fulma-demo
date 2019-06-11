@@ -22,7 +22,6 @@ group netcorebuild
     framework: netstandard2.0
 
     clitool dotnet-fake
-    clitool dotnet-fable
     nuget NETStandard.Library.NETFramework
     nuget Fake.DotNet.Cli
     nuget Fake.DotNet.Paket

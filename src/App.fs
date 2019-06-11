@@ -35,45 +35,54 @@ let private navbarStart dispatch =
                     [ str "Reset demo" ] ] ] ]
 
 let private navbarView isBurgerOpen dispatch =
-    div [ ClassName "navbar-bg" ]
-        [ Container.container [ ]
-            [ Navbar.navbar [ Navbar.CustomClass "is-primary" ]
-                [ Navbar.Brand.div [ ]
-                    [ Navbar.Item.a [ Navbar.Item.Props [ Href "#" ] ]
-                        [ Image.image [ Image.Is32x32 ]
-                            [ img [ Src "assets/mini_logo.svg" ] ]
-                          Heading.p [ Heading.Is4 ]
-                            [ str "Fulma-demo" ] ]
-                      // Icon display only on mobile
-                      Navbar.Item.a [ Navbar.Item.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ]
-                                      Navbar.Item.CustomClass "is-hidden-desktop" ]
-                                    [ Icon.icon [ ]
-                                        [ Fa.i [ Fa.Brand.Github
-                                                 Fa.Size Fa.FaLarge ] [ ] ] ]
-                      // Make sure to have the navbar burger as the last child of the brand
-                      Navbar.burger [ Fulma.Common.CustomClass (if isBurgerOpen then "is-active" else "")
-                                      Fulma.Common.Props [
-                                        OnClick (fun _ -> dispatch ToggleBurger) ] ]
-                        [ span [ ] [ ]
-                          span [ ] [ ]
-                          span [ ] [ ] ] ]
-                  Navbar.menu [ Navbar.Menu.IsActive isBurgerOpen ]
-                    [ navbarStart dispatch
-                      navbarEnd ] ] ] ]
+    Navbar.navbar [ Navbar.Color IsPrimary
+                    Navbar.IsFixedTop ]
+        [ Navbar.Brand.div [ ]
+            [ Navbar.Item.a [ ]
+                [ //img [ Src "assets/logo_transparent.svg" ]
+                  str "Fulma - Inbox" ] ]
+          Navbar.End.div [ ]
+            [ Navbar.Item.div [ Navbar.Item.HasDropdown
+                                Navbar.Item.IsHoverable ]
+                [ Navbar.Link.a [ ]
+                    [  str "Account" ]
+                  Navbar.Dropdown.div [ ]
+                    [ Navbar.Item.a [ ]
+                        [ str "Dashboard" ]
+                      Navbar.Item.a [ ]
+                        [ str "Profile" ]
+                      Navbar.Item.a [ ]
+                        [ str "Settings" ]
+                      Navbar.divider [ ] [ ]
+                      Navbar.Item.a [ ]
+                        [ str "Logout" ] ] ] ] ]
 
-let private renderPage model dispatch =
-    match model with
-    | { CurrentPage = Router.Question _
-        QuestionDispatcher = Some extractedModel } ->
-        Question.Dispatcher.View.root model.Session extractedModel (QuestionDispatcherMsg >> dispatch)
-    | _ ->
-        Render.pageNotFound
+let sideMenu =
+    Menu.menu [ ]
+        [ Menu.list [ ]
+            [ Menu.Item.li [ ]
+                [ Icon.icon [ ]
+                    [ Fa.i [ Fa.Solid.Inbox ]
+                        [ ] ]
+                  str "Inbox" ]
+              Menu.Item.li [ ] [ str "Sent" ]
+              Menu.Item.li [ ] [ str "Stared" ]
+              Menu.Item.li [ ] [ str "Trash" ] ] ]
+
+let pageContent =
+    Columns.columns [ Columns.CustomClass "is-inbox"
+                      Columns.IsGapless ]
+        [ Column.column [ Column.Width (Screen.All, Column.Is2) ]
+            [ sideMenu ]
+          Column.column [ ]
+            [ ]
+          Column.column [ ]
+            [ ] ]
 
 let private root model dispatch =
     div [ ]
         [ navbarView model.IsBurgerOpen dispatch
-          renderPage model dispatch ]
-
+          pageContent ]
 
 open Elmish.Debug
 open Elmish.Navigation

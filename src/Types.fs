@@ -16,7 +16,6 @@ type Question =
 type Model =
     { CurrentPage : Router.Page
       Session : User
-      QuestionDispatcher : Question.Dispatcher.Types.Model option
       IsBurgerOpen : bool }
 
     static member Empty =
@@ -28,10 +27,8 @@ type Model =
             match Database.GetUserById userId with
             | Some user -> user
             | None -> failwithf "User#%i not found" userId
-          QuestionDispatcher = None
           IsBurgerOpen = false }
 
 type Msg =
-    | QuestionDispatcherMsg of Question.Dispatcher.Types.Msg
     | ResetDatabase
     | ToggleBurger
