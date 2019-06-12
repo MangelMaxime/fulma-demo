@@ -1,3 +1,5 @@
+version 5.203.2
+
 source https://www.nuget.org/api/v2
 storage:none
 framework: netstandard2.0
@@ -13,6 +15,7 @@ nuget Fable.React
 nuget Fable.Promise
 nuget Fulma
 nuget Fulma.Extensions.Wikiki.PageLoader
+nuget Fulma.Extensions.Wikiki.Checkradio
 nuget Fable.FontAwesome.Free
 nuget Thoth.Json
 

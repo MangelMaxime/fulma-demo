@@ -12,9 +12,109 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
 
 @import '~bulma/bulma.sass';
 @import '~bulma-pageloader/dist/css/bulma-pageloader.sass';
+@import '~bulma-checkradio/dist/css/bulma-checkradio.sass';
+
+// Bulma is hard coding this value but we use a variable
+// in our customisation code
+$media-margin: 1rem;
+
+html {
+    overflow: hidden
+}
 
 .columns {
     &.is-inbox {
         height: calc(100vh - #{$navbar-height});
+
+        .column {
+            &.is-main-menu {
+                background-color: $white-ter;
+            }
+
+            &.is-email-list {
+                // padding: 1.5rem !important;
+                height: calc(100vh - #{$navbar-height * 2});
+                overflow: hidden auto;
+                padding-right: $media-margin !important;
+
+                .media.is-email-preview {
+                    &:first-child {
+                        margin-top: $media-margin;
+                    }
+
+                    &:last-child {
+                        margin-bottom: $media-margin;
+                    }
+
+                    .media-left {
+                        .is-checkradio {
+                            margin-right: $media-margin;
+                            padding: 0;
+
+                            + label {
+                                padding-left: 0;
+                            }
+                        }
+                    }
+
+                    .media-right.is-info-container {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+
+                        .is-date {
+                            font-weight: $weight-light;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.menu.sidebar-main {
+    .menu-list {
+        li > a {
+            .icon {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+
+            &.is-active {
+                background-color: $grey-lighter;
+                color: $text;
+                font-weight: $weight-bold;
+            }
+
+            &:hover {
+                background-color: $grey-lighter;
+            }
+        }
+    }
+}
+
+.media {
+    &.is-email-preview {
+        .media-left {
+            margin-left: $media-margin;
+            margin-top: auto;
+        }
+    }
+}
+
+.level {
+    &.is-menubar {
+        .buttons {
+            margin-bottom: 0;
+            margin-right: 3rem;
+
+            .button {
+                margin-bottom: 0;
+            }
+        }
+
+        background-color: $white-ter;
+
+        height: $navbar-height;
     }
 }

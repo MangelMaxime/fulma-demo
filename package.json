@@ -10,6 +10,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.9.0",
     "bulma": "^0.7.5",
+    "bulma-checkradio": "^1.1.0",
     "bulma-pageloader": "^2.1.0",
     "lowdb": "^1.0.0",
     "marked": "^0.6.2",
