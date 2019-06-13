@@ -7,7 +7,10 @@
 var CONFIG = {
     indexHtmlTemplate: './src/index.html',
     fsharpEntry: './src/Demo.fsproj',
-    cssEntry: './src/scss/main.scss',
+    cssEntries: {
+        light: './src/scss/light.scss',
+        dark: './src/scss/dark.scss'
+    },
     outputDir: './output',
     assetsDir: './public',
     devServerPort: 8080,
@@ -45,17 +48,25 @@ var commonPlugins = [
     new HtmlWebpackPlugin({
         filename: 'index.html',
         template: CONFIG.indexHtmlTemplate
-    })
+    }),
+    new MiniCssExtractPlugin({ filename: '[name].css' })
 ];
 
 module.exports = {
     // In development, have two different entries to speed up hot reloading.
     // In production, have a single entry but use mini-css-extract-plugin to move the styles to a separate file.
     entry: isProduction ? {
-        app: [CONFIG.fsharpEntry, CONFIG.cssEntry]
+        app: [
+            CONFIG.fsharpEntry,
+            CONFIG.cssEntries.light,
+            CONFIG.cssEntries.dark
+        ]
     } : {
-            app: [CONFIG.fsharpEntry],
-            style: [CONFIG.cssEntry]
+            app: [
+                CONFIG.fsharpEntry
+            ],
+            "style.light": CONFIG.cssEntries.light,
+            "style.dark": CONFIG.cssEntries.dark
         },
     // Add a hash to the output file name in production
     // to prevent browser caching if code changes
@@ -88,7 +99,6 @@ module.exports = {
     //      - HotModuleReplacementPlugin: Enables hot reloading when code changes without refreshing
     plugins: isProduction ?
         commonPlugins.concat([
-            new MiniCssExtractPlugin({ filename: 'style.css' }),
             new CopyWebpackPlugin([{ from: CONFIG.assetsDir }]),
         ])
         : commonPlugins.concat([
@@ -133,9 +143,14 @@ module.exports = {
             {
                 test: /\.(sass|scss|css)$/,
                 use: [
-                    isProduction
-                        ? MiniCssExtractPlugin.loader
-                        : 'style-loader',
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            hmr: true,
+                            hot: true,
+                            reloadAll: true,
+                        }
+                    },
                     'css-loader',
                     'sass-loader',
                 ],

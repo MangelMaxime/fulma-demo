@@ -168,8 +168,19 @@ let pageContent =
                     [ ] ] ] ]
 
 let private root model dispatch =
+    let theme =
+        if model.IsDark then
+            "dark"
+        else
+            "light"
+
     div [ ]
-        [ navbarView model.IsBurgerOpen dispatch
+        [ ofType<ThemeLoader.ThemeLoader,_,_> { Theme = theme } [ ]
+          navbarView model.IsBurgerOpen dispatch
+          Button.button [ Button.OnClick (fun _ ->
+            dispatch ToggleTheme
+          ) ]
+            [ str "Toggle theme" ]
           pageContent ]
 
 open Elmish.Debug

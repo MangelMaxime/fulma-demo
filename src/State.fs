@@ -53,3 +53,6 @@ let update msg model =
 
     | (ToggleBurger, _) ->
         { model with IsBurgerOpen = not model.IsBurgerOpen }, Cmd.none
+
+    | (ToggleTheme, _) ->
+        { model with IsDark = not model.IsDark }, Cmd.none

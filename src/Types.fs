@@ -16,7 +16,8 @@ type Question =
 type Model =
     { CurrentPage : Router.Page
       Session : User
-      IsBurgerOpen : bool }
+      IsBurgerOpen : bool
+      IsDark : bool }
 
     static member Empty =
         { CurrentPage =
@@ -27,8 +28,10 @@ type Model =
             match Database.GetUserById userId with
             | Some user -> user
             | None -> failwithf "User#%i not found" userId
-          IsBurgerOpen = false }
+          IsBurgerOpen = false
+          IsDark = true }
 
 type Msg =
     | ResetDatabase
     | ToggleBurger
+    | ToggleTheme

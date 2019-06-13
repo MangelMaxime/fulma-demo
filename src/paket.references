@@ -11,3 +11,5 @@ Fulma.Extensions.Wikiki.PageLoader
 Fulma.Extensions.Wikiki.Checkradio
 Fable.FontAwesome.Free
 Thoth.Json
+Fable.Browser.Dom
+Fable.Browser.Css
