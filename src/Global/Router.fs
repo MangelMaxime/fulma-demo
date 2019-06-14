@@ -1,3 +1,4 @@
+[<RequireQualifiedAccess>]
 module Router
 
 open Browser
@@ -5,30 +6,43 @@ open Fable.React.Props
 open Elmish.Navigation
 open Elmish.UrlParser
 
-type QuestionPage =
-    | Index
-    | Show of int
-    | Create
+[<RequireQualifiedAccess>]
+type MailboxPage =
+    | Inbox
+    | Sent
+    | Stared
+    | Trash
 
 type Page =
-    | Question of QuestionPage
-    | Home
+    | Mailbox of MailboxPage
+
+let private segment (pathA : string) (pathB : string) =
+    pathA + "/" + pathB
 
 let private toHash page =
     match page with
-    | Question questionPage ->
-        match questionPage with
-        | Index -> "#question/index"
-        | Show id -> sprintf "#question/%i" id
-        | Create -> "#question/create"
-    | Home -> "#/"
+    | Mailbox mailboxPage ->
+        match mailboxPage with
+        | MailboxPage.Inbox ->
+            "inbox"
+        | MailboxPage.Sent ->
+            "sent"
+        | MailboxPage.Stared ->
+            "stared"
+        | MailboxPage.Trash ->
+            "trash"
+        |> segment "mailbox/"
+
+    |> segment "#/"
 
 let pageParser: Parser<Page->Page,Page> =
-    oneOf [
-        map (QuestionPage.Index |> Question) (s "question" </> s "index")
-        map (QuestionPage.Show >> Question) (s "question" </> i32)
-        map (QuestionPage.Create |> Question) (s "question" </> s "create")
-        map (QuestionPage.Index |> Question) top ]
+    oneOf
+        [ map (MailboxPage.Inbox |> Mailbox) (s "mailbox" </> s "inbox")
+        ; map (MailboxPage.Sent |> Mailbox) (s "mailbox" </> s "sent")
+        ; map (MailboxPage.Stared |> Mailbox) (s "mailbox" </> s "stared")
+        ; map (MailboxPage.Trash |> Mailbox) (s "mailbox" </> s "trash")
+        ; map (MailboxPage.Inbox |> Mailbox) top
+        ]
 
 let href route =
     Href (toHash route)

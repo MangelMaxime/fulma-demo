@@ -14,5 +14,8 @@
         "**/paket-files": true
     },
     "files.trimTrailingWhitespace": true,
-    "files.trimFinalNewlines": true
+    "files.trimFinalNewlines": true,
+    "indentRainbow.colors": [
+        "transparent"
+    ]
 }

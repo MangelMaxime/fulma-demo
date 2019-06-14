@@ -147,8 +147,7 @@ module.exports = {
                         loader: MiniCssExtractPlugin.loader,
                         options: {
                             hmr: true,
-                            hot: true,
-                            reloadAll: true,
+                            hot: true
                         }
                     },
                     'css-loader',

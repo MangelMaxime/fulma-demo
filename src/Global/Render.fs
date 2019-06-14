@@ -20,5 +20,6 @@ type DangerousInnerHtml =
 let contentFromMarkdown options str =
     Content.content
         [ yield! options
-          yield Content.Props [ DangerouslySetInnerHTML { __html =  converter.makeHtml str } ] ]
+        ; yield Content.Props [ DangerouslySetInnerHTML { __html =  converter.makeHtml str } ]
+        ]
         [ ]

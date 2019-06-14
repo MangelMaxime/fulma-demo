@@ -9,7 +9,7 @@
     <Compile Include="Global/Logger.fs" />
     <Compile Include="Global/Router.fs" />
     <Compile Include="Global/Database.fs" />
-    <Compile Include="Components/ThemeLoader.fs" />
+    <Compile Include="Components/ThemeChanger.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="State.fs" />
     <Compile Include="App.fs" />

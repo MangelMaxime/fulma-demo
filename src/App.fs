@@ -109,8 +109,11 @@ let buttonIcon icon =
                 [ ] ] ]
 
 let menubar =
-    Level.level [ Level.Level.CustomClass "is-menubar"
-                  Level.Level.Modifiers [ Modifier.IsMarginless ] ]
+    Level.level
+        [
+            Level.Level.CustomClass "is-menubar"
+            Level.Level.Modifiers [ Modifier.IsMarginless ]
+        ]
         [ Level.left [ ]
             [ Button.list [ Button.List.HasAddons ]
                 [ buttonIcon Fa.Solid.LongArrowAltLeft ]
@@ -175,12 +178,12 @@ let private root model dispatch =
             "light"
 
     div [ ]
-        [ ofType<ThemeLoader.ThemeLoader,_,_> { Theme = theme } [ ]
+        [ ofType<ThemeChanger.ThemeChanger,_,_> { Theme = theme } [ ]
           navbarView model.IsBurgerOpen dispatch
-          Button.button [ Button.OnClick (fun _ ->
-            dispatch ToggleTheme
-          ) ]
-            [ str "Toggle theme" ]
+        //   Button.button [ Button.OnClick (fun _ ->
+        //     dispatch ToggleTheme
+        //   ) ]
+        //     [ str "Change theme" ]
           pageContent ]
 
 open Elmish.Debug
