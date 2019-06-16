@@ -32,7 +32,6 @@ let private toHash page =
         | MailboxPage.Trash ->
             "trash"
         |> segment "mailbox/"
-
     |> segment "#/"
 
 let pageParser: Parser<Page->Page,Page> =

@@ -3,15 +3,16 @@ module ThemeChanger
 open Fable.Core
 open Fable.Core.JsInterop
 open Fable.React
-open Browser.CssExtensions
+open Browser
 
 let hot = HMR.``module``.hot
 
 [<Emit("new MutationObserver($0)")>]
 let newMutationObserver (callback : obj list -> obj -> unit) : obj = jsNative
 
-type ThemeChangerProps =
-    { Theme : string }
+type ThemeChangerProps = {
+    Theme : string
+}
 
 type ThemeChanger(initProps) =
     inherit Component<ThemeChangerProps, obj>(initProps)
@@ -23,7 +24,7 @@ type ThemeChanger(initProps) =
             observer?disconnect()
 
     member this.registerObserver() =
-        let targetNode = Browser.Dom.document.querySelector("body")
+        let targetNode = document.querySelector("body")
 
         let config =
             createObj [
@@ -35,9 +36,9 @@ type ThemeChanger(initProps) =
                 if mutation?``type`` = "childList" then
                     let nodes =
                         [ for node in mutation?addedNodes do
-                            yield node :> Browser.Types.Node
+                            yield node :> Types.Node
                         ; for node in mutation?removedNodes do
-                            yield node :> Browser.Types.Node
+                            yield node :> Types.Node
                         ]
 
                     let shouldUpdateStyle =
@@ -54,7 +55,7 @@ type ThemeChanger(initProps) =
         observer?observe(targetNode, config)
 
     member __.updateStyle(activeTheme : string) =
-        let styles = Browser.Dom.document.styleSheets
+        let styles = document.styleSheets
         for index = 0 to (int styles.length) - 1 do
             let currentStyle = styles.item (float index)
 

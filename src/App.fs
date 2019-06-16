@@ -9,31 +9,146 @@ open Fable.FontAwesome
 open Fable.FontAwesome.Free
 open Fulma
 open Fulma.Extensions.Wikiki
+open Fable.Core
+
+
+type Model =
+    { CurrentPage : Router.Page
+    }
+
+
+type Msg =
+    | InboxMsg
+
+
+let urlUpdate (result: Option<Router.Page>) model =
+    match result with
+    | None ->
+        let requestedUrl = Browser.Dom.window.location.href
+
+        JS.console.error("Error parsing url: " + requestedUrl)
+
+        ( model
+        , Router.modifyUrl model.CurrentPage
+        )
+
+    | Some page ->
+
+        ( model
+        , Cmd.none
+        )
+
+
+let init result =
+    let initialModel = {
+        CurrentPage =
+            Router.MailboxPage.Inbox
+            |> Router.Mailbox
+    }
+
+    urlUpdate result initialModel
+
 
 let private navbarEnd =
-    Navbar.End.div [ ]
-        [ Navbar.Item.div [ ]
-            [ Field.div [ Field.IsGrouped ]
+    Navbar.End.div
+        [ ]
+        [ Navbar.Item.div
+            [ ]
+            [ Field.div
+                [ Field.IsGrouped ]
                 [ Control.p [ ]
-                    [ Button.a [ Button.Props [ Href "https://github.com/MangelMaxime/fulma-demo" ] ]
-                        [ Icon.icon [ ]
-                            [ Fa.i [ Fa.Brand.Github ] [ ] ]
-                          span [ ] [ str "Source" ] ] ] ] ] ]
+                    [ Button.a
+                        [ Button.Props
+                            [ Href "https://github.com/MangelMaxime/fulma-demo" ]
+                        ]
+                        [ Icon.icon
+                            [ ]
+                            [ Fa.i
+                                [ Fa.Brand.Github ]
+                                [ ]
+                            ]
+
+                        ; span [ ]
+                            [ str "Source" ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
 
 let private navbarStart dispatch =
-    Navbar.Start.div [ ]
-        [ Navbar.Item.a [ Navbar.Item.Props [ OnClick (fun _ ->
-                                                        Router.QuestionPage.Index
-                                                        |> Router.Question
-                                                        |> Router.modifyLocation) ] ]
-            [ str "Home" ]
-          Navbar.Item.div [ Navbar.Item.HasDropdown
-                            Navbar.Item.IsHoverable ]
-            [ Navbar.Link.div [ ]
-                [ str "Options" ]
-              Navbar.Dropdown.div [ ]
-                [ Navbar.Item.a [ Navbar.Item.Props [ OnClick (fun _ -> dispatch ResetDatabase)] ]
-                    [ str "Reset demo" ] ] ] ]
+    Navbar.Start.div
+        [ ]
+        [ Navbar.Item.a
+            [ Navbar.Item.Props
+                [ OnClick (fun _ ->
+                        Router.MailboxPage.Inbox
+                        |> Router.Mailbox
+                        |> Router.modifyLocation
+                    )
+                ]
+            ]
+            [ str "Home"  ]
+
+        ; Navbar.Item.div
+                [ Navbar.Item.HasDropdown
+                ; Navbar.Item.IsHoverable
+                ]
+                [ Navbar.Link.div
+                    [ ]
+                    [ str "Options" ]
+
+                ; Navbar.Dropdown.div
+                    [ ]
+                    [ Navbar.Item.a [ Navbar.Item.Props [ OnClick (fun _ -> dispatch ResetDatabase)] ]
+                        [ str "Reset demo" ]
+                    ]
+                ]
+        ]
+
+let private navbarView isBurgerOpen dispatch =
+    Navbar.navbar
+        [ Navbar.Color IsPrimary
+        ; Navbar.IsFixedTop ]
+        [ Navbar.Brand.div
+            [ ]
+            [ Navbar.Item.a [ ]
+                [ str "Fulma - Inbox" ]
+            ]
+
+        ; Navbar.End.div
+            [ ]
+            [ Navbar.Item.div
+                [ Navbar.Item.HasDropdown
+                ; Navbar.Item.IsHoverable
+                ]
+                [ Navbar.Link.a
+                    [ ]
+                    [  str "Account" ]
+
+                ; Navbar.Dropdown.div
+                    [ ]
+                    [ Navbar.Item.a
+                        [ ]
+                        [ str "Dashboard" ]
+
+                    ; Navbar.Item.a
+                        [ ]
+                        [ str "Profile" ]
+
+                    ; Navbar.Item.a
+                        [ ]
+                        [ str "Settings" ]
+
+                    ; Navbar.divider [ ] [ ]
+
+                    ; Navbar.Item.a [ ]
+                        [ str "Logout" ]
+                    ]
+                ]
+            ]
+        ]
+
 
 let private navbarView isBurgerOpen dispatch =
     Navbar.navbar [ Navbar.Color IsPrimary
