@@ -10,8 +10,9 @@
     <Compile Include="Global/Router.fs" />
     <Compile Include="Global/Database.fs" />
     <Compile Include="Components/ThemeChanger.fs" />
-    <Compile Include="Types.fs" />
-    <Compile Include="State.fs" />
+    <Compile Include="Views/Navbar.fs" />
+    <Compile Include="Pages/Inbox.fs" />
+    <Compile Include="Pages/Mailbox.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

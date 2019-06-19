@@ -7,40 +7,41 @@ open Elmish.Navigation
 open Elmish.UrlParser
 
 [<RequireQualifiedAccess>]
-type MailboxPage =
+type MailboxRoute =
     | Inbox
     | Sent
     | Stared
     | Trash
 
-type Page =
-    | Mailbox of MailboxPage
+type Route =
+    | Mailbox of MailboxRoute
 
 let private segment (pathA : string) (pathB : string) =
     pathA + "/" + pathB
 
 let private toHash page =
     match page with
-    | Mailbox mailboxPage ->
-        match mailboxPage with
-        | MailboxPage.Inbox ->
+    | Mailbox mailboxRoute ->
+        match mailboxRoute with
+        | MailboxRoute.Inbox ->
             "inbox"
-        | MailboxPage.Sent ->
+        | MailboxRoute.Sent ->
             "sent"
-        | MailboxPage.Stared ->
+        | MailboxRoute.Stared ->
             "stared"
-        | MailboxPage.Trash ->
+        | MailboxRoute.Trash ->
             "trash"
         |> segment "mailbox/"
     |> segment "#/"
 
-let pageParser: Parser<Page->Page,Page> =
+let pageParser: Parser<Route -> Route, Route> =
     oneOf
-        [ map (MailboxPage.Inbox |> Mailbox) (s "mailbox" </> s "inbox")
-        ; map (MailboxPage.Sent |> Mailbox) (s "mailbox" </> s "sent")
-        ; map (MailboxPage.Stared |> Mailbox) (s "mailbox" </> s "stared")
-        ; map (MailboxPage.Trash |> Mailbox) (s "mailbox" </> s "trash")
-        ; map (MailboxPage.Inbox |> Mailbox) top
+        [
+            map (MailboxRoute.Inbox |> Mailbox) (s "mailbox" </> s "inbox")
+            map (MailboxRoute.Sent |> Mailbox) (s "mailbox" </> s "sent")
+            map (MailboxRoute.Stared |> Mailbox) (s "mailbox" </> s "stared")
+            map (MailboxRoute.Trash |> Mailbox) (s "mailbox" </> s "trash")
+            map (MailboxRoute.Inbox |> Mailbox) top
         ]
 
 let href route =
