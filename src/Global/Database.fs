@@ -12,25 +12,30 @@ open Thoth.Json
 /// If we update the database content or structure we need to increment this value
 let [<Literal>] CurrentVersion = 0
 
+[<RequireQualifiedAccess>]
 type EmailType =
     | Received
     | Sent
 
 type Email =
     {
-        From : string list
-        To : string list
+        Guid : Guid
+        From : string []
+        To : string []
+        ReceivedAt : DateTime
         Subject : string
         Body : string
         Type : EmailType
         IsStared : bool
         IsTrashed : bool
-        Tags : string list
+        Tags : string []
     }
 
 type DatabaseData =
-    { Version : int
-      Emails : Email list }
+    {
+        Version : int
+        Emails : Email []
+    }
 
 /// Database helpers
 
@@ -67,23 +72,23 @@ type Database =
 
             dbInstance.Value
 
-    static member Questions
+    static member Emails
         with get() : Lowdb.Lowdb =
             Database.Lowdb
-                .get(!^"Questions")
+                .get(!^"Emails")
 
-    static member Users
-        with get() : Lowdb.Lowdb =
-            Database.Lowdb
-                .get(!^"Users")
+    // static member Users
+    //     with get() : Lowdb.Lowdb =
+    //         Database.Lowdb
+    //             .get(!^"Users")
 
-    static member GetUserById (userId: int) =
-        Database.Users
-            .find(createObj [ "Id" ==> userId])
-            .value()
-        |> function
-           | null -> None
-           | value -> unbox<User> value |> Some
+    // static member GetUserById (userId: int) =
+    //     Database.Users
+    //         .find(createObj [ "Id" ==> userId])
+    //         .value()
+    //     |> function
+    //        | null -> None
+    //        | value -> unbox<User> value |> Some
 
     static member Version
         with get() : int =
@@ -115,7 +120,23 @@ type Database =
             .defaults(
                 {
                     Version = CurrentVersion
-                    Emails = []
+                    Emails =
+                        [|
+                            {
+                                Guid = Guid.NewGuid()
+                                From = [| "emilie@mail.com" |]
+                                To = [| "mangel.maxime@fulma.com" |]
+                                Subject = "Fable - Newsletter #1"
+                                ReceivedAt = DateTime(2018, 11, 7, 9, 45, 33, DateTimeKind.Utc)
+                                Body =
+                                    """
+                                    """
+                                Type = EmailType.Sent
+                                IsStared = false
+                                IsTrashed = false
+                                Tags = [| |]
+                            }
+                        |]
                 }
             ).write()
         Logger.debug "Database restored"

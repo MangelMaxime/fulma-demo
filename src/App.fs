@@ -60,8 +60,16 @@ let init (optRoute : Router.Route option) =
 let private update (msg : Msg) (model : Model) =
     match msg with
     | MailboxMsg mailboxMsg ->
-        model
-        , Cmd.none
+        match model.ActivePage with
+        | Page.Mailbox mailboxModel ->
+            let (mailboxModel, mailboxCmd) = Mailbox.update mailboxMsg mailboxModel
+
+            { model with
+                ActivePage = Page.Mailbox mailboxModel
+            }
+            , Cmd.map MailboxMsg mailboxCmd
+        | _ ->
+            model, Cmd.none
 
 let private root (model : Model) (dispatch : Dispatch<Msg>) =
     match model.ActivePage with
@@ -71,7 +79,7 @@ let private root (model : Model) (dispatch : Dispatch<Msg>) =
 
     | Page.Mailbox mailboxModel ->
         div [ ]
-            [ //ofType<ThemeChanger.ThemeChanger,_,_> { Theme = theme } [ ]
+            [ ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
             //   navbarView model.IsBurgerOpen dispatch
             //   Button.button [ Button.OnClick (fun _ ->
             //     dispatch ToggleTheme
