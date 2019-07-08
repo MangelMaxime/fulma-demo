@@ -19,9 +19,11 @@ html {
                 // padding: 1.5rem !important;
                 height: calc(100vh - #{$navbar-height * 2});
                 overflow: hidden auto;
-                padding-right: $media-margin !important;
+                border-right: 1px solid rgba($border, 0.5);
 
                 .media.is-email-preview {
+                    padding-right: $media-margin;
+
                     &:first-child {
                         margin-top: $media-margin;
                     }
@@ -79,9 +81,13 @@ html {
 
 .media {
     &.is-email-preview {
+        cursor: pointer;
+        margin-top: 0;
+        padding-bottom: $media-margin;
+
         .media-left {
             margin-left: $media-margin;
-            margin-top: auto;
+            margin-top: .5rem;
         }
     }
 }
@@ -100,5 +106,12 @@ html {
         background-color: $white-ter;
 
         height: $navbar-height;
+    }
+}
+
+.email-view {
+    .is-header {
+        padding: 1rem;
+        border-bottom: 1px solid rgba($border, 0.5);
     }
 }

@@ -29,6 +29,7 @@ type Email =
         IsStared : bool
         IsTrashed : bool
         Tags : string []
+        // Ancestor : Guid
     }
 
 type DatabaseData =

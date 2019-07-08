@@ -11,6 +11,7 @@ type Model =
     {
         Emails : Email list
         IsLoading : bool
+        ActiveEmail : Email option
     }
 
 [<RequireQualifiedAccess>]
@@ -20,6 +21,7 @@ type FetchEmailListResult =
 
 type Msg =
     | FetchEmailListResult of FetchEmailListResult
+    | Open of Email
 
 let private fetchInboxEmails () =
     promise {
@@ -38,6 +40,7 @@ let init () =
     {
         Emails = []
         IsLoading = true
+        ActiveEmail = None
     }
     , Cmd.OfPromise.either fetchInboxEmails () FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
 
@@ -59,7 +62,14 @@ let update (msg : Msg) (model : Model) =
             }
             , Cmd.none
 
-let private renderEmail (email : Email) =
+    | Open email ->
+        { model with
+            ActiveEmail = Some email
+        }
+        , Cmd.none
+
+
+let private renderEmail (dispatch : Dispatch<Msg>) (email : Email) =
     let formatDate =
         Date.Format.localFormat Date.Local.englishUK "dd MMM yyyy"
 
@@ -68,11 +78,20 @@ let private renderEmail (email : Email) =
         |> String.concat ", "
         |> str
 
-    Media.media [ Media.CustomClass "is-email-preview" ]
-        [ Media.left [ ]
-            [ Checkbox.checkbox [ ]
-                [ Checkbox.input [ ]
+    Media.media
+        [
+            Media.CustomClass "is-email-preview"
+            Media.Props
+                [
+                    OnClick (fun _ ->
+                        Open email
+                        |> dispatch
+                    )
                 ]
+        ]
+        [ Media.left [ ]
+            [ Checkradio.checkbox [ Checkradio.Id (email.Guid.ToString()) ]
+                [ ]
             ]
           Media.content [ ]
             [ div [ ]
@@ -130,11 +149,37 @@ let menubar =
             ]
         ]
 
+let private renderActiveEmail (email : Email) =
+    div [ Class "email-view" ]
+        [
+            Level.level [ Level.Level.CustomClass "is-header" ]
+                [
+                    Level.left [ ]
+                        [
+                            Level.item [ ]
+                                [ Heading.h4 [ ]
+                                    [ str email.Subject ]
+                                ]
+                        ]
+                    Level.right [ ]
+                        [ Icon.icon [ ]
+                            [
+                                Fa.i
+                                    [
+                                        Fa.Regular.Star
+                                        Fa.Size Fa.FaLarge
+                                    ]
+                                    [ ]
+                            ]
+                        ]
+                ]
+        ]
+
 let view (model : Model) (dispatch : Dispatch<Msg>) =
     let emails =
         [ for i = 0 to 20 do
             yield! model.Emails
-                    |> List.map renderEmail
+                    |> List.map (renderEmail dispatch)
         ]
 
     div [ ]
@@ -150,7 +195,10 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                 // )
                 emails
               Column.column [ ]
-                [ str (string model.IsLoading)
+                [
+                    model.ActiveEmail
+                    |> Option.map renderActiveEmail
+                    |> Option.defaultValue nothing
                 ]
             ]
         ]
