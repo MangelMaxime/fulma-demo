@@ -20,16 +20,16 @@ type EmailType =
 type Email =
     {
         Guid : Guid
-        From : string []
+        From : string
         To : string []
-        ReceivedAt : DateTime
+        Date : DateTime
         Subject : string
         Body : string
         Type : EmailType
         IsStared : bool
         IsTrashed : bool
         Tags : string []
-        // Ancestor : Guid
+        Ancestor : Guid option
     }
 
 type DatabaseData =
@@ -125,17 +125,95 @@ type Database =
                         [|
                             {
                                 Guid = Guid.NewGuid()
-                                From = [| "emilie@mail.com" |]
+                                From = "emilie@mail.com"
                                 To = [| "mangel.maxime@fulma.com" |]
                                 Subject = "Fable - Newsletter #1"
-                                ReceivedAt = DateTime(2018, 11, 7, 9, 45, 33, DateTimeKind.Utc)
+                                Date = DateTime(2018, 11, 7, 9, 45, 33, DateTimeKind.Utc)
                                 Body =
                                     """
+Hello Kitty,
+
+the main component used for creating the list of answer on [this page](https://mangelmaxime.github.io/fulma-demo/#question/0) is the media object.
+
+Here are some useful ressources:
+
+- [Fulma documentation](https://fulma.github.io/Fulma/#fulma/components/media)
+- [Official Bulma documentation](https://fulma.github.io/Fulma/#fulma/components/media)
+- [A great article on how it helps drasticaly reduce the number of lines](http://www.stubbornella.org/content/2010/06/25/the-media-object-saves-hundreds-of-lines-of-code)
+
+Maxime
+                                    """
+                                Type = EmailType.Received
+                                IsStared = false
+                                IsTrashed = false
+                                Tags = [| |]
+                                Ancestor = None
+                            }
+                            {
+                                Guid = Guid.Parse("3c11ef7f-8ace-430d-a880-aad798c11367")
+                                From = "kitty@mail.com"
+                                To = [| "mangel.maxime@fulma.com" |]
+                                Subject = "Where can I found the documentation of Fulma?"
+                                Date = DateTime(2019, 1, 10, 9, 45, 33, DateTimeKind.Utc)
+                                Body =
+                                    """
+Hello Maxime,
+
+I just found the [Fulma demo](https://mangelmaxime.github.io/fulma-demo/) application and would like to know which components has been used to create the list of answers.
+
+Can you please point me in the right direction?
+
+Kitty
+                                    """
+                                Type = EmailType.Received
+                                IsStared = false
+                                IsTrashed = false
+                                Tags = [| |]
+                                Ancestor = None
+                            }
+                            {
+                                Guid = Guid.Parse("30182082-9be1-4da0-834e-bef3d8234ee8")
+                                From = "mangel.maxime@fulma.com"
+                                To = [| "kitty@mail.com" |]
+                                Subject = "Re: Where can I found the documentation of Fulma?"
+                                Date = DateTime(2019, 1, 10, 10, 45, 33, DateTimeKind.Utc)
+                                Body =
+                                    """
+Hello Kitty,
+
+the main component used for creating the list of answer on [this page](https://mangelmaxime.github.io/fulma-demo/#question/0) is the media object.
+
+Here are some useful ressources:
+
+- [Fulma documentation](https://fulma.github.io/Fulma/#fulma/components/media)
+- [Official Bulma documentation](https://fulma.github.io/Fulma/#fulma/components/media)
+- [A great article on how it helps drasticaly reduce the number of lines](http://www.stubbornella.org/content/2010/06/25/the-media-object-saves-hundreds-of-lines-of-code)
+
+Maxime
                                     """
                                 Type = EmailType.Sent
                                 IsStared = false
                                 IsTrashed = false
                                 Tags = [| |]
+                                Ancestor = Some (Guid.Parse("3c11ef7f-8ace-430d-a880-aad798c11367"))
+                            }
+                            {
+                                Guid = Guid.Parse("93d94890-b7bc-4f50-ad8d-67def5fc1d82")
+                                From = "mangel.maxime@fulma.com"
+                                To = [| "kitty@mail.com" |]
+                                Subject = "Re: Re: Where can I found the documentation of Fulma?"
+                                Date = DateTime(2019, 1, 10, 10, 45, 33, DateTimeKind.Utc)
+                                Body =
+                                    """
+Awesome,
+
+thank you.
+                                    """
+                                Type = EmailType.Received
+                                IsStared = false
+                                IsTrashed = false
+                                Tags = [| |]
+                                Ancestor = Some (Guid.Parse("30182082-9be1-4da0-834e-bef3d8234ee8"))
                             }
                         |]
                 }

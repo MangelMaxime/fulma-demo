@@ -25,11 +25,16 @@ html {
                     padding-right: $media-margin;
 
                     &:first-child {
-                        margin-top: $media-margin;
+                        padding-top: $media-margin;
                     }
 
                     &:last-child {
-                        margin-bottom: $media-margin;
+                        padding-bottom: $media-margin;
+                    }
+
+                    &.is-opened {
+                        $color-lightning: max((100% - lightness($primary)) - 5%, 0%);
+                        background-color: lighten($primary, $color-lightning);
                     }
 
                     .media-left {
@@ -113,5 +118,8 @@ html {
     .is-header {
         padding: 1rem;
         border-bottom: 1px solid rgba($border, 0.5);
+        margin-bottom: 1rem;
     }
 }
+
+@import './email-media.scss';

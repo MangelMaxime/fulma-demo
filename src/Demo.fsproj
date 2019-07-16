@@ -5,12 +5,15 @@
   <ItemGroup>
     <Compile Include="Bindings/Showdown.fs" />
     <Compile Include="Bindings/Lowdb.fs" />
+    <Compile Include="Global/Helpers.fs" />
     <Compile Include="Global/Render.fs" />
     <Compile Include="Global/Logger.fs" />
     <Compile Include="Global/Router.fs" />
     <Compile Include="Global/Database.fs" />
     <Compile Include="Components/ThemeChanger.fs" />
     <Compile Include="Views/Navbar.fs" />
+    <Compile Include="Pages/Inbox.EmailView.EmailMedia.fs" />
+    <Compile Include="Pages/Inbox.EmailView.fs" />
     <Compile Include="Pages/Inbox.fs" />
     <Compile Include="Pages/Mailbox.fs" />
     <Compile Include="App.fs" />

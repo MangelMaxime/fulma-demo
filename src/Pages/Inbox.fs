@@ -11,7 +11,7 @@ type Model =
     {
         Emails : Email list
         IsLoading : bool
-        ActiveEmail : Email option
+        EmailView : Inbox.EmailView.Model option
     }
 
 [<RequireQualifiedAccess>]
@@ -22,6 +22,7 @@ type FetchEmailListResult =
 type Msg =
     | FetchEmailListResult of FetchEmailListResult
     | Open of Email
+    | EmailViewMsg of Inbox.EmailView.Msg
 
 let private fetchInboxEmails () =
     promise {
@@ -29,7 +30,8 @@ let private fetchInboxEmails () =
 
         return
             Database.Emails
-                .sortBy("ReceivedAt")
+                .sortBy("Date")
+                .filter({| Ancestor = None |})
                 .value()
             |> unbox<Email []>
             |> Array.toList
@@ -40,7 +42,7 @@ let init () =
     {
         Emails = []
         IsLoading = true
-        ActiveEmail = None
+        EmailView = None
     }
     , Cmd.OfPromise.either fetchInboxEmails () FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
 
@@ -63,20 +65,29 @@ let update (msg : Msg) (model : Model) =
             , Cmd.none
 
     | Open email ->
+        let (emailViewModel, emailViewCmd) = Inbox.EmailView.init email
+
         { model with
-            ActiveEmail = Some email
+            EmailView = Some emailViewModel
         }
-        , Cmd.none
+        , Cmd.map EmailViewMsg emailViewCmd
+
+    | EmailViewMsg emailViewMsg ->
+        match model.EmailView with
+        | Some emailViewModel ->
+            let (emailViewModel, emailViewCmd) = Inbox.EmailView.update emailViewMsg emailViewModel
+            { model with
+                EmailView = Some emailViewModel
+            }
+            , Cmd.map EmailViewMsg emailViewCmd
+
+        | None ->
+            model, Cmd.none
 
 
 let private renderEmail (dispatch : Dispatch<Msg>) (email : Email) =
     let formatDate =
         Date.Format.localFormat Date.Local.englishUK "dd MMM yyyy"
-
-    let senders =
-        email.From
-        |> String.concat ", "
-        |> str
 
     Media.media
         [
@@ -105,11 +116,11 @@ let private renderEmail (dispatch : Dispatch<Msg>) (email : Email) =
                             Modifier.TextSize (Screen.All, TextSize.Is7)
                         ]
                  ]
-                [ senders ]
+                [ str email.From ]
             ]
           Media.right [ ]
             [
-                email.ReceivedAt
+                email.Date
                 |> formatDate
                 |> str
             ]
@@ -194,10 +205,12 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                 //     |> List.map renderEmail
                 // )
                 emails
-              Column.column [ ]
+              Column.column [ Column.Width (Screen.All, Column.Is7) ]
                 [
-                    model.ActiveEmail
-                    |> Option.map renderActiveEmail
+                    model.EmailView
+                    |> Option.map (fun emailViewModel ->
+                        Inbox.EmailView.view emailViewModel (EmailViewMsg >> dispatch)
+                    )
                     |> Option.defaultValue nothing
                 ]
             ]

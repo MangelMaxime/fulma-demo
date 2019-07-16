@@ -10,9 +10,10 @@ let hot = HMR.``module``.hot
 [<Emit("new MutationObserver($0)")>]
 let newMutationObserver (callback : obj list -> obj -> unit) : obj = jsNative
 
-type ThemeChangerProps = {
-    Theme : string
-}
+type ThemeChangerProps =
+    {
+        Theme : string
+    }
 
 type ThemeChanger(initProps) =
     inherit Component<ThemeChangerProps, obj>(initProps)
@@ -35,10 +36,11 @@ type ThemeChanger(initProps) =
             for mutation in mutationList do
                 if mutation?``type`` = "childList" then
                     let nodes =
-                        [ for node in mutation?addedNodes do
-                            yield node :> Types.Node
-                        ; for node in mutation?removedNodes do
-                            yield node :> Types.Node
+                        [
+                            for node in mutation?addedNodes do
+                                yield node :> Types.Node
+                            for node in mutation?removedNodes do
+                                yield node :> Types.Node
                         ]
 
                     let shouldUpdateStyle =
