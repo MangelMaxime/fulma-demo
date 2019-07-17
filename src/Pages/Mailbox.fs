@@ -61,6 +61,7 @@ let private sideMenu =
         [ Menu.list [ ]
             [ item "Inbox" Fa.Solid.Inbox true
               item "Sent" Fa.Regular.Envelope false
+              item "Archive" Fa.Solid.Archive false
               item "Stared" Fa.Solid.Star false
               item "Trash" Fa.Regular.TrashAlt false
             ]

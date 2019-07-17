@@ -67,17 +67,18 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
 
             div [ Class "email-media-preview" ]
                 [
-                    div [ Class "email-media-preview-sender" ]
-                        [ str model.Email.From ]
-                    div [ Class "prepare-truncate" ]
+                    div [ Class "email-media-preview-summary" ]
                         [
-                            div [ Class "email-media-preview-body" ]
-                                [ str model.Email.Body ]
+                            div [ Class "email-media-preview-sender" ]
+                                [ str model.Email.From ]
+                            div [ Class "prepare-truncate" ]
+                                [
+                                    div [ Class "email-media-preview-body" ]
+                                        [ str model.Email.Body ]
+                                ]
                         ]
-                ]
 
-            div [ Class "email-media-date" ]
-                [
-                    str (formatDate model.Email.Date)
+                    div [ Class "email-media-preview-date" ]
+                        [ str (formatDate model.Email.Date) ]
                 ]
         ]
