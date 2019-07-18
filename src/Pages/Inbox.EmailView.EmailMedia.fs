@@ -19,8 +19,7 @@ type FetchEmailHistoryResult =
     | Errored of exn
 
 type Msg =
-    | Expand
-    | Collaspe
+    | ToggleState
 
 let init (email : Email) =
     {
@@ -31,24 +30,59 @@ let init (email : Email) =
 
 let update (msg : Msg) (model : Model) =
     match msg with
-    | Expand ->
+    | ToggleState ->
         { model with
-            IsExpanded = true
+            IsExpanded = not model.IsExpanded
         }
         , Cmd.none
 
-    | Collaspe ->
-        { model with
-            IsExpanded = false
-        }
-        , Cmd.none
+let formatDate =
+    Date.Format.localFormat Date.Local.englishUK "ddd dd/MM/yyyy hh:mm"
 
+let converter = Showdown.Globals.Converter.Create()
+
+let private emailMediaContent (model : Model) (dispatch : Dispatch<Msg>) =
+    let recipients =
+        model.Email.To
+        |> String.concat ","
+
+    div [ Class "email-media-content" ]
+        [
+            div [ Class "email-media-content-header" ]
+                [
+                    div [ Class "email-media-sender" ]
+                        [ str model.Email.From ]
+
+                    div [ Class "email-media-date" ]
+                        [ str (formatDate model.Email.Date) ]
+
+                    div [ Class "email-media-date" ]
+                        [ str recipients ]
+                ]
+
+            div [ Class "email-medial-body" ]
+                [
+                    Content.content [ ]
+                        [
+                            div [ DangerouslySetInnerHTML { __html = converter.makeHtml model.Email.Body } ]
+                                [ ]
+                        ]
+                ]
+        ]
 
 let view (model : Model) (dispatch : Dispatch<Msg>) =
-    let formatDate =
-        Date.Format.localFormat Date.Local.englishUK "ddd dd/MM/yyyy hh:mm"
-
-    div [ Class "email-media" ]
+    div
+        [
+            classBaseList
+                "email-media"
+                [
+                    "is-expanded", model.IsExpanded
+                    "is-collapsed", not model.IsExpanded
+                ]
+            OnClick (fun ev ->
+                dispatch ToggleState
+            )
+        ]
         [
             div [ Class "email-media-avatar" ]
                 [
@@ -69,7 +103,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                 [
                     div [ Class "email-media-preview-summary" ]
                         [
-                            div [ Class "email-media-preview-sender" ]
+                            div [ Class "email-media-sender" ]
                                 [ str model.Email.From ]
                             div [ Class "prepare-truncate" ]
                                 [
@@ -78,7 +112,10 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                                 ]
                         ]
 
-                    div [ Class "email-media-preview-date" ]
+                    div [ Class "email-media-date" ]
                         [ str (formatDate model.Email.Date) ]
                 ]
+
+            emailMediaContent model dispatch
+
         ]

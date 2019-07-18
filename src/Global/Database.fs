@@ -199,8 +199,8 @@ Maxime
                             }
                             {
                                 Guid = Guid.Parse("93d94890-b7bc-4f50-ad8d-67def5fc1d82")
-                                From = "mangel.maxime@fulma.com"
-                                To = [| "kitty@mail.com" |]
+                                From = "kitty@mail.com"
+                                To = [| "mangel.maxime@fulma.com" |]
                                 Subject = "Re: Re: Where can I found the documentation of Fulma?"
                                 Date = DateTime(2019, 1, 10, 10, 45, 33, DateTimeKind.Utc)
                                 Body =
