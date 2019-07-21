@@ -84,6 +84,40 @@
 
         .email-media-content-header {
             padding-bottom: 1rem;
+
+            .email-media-content-header-summary {
+                display: flex;
+                align-items: stretch;
+
+                .email-media-content-header-summary-left,
+                .email-media-content-header-summary-right {
+                    flex-grow: 1;
+                    flex-shrink: 1;
+                    flex-basis: auto;
+                }
+
+                .email-media-content-header-summary-right {
+                    display: flex;
+                    justify-content: end;
+
+                    .dropdown {
+                        margin-left: .5rem;
+                    }
+
+                    .buttons {
+                        // Fix display of the last groups of buttons
+                        &:last-child {
+                            margin-bottom: 1rem;
+                        }
+
+                        margin-left: .5rem;
+                    }
+                }
+            }
+
+            .email-media-content-header-actions {
+
+            }
         }
     }
 

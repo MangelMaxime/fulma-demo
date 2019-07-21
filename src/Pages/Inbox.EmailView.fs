@@ -26,7 +26,7 @@ type Msg =
 
 let private fetchEmailHistory (email : Email) =
     promise {
-        do! Promise.sleep 750
+        do! Promise.sleep 400
 
         // It's working but that's not really pretty code ¯\_(ツ)_/¯
 
@@ -67,27 +67,22 @@ let update (msg : Msg) (model : Model) =
     | FetchEmailHistoryResult result ->
         match result with
         | FetchEmailHistoryResult.Success history ->
-            let builder =
-                [
-                    for email in history do
-                        let (emailMediaModel, emailMediaCmd) = EmailView.EmailMedia.init email
-                        yield (email.Guid, emailMediaModel), Cmd.mapWithGuid EmailMediaMsg email.Guid emailMediaCmd
-                ]
+            let history, cmds =
+                history
+                |> List.map (fun email ->
+                    let (emailMediaModel, emailMediaCmd) = EmailView.EmailMedia.init email
+                    (email.Guid, emailMediaModel), Cmd.mapWithGuid EmailMediaMsg email.Guid emailMediaCmd
+                )
+                |> List.fold (fun (models, cmds) modelAndCmd ->
+                    fst modelAndCmd :: models, snd modelAndCmd :: cmds
+                ) ([], [])
 
-            let history =
-                builder
-                |> List.map fst
-                |> Map.ofList
-
-            let cmds =
-                builder
-                |> List.map snd
-                |> Cmd.batch
 
             { model with
-                History = history
+                IsLoading = false
+                History = Map.ofList history
             }
-            , cmds
+            , Cmd.batch cmds
 
         | FetchEmailHistoryResult.Errored error ->
             Logger.errorfn "Failed to retrieved the email history.\n%s" error.Message
@@ -118,17 +113,17 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                                     [ str model.Email.Subject ]
                                 ]
                         ]
-                    Level.right [ ]
-                        [ Icon.icon [ ]
-                            [
-                                Fa.i
-                                    [
-                                        Fa.Regular.Star
-                                        Fa.Size Fa.FaLarge
-                                    ]
-                                    [ ]
-                            ]
-                        ]
+                    // Level.right [ ]
+                    //     [ Icon.icon [ ]
+                    //         [
+                    //             Fa.i
+                    //                 [
+                    //                     Fa.Regular.Star
+                    //                     Fa.Size Fa.FaLarge
+                    //                 ]
+                    //                 [ ]
+                    //         ]
+                    //     ]
                 ]
             Map.toList model.History
             |> List.sortBy (fun (guid, emailMediaModel) ->

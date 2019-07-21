@@ -41,6 +41,38 @@ let formatDate =
 
 let converter = Showdown.Globals.Converter.Create()
 
+
+let buttonIcon icon =
+    Button.button [ ]
+        [ Icon.icon [ ]
+            [ Fa.i [ icon ]
+                [ ]
+            ]
+        ]
+
+let dropdownAction icon =
+    Dropdown.dropdown
+        [
+            Dropdown.Props
+                [
+                    OnClick (fun ev ->
+                        ev.stopPropagation()
+                    )
+                ]
+        ]
+        [
+            div [ ]
+                [ Button.button [ ]
+                    [ Icon.icon [ ]
+                        [ Fa.i [ icon ]
+                            [ ] ]
+                      Icon.icon [ Icon.Size IsSmall ]
+                        [ Fa.i [ Fa.Solid.AngleDown ]
+                            [ ] ] ] ]
+            Dropdown.menu [ ]
+                [ ]
+        ]
+
 let private emailMediaContent (model : Model) (dispatch : Dispatch<Msg>) =
     let recipients =
         model.Email.To
@@ -50,13 +82,32 @@ let private emailMediaContent (model : Model) (dispatch : Dispatch<Msg>) =
         [
             div [ Class "email-media-content-header" ]
                 [
-                    div [ Class "email-media-sender" ]
-                        [ str model.Email.From ]
+                    div [ Class "email-media-content-header-summary" ]
+                        [
+                            div [ Class "email-media-content-header-summary-left" ]
+                                [
+                                    div [ Class "email-media-sender" ]
+                                        [ str model.Email.From ]
 
-                    div [ Class "email-media-date" ]
-                        [ str (formatDate model.Email.Date) ]
+                                    div [ Class "email-media-date" ]
+                                        [ str (formatDate model.Email.Date) ]
+                                ]
 
-                    div [ Class "email-media-date" ]
+                            div [ Class "email-media-content-header-summary-right" ]
+                                [
+                                    dropdownAction Fa.Solid.Folder
+                                    dropdownAction Fa.Solid.Tag
+                                    Button.list [ Button.List.HasAddons ]
+                                        [
+                                            buttonIcon Fa.Solid.Reply
+                                            buttonIcon Fa.Solid.ReplyAll
+                                            buttonIcon Fa.Solid.Share
+                                        ]
+                                ]
+
+                        ]
+
+                    div [ Class "email-media-recipients" ]
                         [ str recipients ]
                 ]
 
