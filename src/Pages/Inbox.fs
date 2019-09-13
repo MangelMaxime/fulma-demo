@@ -6,10 +6,12 @@ open Fable.React
 open Fable.React.Props
 open Fable.FontAwesome
 open Elmish
+open System
+open Helpers
 
 type Model =
     {
-        Emails : Email list
+        Emails : Map<Guid, Inbox.EmailMeta.Model>
         IsLoading : bool
         EmailView : Inbox.EmailView.Model option
     }
@@ -23,24 +25,34 @@ type Msg =
     | FetchEmailListResult of FetchEmailListResult
     | Open of Email
     | EmailViewMsg of Inbox.EmailView.Msg
+    | EmailMetaMsg of Guid * Inbox.EmailMeta.Msg
+
+open Fable.Core.JsInterop
 
 let private fetchInboxEmails () =
     promise {
         do! Promise.sleep 500
 
-        return
+        let emails =
             Database.Emails
-                .sortBy("Date")
+                // Temporary dynamic typing
+                // Will be removed when updating the binding
+                .orderBy("Date", Lowdb.Desc)
                 .filter({| Ancestor = None |})
                 .value()
             |> unbox<Email []>
             |> Array.toList
+
+        return
+            // Temporary limitation in order to limit the number of mails to render at one time on the screen
+            // This improves the responsiveness
+            emails.[..10]
             |> FetchEmailListResult.Success
     }
 
 let init () =
     {
-        Emails = []
+        Emails = Map.empty
         IsLoading = true
         EmailView = None
     }
@@ -51,6 +63,13 @@ let update (msg : Msg) (model : Model) =
     | FetchEmailListResult result ->
         match result with
         | FetchEmailListResult.Success emails ->
+            let emails =
+                emails
+                |> List.map (fun email ->
+                    email.Guid, Inbox.EmailMeta.init email
+                )
+                |> Map.ofList
+
             { model with
                 Emails = emails
                 IsLoading = false
@@ -84,48 +103,19 @@ let update (msg : Msg) (model : Model) =
         | None ->
             model, Cmd.none
 
+    | EmailMetaMsg (refGuid, emailMetaMsg) ->
+        match Map.tryFind refGuid model.Emails with
+        | Some emailMetaModel ->
+            let (emailMetaModel, emailMetaCmd) = Inbox.EmailMeta.update emailMetaMsg emailMetaModel
 
-let private renderEmail (dispatch : Dispatch<Msg>) (email : Email) =
-    let formatDate =
-        Date.Format.localFormat Date.Local.englishUK "dd MMM yyyy"
+            { model with
+                Emails =
+                    Map.add refGuid emailMetaModel model.Emails
+            }
+            , Cmd.map EmailMetaMsg emailMetaCmd
 
-    Media.media
-        [
-            Media.CustomClass "is-email-preview"
-            Media.Props
-                [
-                    OnClick (fun _ ->
-                        Open email
-                        |> dispatch
-                    )
-                ]
-        ]
-        [ Media.left [ ]
-            [ Checkradio.checkbox [ Checkradio.Id (email.Guid.ToString()) ]
-                [ ]
-            ]
-          Media.content [ ]
-            [ div [ ]
-                [ str email.Subject ]
-              Text.div
-                [
-                     Modifiers
-                        [
-                            Modifier.TextWeight TextWeight.Bold
-                            Modifier.TextColor IsGreyDark
-                            Modifier.TextSize (Screen.All, TextSize.Is7)
-                        ]
-                 ]
-                [ str email.From ]
-            ]
-          Media.right [ ]
-            [
-                email.Date
-                |> formatDate
-                |> str
-            ]
-        ]
-
+        | None ->
+            model, Cmd.none
 
 let buttonIcon icon =
     Button.button [ ]
@@ -187,31 +177,38 @@ let private renderActiveEmail (email : Email) =
         ]
 
 let view (model : Model) (dispatch : Dispatch<Msg>) =
-    let emails =
-        [ for i = 0 to 20 do
-            yield! model.Emails
-                    |> List.map (renderEmail dispatch)
-        ]
+    let emailMetaDispatch (guid : Guid) =
+        Curry.apply EmailMetaMsg guid >> dispatch
+
+    let emailList =
+        model.Emails
+        |> Seq.sortByDescending (fun keyValue ->
+            keyValue.Value.SortableKey
+        )
+        |> Seq.map (fun keyValue ->
+            Inbox.EmailMeta.view  keyValue.Value (emailMetaDispatch keyValue.Key)
+        )
+        |> Seq.toList
 
     div [ ]
-        [ menubar
-          Columns.columns [ Columns.IsGapless ]
-            [ Column.column
-                [ Column.CustomClass "is-email-list"
-                  Column.Width (Screen.All, Column.Is5)
-                ]
-                // (
-                //     model.Emails
-                //     |> List.map renderEmail
-                // )
-                emails
-              Column.column [ Column.Width (Screen.All, Column.Is7) ]
+        [
+            menubar
+            Columns.columns [ Columns.IsGapless ]
                 [
-                    model.EmailView
-                    |> Option.map (fun emailViewModel ->
-                        Inbox.EmailView.view emailViewModel (EmailViewMsg >> dispatch)
-                    )
-                    |> Option.defaultValue nothing
+                    Column.column
+                        [
+                            Column.CustomClass "is-email-list"
+                            Column.Width (Screen.All, Column.Is5)
+                        ]
+                        emailList
+
+                    Column.column [ Column.Width (Screen.All, Column.Is7) ]
+                        [
+                            model.EmailView
+                            |> Option.map (fun emailViewModel ->
+                                Inbox.EmailView.view emailViewModel (EmailViewMsg >> dispatch)
+                            )
+                            |> Option.defaultValue nothing
+                        ]
                 ]
-            ]
         ]

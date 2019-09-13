@@ -6,6 +6,7 @@ open Fable.FontAwesome
 open Fable.React
 open Fable.React.Props
 open System
+open Helpers
 
 type Model =
     {

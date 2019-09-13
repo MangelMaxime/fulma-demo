@@ -133,6 +133,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
             OnClick (fun ev ->
                 dispatch ToggleState
             )
+            Key (model.Email.Guid.ToString())
         ]
         [
             div [ Class "email-media-avatar" ]

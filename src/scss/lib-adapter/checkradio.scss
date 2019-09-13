@@ -1,0 +1,48 @@
+//  .is-checkradio[type="checkbox"] + label::after {
+//     border-width: 0.15rem;
+// }
+
+// .is-checkradio[type="checkbox"]:not(:checked).has-background-color + label::before {
+//     border-color: unset !important;
+//     background-color: unset !important;
+// }
+
+.is-checkradio[type="checkbox"] {
+    @each $name, $pair in $colors {
+        $color: nth($pair, 1);
+        $color-invert: nth($pair, 2);
+
+        &.is-#{$name} {
+            color: $color;
+            border-color: $color;
+
+            &.is-outlined {
+                + label {
+                    &::before,
+                    &:before {
+                        // border-color: transparent !important;
+                        // background-color: $color !important;
+                    }
+                }
+            }
+
+            &:checked {
+                &.is-outlined {
+                    + label {
+                        &::before,
+                        &:before {
+                            border-color: transparent !important;
+                            background-color: $color !important;
+                        }
+
+                        &::after,
+                        &:after {
+                            border-color: $color-invert !important;
+                            background-color: $color !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -7,6 +7,7 @@ open Fable.React.Props
 open Fable.FontAwesome
 open Elmish
 open System
+open Helpers
 
 type Model =
     {
@@ -101,7 +102,47 @@ let update (msg : Msg) (model : Model) =
             model, Cmd.none
 
 
+let private renderLoadingView =
+    Text.div
+        [
+            Modifiers
+                [
+                    Modifier.TextAlignment (Screen.All, TextAlignment.Centered)
+                ]
+        ]
+        [
+            Icon.icon
+                [
+                    Icon.Size IsLarge
+                    Icon.Modifiers [ Modifier.TextColor IsGrey ]
+                ]
+                [
+                    Fa.i
+                        [
+                            Fa.Solid.Spinner
+                            Fa.Spin
+                            Fa.Size Fa.Fa2x
+                        ]
+                        [ ]
+                ]
+        ]
+
 let view (model : Model) (dispatch : Dispatch<Msg>) =
+    let content =
+        if model.IsLoading then
+            renderLoadingView
+        else
+            Map.toList model.History
+            |> List.sortBy (fun (guid, emailMediaModel) ->
+                emailMediaModel.Email.Date
+            )
+            |> List.map (fun (guid, emailMediaModel) ->
+                let dispatch =
+                    (fun msg -> dispatch (EmailMediaMsg (guid, msg)) )
+                EmailView.EmailMedia.view emailMediaModel dispatch
+            )
+            |> ofList
+
     div [ Class "email-view" ]
         [
             Level.level [ Level.Level.CustomClass "is-header" ]
@@ -125,14 +166,5 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                     //         ]
                     //     ]
                 ]
-            Map.toList model.History
-            |> List.sortBy (fun (guid, emailMediaModel) ->
-                emailMediaModel.Email.Date
-            )
-            |> List.map (fun (guid, emailMediaModel) ->
-                let dispatch =
-                    (fun msg -> dispatch (EmailMediaMsg (guid, msg)) )
-                EmailView.EmailMedia.view emailMediaModel dispatch
-            )
-            |> ofList
+            content
         ]

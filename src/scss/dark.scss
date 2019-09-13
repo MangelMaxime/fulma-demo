@@ -1,5 +1,10 @@
 @import './prelude.scss';
 
+// Configure initial variables here
 $primary: black;
+
+@import "~bulma/sass/utilities/derived-variables.sass";
+
+// Configure derived variables here
 
 @import './layout.scss';

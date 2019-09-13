@@ -1,2 +1,16 @@
 @import './prelude.scss';
+
+// Configure initial variables here
+// https://flatuicolors.com/palette/defo
+$primary: #9b59b6;
+$danger: #e74c3c;
+$warning: #e67e22;
+$info: #2980b9;
+$success: #27ae60;
+$text: #2c3e50;
+
+@import "~bulma/sass/utilities/derived-variables.sass";
+
+// Configure derived variables here
+
 @import './layout.scss';

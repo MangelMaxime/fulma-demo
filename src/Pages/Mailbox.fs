@@ -9,7 +9,6 @@ open Fable.React.Props
 [<RequireQualifiedAccess>]
 type Page =
     | Inbox of Mailbox.Inbox.Model
-    | Sent
 
 type Model =
     {
@@ -42,9 +41,6 @@ let update (msg  : Msg) (model : Model) =
             }
             , Cmd.map InboxMsg inboxCmd
 
-        | _ ->
-            model, Cmd.none
-
 
 let private item txt icon isActive =
     Menu.Item.li [ Menu.Item.IsActive isActive ]
@@ -55,16 +51,58 @@ let private item txt icon isActive =
           str txt
         ]
 
+let private renderFolderItem (txt : string) (color : string) =
+    Menu.Item.li [ ]
+        [
+            Icon.icon [ Icon.Props [ Style [ Color color ] ] ]
+                [
+                    Fa.i [ Fa.Solid.Folder ]
+                        [ ]
+                ]
+            str txt
+        ]
+
+let private renderTagItem (txt : string) (color : string) =
+    Menu.Item.li [ ]
+        [
+            Icon.icon [ Icon.Props [ Style [ Color color ] ] ]
+                [
+                    Fa.i [ Fa.Solid.Tag ]
+                        [ ]
+                ]
+            str txt
+        ]
 
 let private sideMenu =
     Menu.menu [ CustomClass "sidebar-main" ]
-        [ Menu.list [ ]
-            [ item "Inbox" Fa.Solid.Inbox true
-              item "Sent" Fa.Regular.Envelope false
-              item "Archive" Fa.Solid.Archive false
-              item "Stared" Fa.Solid.Star false
-              item "Trash" Fa.Regular.TrashAlt false
-            ]
+        [
+            Menu.list [ ]
+                [ item "Inbox" Fa.Solid.Inbox true
+                  item "Sent" Fa.Regular.Envelope false
+                  item "Archive" Fa.Solid.Archive false
+                  item "Stared" Fa.Solid.Star false
+                  item "Trash" Fa.Regular.TrashAlt false
+                ]
+
+            Menu.label [ ]
+                [
+                    str "Folders"
+                ]
+            Menu.list [ ]
+                [
+                    renderFolderItem "Bills" "#e6984c"
+                    renderFolderItem "OSS" "#c793ca"
+                ]
+
+            Menu.label [ ]
+                [
+                    str "Tags"
+                ]
+            Menu.list [ ]
+                [
+                    renderTagItem "Github" "#c793ca"
+                    renderTagItem "Gitlab" "#c793ca"
+                ]
         ]
 
 

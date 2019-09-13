@@ -5,6 +5,7 @@
   <ItemGroup>
     <Compile Include="Bindings/Showdown.fs" />
     <Compile Include="Bindings/Lowdb.fs" />
+    <Compile Include="Bindings/FakerJS.fs" />
     <Compile Include="Global/Helpers.fs" />
     <Compile Include="Global/Render.fs" />
     <Compile Include="Global/Logger.fs" />
@@ -14,10 +15,13 @@
     <Compile Include="Views/Navbar.fs" />
     <Compile Include="Pages/Inbox.EmailView.EmailMedia.fs" />
     <Compile Include="Pages/Inbox.EmailView.fs" />
+    <Compile Include="Pages/Inbox.EmailMeta.fs" />
     <Compile Include="Pages/Inbox.fs" />
     <Compile Include="Pages/Composer.fs" />
     <Compile Include="Pages/Composer.Container.fs" />
     <Compile Include="Pages/Mailbox.fs" />
+    <Compile Include="Pages/Settings.Labels.fs" />
+    <Compile Include="Pages/Settings.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

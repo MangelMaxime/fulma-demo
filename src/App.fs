@@ -11,8 +11,9 @@ open Fable.Core
 
 [<RequireQualifiedAccess>]
 type Page =
-    | Mailbox of Mailbox.Model
     | Loading
+    | Mailbox of Mailbox.Model
+    | Settings of Settings.Model
 
 type Model =
     {
@@ -22,6 +23,7 @@ type Model =
 
 type Msg =
     | MailboxMsg of Mailbox.Msg
+    | SettingsMsg of Settings.Msg
 
 
 let setRoute (result: Option<Router.Route>) (model : Model) =
@@ -43,6 +45,14 @@ let setRoute (result: Option<Router.Route>) (model : Model) =
                 ActivePage = Page.Mailbox mailboxModel
             }
             , Cmd.map MailboxMsg mailboxCmd
+
+        | Router.Settings settingsRoute ->
+            let (settingsModel, settingsCmd) = Settings.init settingsRoute
+
+            { model with
+                ActivePage = Page.Settings settingsModel
+            }
+            , Cmd.map SettingsMsg settingsCmd
 
 
 let init (optRoute : Router.Route option) =
@@ -68,6 +78,20 @@ let private update (msg : Msg) (model : Model) =
                 ActivePage = Page.Mailbox mailboxModel
             }
             , Cmd.map MailboxMsg mailboxCmd
+
+        | _ ->
+            model, Cmd.none
+
+    | SettingsMsg settingsMsg ->
+        match model.ActivePage with
+        | Page.Settings settingsModel ->
+            let (settingsModel, mailboxCmd) = Settings.update settingsMsg settingsModel
+
+            { model with
+                ActivePage = Page.Settings settingsModel
+            }
+            , Cmd.map SettingsMsg mailboxCmd
+
         | _ ->
             model, Cmd.none
 
@@ -87,6 +111,18 @@ let private root (model : Model) (dispatch : Dispatch<Msg>) =
             //     [ str "Change theme" ]
               Navbar.view false ignore
               Mailbox.view mailboxModel (MailboxMsg >> dispatch) ]
+
+    | Page.Settings settingsModel ->
+        div [ ]
+            [ ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
+            //   navbarView model.IsBurgerOpen dispatch
+            //   Button.button [ Button.OnClick (fun _ ->
+            //     dispatch ToggleTheme
+            //   ) ]
+            //     [ str "Change theme" ]
+              Navbar.view false ignore
+              Settings.view settingsModel (SettingsMsg >> dispatch) ]
+
 
 open Elmish.Debug
 open Elmish.Navigation

@@ -98,7 +98,7 @@
 
                 .email-media-content-header-summary-right {
                     display: flex;
-                    justify-content: end;
+                    justify-content: flex-end;
 
                     .dropdown {
                         margin-left: .5rem;
@@ -115,9 +115,6 @@
                 }
             }
 
-            .email-media-content-header-actions {
-
-            }
         }
     }
 

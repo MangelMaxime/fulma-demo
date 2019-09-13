@@ -1,6 +1,7 @@
 @import '~bulma/bulma.sass';
 @import '~bulma-pageloader/dist/css/bulma-pageloader.sass';
 @import '~bulma-checkradio/dist/css/bulma-checkradio.sass';
+@import './lib-adapter/_all.scss';
 
 html {
     overflow: hidden
@@ -39,7 +40,7 @@ html {
 
                     .media-left {
                         .is-checkradio {
-                            margin-right: $media-margin;
+                            // margin-right: $media-margin;
                             padding: 0;
 
                             + label {
@@ -64,6 +65,10 @@ html {
 }
 
 .menu.sidebar-main {
+    .menu-label {
+        margin-left: 1rem;
+    }
+
     .menu-list {
         li > a {
             .icon {

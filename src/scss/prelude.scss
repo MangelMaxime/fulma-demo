@@ -13,3 +13,7 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
 // Bulma is hard coding this value but we use a variable
 // in our customisation code
 $media-margin: 1rem;
+
+// Checkradio
+$checkbox-checked-width: .15rem;
+$checkbox-border: .15rem solid $grey-lighter;

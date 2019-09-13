@@ -13,8 +13,14 @@ type MailboxRoute =
     | Stared
     | Trash
 
+[<RequireQualifiedAccess>]
+type SettingsRoute =
+    | Folders
+    | Labels
+
 type Route =
     | Mailbox of MailboxRoute
+    | Settings of SettingsRoute
 
 let private segment (pathA : string) (pathB : string) =
     pathA + "/" + pathB
@@ -31,8 +37,17 @@ let private toHash page =
             "stared"
         | MailboxRoute.Trash ->
             "trash"
-        |> segment "mailbox/"
-    |> segment "#/"
+        |> segment "mailbox"
+
+    | Settings settingsRoute ->
+        match settingsRoute with
+        | SettingsRoute.Folders ->
+            "folders"
+        | SettingsRoute.Labels ->
+            "labels"
+        |> segment "settings"
+
+    |> segment "#"
 
 let pageParser: Parser<Route -> Route, Route> =
     oneOf
@@ -41,6 +56,11 @@ let pageParser: Parser<Route -> Route, Route> =
             map (MailboxRoute.Sent |> Mailbox) (s "mailbox" </> s "sent")
             map (MailboxRoute.Stared |> Mailbox) (s "mailbox" </> s "stared")
             map (MailboxRoute.Trash |> Mailbox) (s "mailbox" </> s "trash")
+
+            map (SettingsRoute.Folders |> Settings) (s "settings" </> s "folders")
+            map (SettingsRoute.Labels |> Settings) (s "settings" </> s "labels")
+
+            // Default page of the application
             map (MailboxRoute.Inbox |> Mailbox) top
         ]
 
