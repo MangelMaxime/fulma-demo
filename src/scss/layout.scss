@@ -20,10 +20,11 @@ html {
                 // padding: 1.5rem !important;
                 height: calc(100vh - #{$navbar-height * 2});
                 overflow: hidden auto;
-                border-right: 1px solid rgba($border, 0.5);
+                border-right: 1px solid $border;
 
                 .media.is-email-preview {
                     padding-right: $media-margin;
+                    border-top: 1px solid $border;
 
                     &:first-child {
                         padding-top: $media-margin;
@@ -33,9 +34,62 @@ html {
                         padding-bottom: $media-margin;
                     }
 
-                    &.is-opened {
-                        $color-lightning: max((100% - lightness($primary)) - 5%, 0%);
-                        background-color: lighten($primary, $color-lightning);
+                    // border-left: 5px solid $background;
+
+                    &:hover {
+                        background-color: $grey-lighter;
+                        .is-checkradio[type="checkbox"] {
+                            &.is-outlined {
+                                + label {
+                                    &::before,
+                                    &:before {
+                                        border-color: $background;
+                                    }
+
+                                    &::after,
+                                    &:after {
+                                        border-color: $background;
+                                    }
+                                }
+
+                                &:hover:not(:checked) {
+                                    + label {
+                                        &::before,
+                                        &:before {
+                                            border-color: $background !important;
+                                        }
+
+                                        &::after,
+                                        &:after {
+                                            border-color: $background !important;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    &.is-active {
+                        $color: lighten($primary, 15%);
+                        background-color: $color;
+                        color: findColorInvert($color);
+
+                        .media-content {
+                            .email-sender {
+                                color: findColorInvert($color);
+                            }
+                        }
+                    }
+
+                    .media-content {
+                        .email-sender {
+                            font-weight: $weight-semibold;
+                            font-size: $size-7;
+                            color: $grey-dark;
+                            // Modifier.TextWeight TextWeight.Bold
+                            // Modifier.TextColor IsGreyDark
+                            // Modifier.TextSize (Screen.All, TextSize.Is7)
+                        }
                     }
 
                     .media-left {
@@ -124,6 +178,23 @@ html {
         padding: 1rem;
         border-bottom: 1px solid rgba($border, 0.5);
         margin-bottom: 1rem;
+    }
+}
+
+.checked-summary {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    flex-direction: column;
+
+    .checked-summary-item {
+        text-align: center;
+
+        &:not(:last-child) {
+            margin-bottom: 1rem;
+        }
     }
 }
 

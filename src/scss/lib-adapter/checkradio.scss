@@ -16,15 +16,15 @@
             color: $color;
             border-color: $color;
 
-            &.is-outlined {
-                + label {
-                    &::before,
-                    &:before {
-                        // border-color: transparent !important;
-                        // background-color: $color !important;
-                    }
-                }
-            }
+            // &.is-outlined {
+            //     + label {
+            //         &::before,
+            //         &:before {
+            //             // border-color: transparent !important;
+            //             // background-color: $color !important;
+            //         }
+            //     }
+            // }
 
             &:checked {
                 &.is-outlined {

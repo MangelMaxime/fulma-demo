@@ -12,6 +12,7 @@ open Helpers
 type Model =
     {
         Emails : Map<Guid, Inbox.EmailMeta.Model>
+        CheckedEmails : Set<Guid>
         IsLoading : bool
         EmailView : Inbox.EmailView.Model option
     }
@@ -24,6 +25,8 @@ type FetchEmailListResult =
 type Msg =
     | FetchEmailListResult of FetchEmailListResult
     | Open of Email
+    | ToggleCheck of Guid
+    | DeselectAll
     | EmailViewMsg of Inbox.EmailView.Msg
     | EmailMetaMsg of Guid * Inbox.EmailMeta.Msg
 
@@ -53,6 +56,7 @@ let private fetchInboxEmails () =
 let init () =
     {
         Emails = Map.empty
+        CheckedEmails = Set.empty
         IsLoading = true
         EmailView = None
     }
@@ -106,16 +110,44 @@ let update (msg : Msg) (model : Model) =
     | EmailMetaMsg (refGuid, emailMetaMsg) ->
         match Map.tryFind refGuid model.Emails with
         | Some emailMetaModel ->
-            let (emailMetaModel, emailMetaCmd) = Inbox.EmailMeta.update emailMetaMsg emailMetaModel
+            let (emailMetaModel, emailMetaCmd, externalMsg) = Inbox.EmailMeta.update emailMetaMsg emailMetaModel
+
+            let (model, extraCmd) =
+                match externalMsg with
+                | Inbox.EmailMeta.ExternalMsg.NoOp ->
+                    model
+                    , Cmd.none
+
+                | Inbox.EmailMeta.ExternalMsg.Selected selectedEmail ->
+                    { model with
+                        CheckedEmails = Set.empty
+                    }
+                    , Cmd.ofMsg (Open selectedEmail)
 
             { model with
                 Emails =
                     Map.add refGuid emailMetaModel model.Emails
             }
-            , Cmd.map EmailMetaMsg emailMetaCmd
+            , Cmd.batch
+                [
+                    Cmd.map EmailMetaMsg emailMetaCmd
+                    extraCmd
+                ]
 
         | None ->
             model, Cmd.none
+
+    | ToggleCheck guid ->
+        { model with
+            CheckedEmails = Set.toggle guid model.CheckedEmails
+        }
+        , Cmd.none
+
+    | DeselectAll ->
+        { model with
+            CheckedEmails = Set.empty
+        }
+        , Cmd.none
 
 let buttonIcon icon =
     Button.button [ ]
@@ -176,6 +208,58 @@ let private renderActiveEmail (email : Email) =
                 ]
         ]
 
+let private renderCheckedEmailsView (model : Model) (dispatch : Dispatch<Msg>) =
+    let text =
+        sprintf "%i conversations selected" (Set.count model.CheckedEmails)
+
+    let summaryItem =
+        div [ Class "checked-summary-item" ]
+
+    let actionButton =
+        if Set.count model.CheckedEmails > 0 then
+            Button.button
+                [
+                    Button.Color IsPrimary
+                    Button.OnClick (fun _ ->
+                        dispatch DeselectAll
+                    )
+                ]
+                [ str "Deselect all" ]
+        else
+            nothing
+
+    div [ Class "checked-summary" ]
+        [
+            summaryItem
+                [
+                    Icon.icon [ Icon.Size IsMedium ]
+                        [
+                            Fa.i
+                                [
+                                     Fa.Solid.CheckSquare
+                                     Fa.Size Fa.Fa2x
+                                ]
+                                [ ]
+                        ]
+                ]
+            summaryItem
+                [
+                    Text.div
+                        [
+                            Modifiers
+                                [
+                                    Modifier.TextSize (Screen.All, TextSize.Is5)
+                                    Modifier.TextColor IsGrey
+                                ]
+                        ]
+                        [ str text ]
+                ]
+            summaryItem
+                [
+                    actionButton
+                ]
+        ]
+
 let view (model : Model) (dispatch : Dispatch<Msg>) =
     let emailMetaDispatch (guid : Guid) =
         Curry.apply EmailMetaMsg guid >> dispatch
@@ -186,9 +270,29 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
             keyValue.Value.SortableKey
         )
         |> Seq.map (fun keyValue ->
-            Inbox.EmailMeta.view  keyValue.Value (emailMetaDispatch keyValue.Key)
+            Inbox.EmailMeta.view
+                {
+                    Model = keyValue.Value
+                    IsChecked = Set.contains keyValue.Key model.CheckedEmails
+                    OnCheck = ToggleCheck >> dispatch
+                    Dispatch = (emailMetaDispatch keyValue.Key)
+                }
+
         )
         |> Seq.toList
+
+    let rightColumnContent =
+        match model.EmailView with
+        | Some emailViewModel ->
+            // Only render the emailView if we have no selection
+            if Set.count model.CheckedEmails > 0 then
+                renderCheckedEmailsView model dispatch
+            else
+                Inbox.EmailView.view emailViewModel (EmailViewMsg >> dispatch)
+
+        | None ->
+            renderCheckedEmailsView model dispatch
+
 
     div [ ]
         [
@@ -204,11 +308,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
 
                     Column.column [ Column.Width (Screen.All, Column.Is7) ]
                         [
-                            model.EmailView
-                            |> Option.map (fun emailViewModel ->
-                                Inbox.EmailView.view emailViewModel (EmailViewMsg >> dispatch)
-                            )
-                            |> Option.defaultValue nothing
+                            rightColumnContent
                         ]
                 ]
         ]

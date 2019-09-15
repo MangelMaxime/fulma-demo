@@ -1,5 +1,25 @@
 module Helpers
 
+module Set =
+
+    let toggle (item : 'T) (set : Set<'T>) =
+        if Set.contains item set then
+            Set.remove item set
+        else
+            Set.add item set
+
+type Classes =
+
+    static member fromList (classes : (string * bool) list) =
+        classes
+        |> List.filter snd
+        |> List.map fst
+        |> String.concat " "
+
+    static member fromListWithBase (baseClass : string) (classes : (string * bool) list) =
+        Classes.fromList classes
+        |> (+) (baseClass + " ")
+
 module HMR =
 
     let hot = HMR.``module``.hot

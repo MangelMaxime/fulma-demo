@@ -23,14 +23,14 @@ type Model =
     member this.Key =
         this.Email.Guid
 
-[<RequireQualifiedAccess>]
-type FetchEmailListResult =
-    | Success of emails : Email list
-    | Errored of exn
+[<RequireQualifiedAccessAttribute>]
+type ExternalMsg =
+    | NoOp
+    | Selected of Email
 
 type Msg =
-    | FetchEmailListResult of FetchEmailListResult
     | Select
+    | Unselect
 
 let init (email : Email) =
     {
@@ -53,92 +53,116 @@ let update (msg : Msg) (model : Model) =
     match msg with
     | Select ->
         if model.IsSelected then
-            model, Cmd.none
+            model
+            , Cmd.none
+            , ExternalMsg.NoOp
 
         else
             { model with
                 IsSelected = true
             }
             , Cmd.OfFunc.execute notifyUnselect model.Email.Guid
+            , ExternalMsg.Selected model.Email
 
-let private viewComponent =
+    | Unselect ->
+        { model with
+            IsSelected = false
+        }
+        , Cmd.none
+        , ExternalMsg.NoOp
+
+type ViewProps =
+    {
+        Model : Model
+        IsChecked : bool
+        OnCheck : Guid -> unit
+        Dispatch : Dispatch<Msg>
+    }
+
+let view =
     let formatDate =
         Date.Format.localFormat Date.Local.englishUK "dd MMM yyyy"
 
-    FunctionComponent.Of(fun (props :
-                                {|
-                                    Model : Model
-                                    Dispatch : Dispatch<Msg>
-                                |}) ->
+    FunctionComponent.Of(fun (props : ViewProps) ->
 
         Hooks.useEffectDisposable(fun () ->
             let listener =
                 fun (ev : Browser.Types.Event) ->
                     let ev = ev :?>  Browser.Types.CustomEvent
-                    printfn "Unselect all example: %A" ev.detail
+                    let caller = ev.detail |> unbox<Guid>
 
-            printfn "register effect"
+                    if props.Model.IsSelected && props.Model.Key <> caller then
+                        props.Dispatch Unselect
+
             window.addEventListener("inbox-email-meta-force-unselect", listener)
 
             { new System.IDisposable with
                 member __.Dispose() =
-                    printfn "Disposing"
                     window.removeEventListener("inbox-email-meta-force-unselect", listener)
             }
-        , [||])
+        , [| props.Model.IsSelected |])
 
-        printfn "Maxime"
+        let mediaClass =
+            Classes.fromListWithBase
+                "is-email-preview"
+                [
+                    "is-active", props.Model.IsSelected
+                ]
 
         Media.media
             [
-                Media.CustomClass "is-email-preview"
+                Media.CustomClass mediaClass
                 Media.Props
                     [
                         OnClick (fun _ ->
-                            printfn "Clicked: %A" props.Model.Email.Guid
                             props.Dispatch Select
                         )
                     ]
             ]
-            [ Media.left [ ]
-                [
-                    Checkradio.checkbox
-                        [
-                            Checkradio.Id (props.Model.Email.Guid.ToString())
-                            Checkradio.Color IsPrimary
-                            Checkradio.CustomClass "is-outlined"
-                        ]
-                        [ ]
-                ]
-              Media.content [ ]
-                [ div [ ]
-                    [ str props.Model.Email.Subject ]
-                  Text.div
+            [
+                Media.left [ ]
                     [
-                         Modifiers
+                        Checkradio.checkbox
                             [
-                                Modifier.TextWeight TextWeight.Bold
-                                Modifier.TextColor IsGreyDark
-                                Modifier.TextSize (Screen.All, TextSize.Is7)
+                                Checkradio.Id (props.Model.Email.Guid.ToString())
+                                Checkradio.Color IsPrimary
+                                Checkradio.CustomClass "is-outlined"
+                                Checkradio.Checked props.IsChecked
+                                // We need to attach an onClick listner instead of onChange becasue the parent is listening to onClick.
+                                // If we use, onChange on the checkradio then both the child and parent events are triggering without having
+                                // an easy way to prevent parent events.
+                                Checkradio.LabelProps
+                                    [
+                                        OnClick (fun ev ->
+                                            ev.stopPropagation()
+                                            ev.preventDefault()
+                                            props.OnCheck props.Model.Key
+                                        )
+                                    ]
+                                // Set the input as read-only because we don't use onChange to detect the new state
+                                // This removes a react warning
+                                Checkradio.InputProps
+                                    [
+                                        ReadOnly true
+                                    ]
                             ]
-                     ]
-                    [ str props.Model.Email.From ]
-                ]
-              Media.right [ ]
-                [
-                    props.Model.Email.Date
-                    |> formatDate
-                    |> str
-                ]
+                            [ ]
+                    ]
+                Media.content [ ]
+                    [
+                        div [ ]
+                            [ str props.Model.Email.Subject ]
+                        div [ Class "email-sender" ]
+                            [ str props.Model.Email.From ]
+                    ]
+                Media.right [ ]
+                    [
+                        props.Model.Email.Date
+                        |> formatDate
+                        |> str
+                    ]
             ]
 
     , "Inbox.EmailMeta"
     , HMR.equalsButFunctions
     )
-
-let view (model : Model) (dispatch : Dispatch<Msg>) =
-    viewComponent
-        {|
-            Model = model
-            Dispatch = dispatch
-        |}
