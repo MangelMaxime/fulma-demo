@@ -6,13 +6,9 @@ open Fable.FontAwesome
 open Fable.React
 open Fable.React.Props
 
-[<RequireQualifiedAccess>]
-type Page =
-    | Inbox of Mailbox.Inbox.Model
-
 type Model =
     {
-        Page : Page
+        Inbox : Mailbox.Inbox.Model
     }
 
 type Msg =
@@ -20,10 +16,13 @@ type Msg =
 
 let init (route : Router.MailboxRoute) =
     match route with
-    | Router.MailboxRoute.Inbox ->
-        let (inboxModel, inboxCmd) = Mailbox.Inbox.init ()
+    | Router.MailboxRoute.Inbox pageRank ->
+        let pageRank =
+            Option.defaultValue 1 pageRank
+
+        let (inboxModel, inboxCmd) = Mailbox.Inbox.init pageRank
         {
-            Page = Page.Inbox inboxModel
+            Inbox = inboxModel
         }
         , Cmd.map InboxMsg inboxCmd
 
@@ -33,13 +32,11 @@ let init (route : Router.MailboxRoute) =
 let update (msg  : Msg) (model : Model) =
     match msg with
     | InboxMsg inboxMsg ->
-        match model.Page with
-        | Page.Inbox inboxModel ->
-            let (inboxModel, inboxCmd) = Mailbox.Inbox.update inboxMsg inboxModel
-            { model with
-                Page = Page.Inbox inboxModel
-            }
-            , Cmd.map InboxMsg inboxCmd
+        let (inboxModel, inboxCmd) = Mailbox.Inbox.update inboxMsg model.Inbox
+        { model with
+            Inbox = inboxModel
+        }
+        , Cmd.map InboxMsg inboxCmd
 
 
 let private item txt icon isActive =
@@ -107,33 +104,40 @@ let private sideMenu =
 
 
 let view (model : Model) (dispatch : Dispatch<Msg>) =
-    let content =
-        match model.Page with
-        | Page.Inbox inboxModel ->
-            Mailbox.Inbox.view inboxModel (InboxMsg >> dispatch)
-
     Columns.columns
-        [ Columns.CustomClass "is-inbox"
-          Columns.IsGapless ]
-        [ Column.column
-            [ Column.CustomClass "is-main-menu"
-              Column.Width (Screen.All, Column.Is2) ]
-            [ Text.div
-                [ Modifiers
-                    [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ]
-                  Props
-                    [ Style
-                        [ Padding "2rem 2rem 1rem" ]
-                    ]
+        [
+            Columns.CustomClass "is-inbox"
+            Columns.IsGapless
+        ]
+        [
+            Column.column
+                [
+                    Column.CustomClass "is-main-menu"
+                    Column.Width (Screen.All, Column.Is2)
                 ]
-                [ Button.button
-                    [ Button.Color IsPrimary
-                      Button.IsFullWidth
-                      Button.Modifiers [ Modifier.TextWeight TextWeight.Bold ]
-                    ]
-                    [ str "Compose" ]
+                [
+                    Text.div
+                        [
+                            Modifiers
+                                [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ]
+                            Props
+                                [ Style
+                                    [ Padding "2rem 2rem 1rem" ]
+                                ]
+                        ]
+                        [
+                            Button.button
+                                [
+                                    Button.Color IsPrimary
+                                    Button.IsFullWidth
+                                    Button.Modifiers [ Modifier.TextWeight TextWeight.Bold ]
+                                ]
+                                [ str "Compose" ]
+                        ]
+                    sideMenu
                 ]
-              sideMenu ]
-          Column.column [ ]
-            [ content ]
+            Column.column [ ]
+                [
+                    Mailbox.Inbox.view model.Inbox (InboxMsg >> dispatch)
+                ]
         ]

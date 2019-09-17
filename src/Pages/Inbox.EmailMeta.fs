@@ -165,4 +165,5 @@ let view =
 
     , "Inbox.EmailMeta"
     , HMR.equalsButFunctions
+    , (fun props -> props.Model.Key.ToString())
     )

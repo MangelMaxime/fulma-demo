@@ -11,6 +11,7 @@ open Helpers
 
 type Model =
     {
+        PageRank : int
         Emails : Map<Guid, Inbox.EmailMeta.Model>
         CheckedEmails : Set<Guid>
         IsLoading : bool
@@ -32,9 +33,9 @@ type Msg =
 
 open Fable.Core.JsInterop
 
-let private fetchInboxEmails () =
+let private fetchInboxEmails pageRank =
     promise {
-        do! Promise.sleep 500
+        do! Promise.sleep (int (Random.between 500. 1200.))
 
         let emails =
             Database.Emails
@@ -46,21 +47,24 @@ let private fetchInboxEmails () =
             |> unbox<Email []>
             |> Array.toList
 
+        let offset = (pageRank - 1) * 10
+
         return
             // Temporary limitation in order to limit the number of mails to render at one time on the screen
             // This improves the responsiveness
-            emails.[..10]
+            emails.[offset..offset+10]
             |> FetchEmailListResult.Success
     }
 
-let init () =
+let init (pageRank : int) =
     {
+        PageRank = pageRank
         Emails = Map.empty
         CheckedEmails = Set.empty
         IsLoading = true
         EmailView = None
     }
-    , Cmd.OfPromise.either fetchInboxEmails () FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
+    , Cmd.OfPromise.either fetchInboxEmails pageRank FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
 
 let update (msg : Msg) (model : Model) =
     match msg with
@@ -265,21 +269,29 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
         Curry.apply EmailMetaMsg guid >> dispatch
 
     let emailList =
-        model.Emails
-        |> Seq.sortByDescending (fun keyValue ->
-            keyValue.Value.SortableKey
-        )
-        |> Seq.map (fun keyValue ->
-            Inbox.EmailMeta.view
-                {
-                    Model = keyValue.Value
-                    IsChecked = Set.contains keyValue.Key model.CheckedEmails
-                    OnCheck = ToggleCheck >> dispatch
-                    Dispatch = (emailMetaDispatch keyValue.Key)
-                }
+        if model.IsLoading then
+            div [ Class "loader-dual-ring-container" ]
+                [
+                    div [ Class "loader-dual-ring is-medium is-black" ]
+                        [ ]
+                ]
+        else
+            model.Emails
+            |> Seq.sortByDescending (fun keyValue ->
+                keyValue.Value.SortableKey
+            )
+            |> Seq.map (fun keyValue ->
+                Inbox.EmailMeta.view
+                    {
+                        Model = keyValue.Value
+                        IsChecked = Set.contains keyValue.Key model.CheckedEmails
+                        OnCheck = ToggleCheck >> dispatch
+                        Dispatch = (emailMetaDispatch keyValue.Key)
+                    }
 
-        )
-        |> Seq.toList
+            )
+            |> Seq.toList
+            |> ofList
 
     let rightColumnContent =
         match model.EmailView with
@@ -294,7 +306,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
             renderCheckedEmailsView model dispatch
 
 
-    div [ ]
+    div [ Class "inbox-container" ]
         [
             menubar
             Columns.columns [ Columns.IsGapless ]
@@ -304,7 +316,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                             Column.CustomClass "is-email-list"
                             Column.Width (Screen.All, Column.Is5)
                         ]
-                        emailList
+                        [ emailList ]
 
                     Column.column [ Column.Width (Screen.All, Column.Is7) ]
                         [

@@ -2,6 +2,7 @@
 @import '~bulma-pageloader/dist/css/bulma-pageloader.sass';
 @import '~bulma-checkradio/dist/css/bulma-checkradio.sass';
 @import './lib-adapter/_all.scss';
+@import './loader.scss';
 
 html {
     overflow: hidden

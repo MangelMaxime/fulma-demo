@@ -8,7 +8,7 @@ open Elmish.UrlParser
 
 [<RequireQualifiedAccess>]
 type MailboxRoute =
-    | Inbox
+    | Inbox of int option
     | Sent
     | Stared
     | Trash
@@ -29,8 +29,13 @@ let private toHash page =
     match page with
     | Mailbox mailboxRoute ->
         match mailboxRoute with
-        | MailboxRoute.Inbox ->
-            "inbox"
+        | MailboxRoute.Inbox pageRank ->
+            let parameters =
+                match pageRank with
+                | Some pageRank -> "?page=" + string pageRank
+                | None -> ""
+
+            "inbox" + parameters
         | MailboxRoute.Sent ->
             "sent"
         | MailboxRoute.Stared ->
@@ -52,7 +57,7 @@ let private toHash page =
 let pageParser: Parser<Route -> Route, Route> =
     oneOf
         [
-            map (MailboxRoute.Inbox |> Mailbox) (s "mailbox" </> s "inbox")
+            map (MailboxRoute.Inbox >> Mailbox) (s "mailbox" </> s "inbox" <?> intParam "page")
             map (MailboxRoute.Sent |> Mailbox) (s "mailbox" </> s "sent")
             map (MailboxRoute.Stared |> Mailbox) (s "mailbox" </> s "stared")
             map (MailboxRoute.Trash |> Mailbox) (s "mailbox" </> s "trash")
@@ -61,7 +66,7 @@ let pageParser: Parser<Route -> Route, Route> =
             map (SettingsRoute.Labels |> Settings) (s "settings" </> s "labels")
 
             // Default page of the application
-            map (MailboxRoute.Inbox |> Mailbox) top
+            map (None |> MailboxRoute.Inbox |> Mailbox) top
         ]
 
 let href route =

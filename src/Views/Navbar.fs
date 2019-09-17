@@ -31,7 +31,7 @@ let private navbarStart dispatch =
         [ Navbar.Item.a
             [ Navbar.Item.Props
                 [ OnClick (fun _ ->
-                        Router.MailboxRoute.Inbox
+                        Router.MailboxRoute.Inbox None
                         |> Router.Mailbox
                         |> Router.modifyLocation
                     )

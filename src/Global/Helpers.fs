@@ -1,5 +1,12 @@
 module Helpers
 
+module Random =
+
+    open Fable.Core
+
+    let between (min : float) (max : float) =
+        JS.Math.floor(JS.Math.random() * (max - min + 1.) + 1.)
+
 module Set =
 
     let toggle (item : 'T) (set : Set<'T>) =

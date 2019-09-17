@@ -59,7 +59,7 @@ let init (optRoute : Router.Route option) =
     let initialModel =
         {
             CurrentRoute =
-                Router.MailboxRoute.Inbox
+                Router.MailboxRoute.Inbox None
                 |> Router.Mailbox
             ActivePage = Page.Loading
         }

@@ -101,36 +101,14 @@ let update (msg : Msg) (model : Model) =
         | None ->
             model, Cmd.none
 
-
-let private renderLoadingView =
-    Text.div
-        [
-            Modifiers
-                [
-                    Modifier.TextAlignment (Screen.All, TextAlignment.Centered)
-                ]
-        ]
-        [
-            Icon.icon
-                [
-                    Icon.Size IsLarge
-                    Icon.Modifiers [ Modifier.TextColor IsGrey ]
-                ]
-                [
-                    Fa.i
-                        [
-                            Fa.Solid.Spinner
-                            Fa.Spin
-                            Fa.Size Fa.Fa2x
-                        ]
-                        [ ]
-                ]
-        ]
-
 let view (model : Model) (dispatch : Dispatch<Msg>) =
     let content =
         if model.IsLoading then
-            renderLoadingView
+            div [ Class "loader-dual-ring-container" ]
+                [
+                    div [ Class "loader-dual-ring is-medium is-black" ]
+                        [ ]
+                ]
         else
             Map.toList model.History
             |> List.sortBy (fun (guid, emailMediaModel) ->
