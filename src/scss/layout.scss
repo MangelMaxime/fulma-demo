@@ -29,7 +29,7 @@ html {
 
 
                     &:last-child {
-                        padding-bottom: $media-margin;
+                        // padding-bottom: $media-margin;
                         border-bottom: 1px solid $border;
                     }
                 }
@@ -208,7 +208,10 @@ html {
     flex-direction: column;
 
     .checked-summary-item {
-        text-align: center;
+
+        &.is-centered {
+            text-align: center;
+        }
 
         &:not(:last-child) {
             margin-bottom: 1rem;

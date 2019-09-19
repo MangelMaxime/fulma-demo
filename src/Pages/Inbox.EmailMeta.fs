@@ -35,6 +35,7 @@ type Msg =
     | Select
     | Unselect
     | Check
+    | UpdateEmail of Email
 
 let init (email : Email) =
     {
@@ -68,6 +69,13 @@ let private notifyUnselectIfNotChecked (guid : Guid) =
 let unselect (model : Model) =
     { model with
         IsSelected = false
+        IsChecked = false
+    }
+
+let select (model : Model) =
+    { model with
+        IsSelected = true
+        IsChecked = true
     }
 
 let update (msg : Msg) (model : Model) =
@@ -94,7 +102,6 @@ let update (msg : Msg) (model : Model) =
         , ExternalMsg.NoOp
 
     | Check ->
-        printfn "chek triggered"
         if model.IsChecked then
             { model with
                 IsSelected = false
@@ -111,11 +118,18 @@ let update (msg : Msg) (model : Model) =
             , Cmd.OfFunc.execute notifyUnselectIfNotChecked model.Email.Guid
             , ExternalMsg.Checked model.Email
 
+    | UpdateEmail email ->
+        { model with
+            Email = email
+        }
+        , Cmd.none
+        , ExternalMsg.NoOp
+
 type ViewProps =
     {
         Model : Model
-        IsChecked : bool
-        OnCheck : Guid -> unit
+        // IsChecked : bool
+        // OnCheck : Guid -> unit
         Dispatch : Dispatch<Msg>
     }
 

@@ -55,7 +55,7 @@ let fetchInboxEmails (pageRank : int) (category : Email.Category) =
             |> Array.toList
 
         let minOffset = (pageRank - 1) * 10
-        let maxOffet = Math.Min(minOffset + 10, emails.Length - 1)
+        let maxOffet = Math.Min(minOffset + 9, emails.Length - 1) // + 9 -> Means takins 10 elements because the index start to 0
 
         return
             // Temporary limitation in order to limit the number of mails to render at one time on the screen
