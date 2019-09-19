@@ -11,6 +11,8 @@
     <Compile Include="Global/Logger.fs" />
     <Compile Include="Global/Router.fs" />
     <Compile Include="Global/Database.fs" />
+    <Compile Include="Global/Types.fs" />
+    <Compile Include="API/Email.fs" />
     <Compile Include="Components/ThemeChanger.fs" />
     <Compile Include="Views/Navbar.fs" />
     <Compile Include="Pages/Inbox.EmailView.EmailMedia.fs" />

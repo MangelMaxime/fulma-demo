@@ -8,10 +8,11 @@ open Fable.FontAwesome
 open Elmish
 open System
 open Helpers
+open Types
+open Fable.Core.JsInterop
 
 type Model =
     {
-        PageRank : int
         Emails : Map<Guid, Inbox.EmailMeta.Model>
         CheckedEmails : Set<Guid>
         IsLoading : bool
@@ -23,48 +24,61 @@ type FetchEmailListResult =
     | Success of emails : Email list
     | Errored of exn
 
+[<RequireQualifiedAccess>]
+type Read_Unread_Result =
+    | Success of emails : Email list
+    | Errored of exn
+
 type Msg =
     | FetchEmailListResult of FetchEmailListResult
     | Open of Email
     | ToggleCheck of Guid
+    | ToggleSelectAll
     | DeselectAll
     | EmailViewMsg of Inbox.EmailView.Msg
     | EmailMetaMsg of Guid * Inbox.EmailMeta.Msg
+    | MarkAsRead
+    | Read_Unread_Result of Read_Unread_Result
+    | MarkAsUnRead
+    | MoveToTrash
+    | MoveToArchive
+    | MoveToSpam
 
-open Fable.Core.JsInterop
-
-let private fetchInboxEmails pageRank =
-    promise {
-        do! Promise.sleep (int (Random.between 500. 1200.))
-
-        let emails =
-            Database.Emails
-                // Temporary dynamic typing
-                // Will be removed when updating the binding
-                .orderBy("Date", Lowdb.Desc)
-                .filter({| Ancestor = None |})
-                .value()
-            |> unbox<Email []>
-            |> Array.toList
-
-        let offset = (pageRank - 1) * 10
-
-        return
-            // Temporary limitation in order to limit the number of mails to render at one time on the screen
-            // This improves the responsiveness
-            emails.[offset..offset+10]
-            |> FetchEmailListResult.Success
+type Context =
+    {
+        PageRank : int
+        Category : Email.Category
     }
 
-let init (pageRank : int) =
+let private fetchInboxEmails (context : Context) =
+    promise {
+        let! emails =
+            API.Email.fetchInboxEmails context.PageRank context.Category
+
+        return FetchEmailListResult.Success emails
+    }
+
+let init (context : Context) =
     {
-        PageRank = pageRank
         Emails = Map.empty
         CheckedEmails = Set.empty
         IsLoading = true
         EmailView = None
     }
-    , Cmd.OfPromise.either fetchInboxEmails pageRank FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
+    , Cmd.OfPromise.either fetchInboxEmails context FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
+
+let updateEmailsFromList (updatedEmails : Email list) (model : Model)  =
+    let rec updater (toUpdate : Email list) (state : Map<Guid, Inbox.EmailMeta.Model>) =
+        match toUpdate with
+        | email::tail ->
+            Map.add email.Guid (Inbox.EmailMeta.init email) state
+            |> updater tail
+        | [ ] ->
+            state
+
+    { model with
+        Emails = updater updatedEmails model.Emails
+    }
 
 let update (msg : Msg) (model : Model) =
     match msg with
@@ -128,6 +142,34 @@ let update (msg : Msg) (model : Model) =
                     }
                     , Cmd.ofMsg (Open selectedEmail)
 
+                | Inbox.EmailMeta.ExternalMsg.Checked selectedEmail ->
+                    let cmd =
+                        match model.EmailView with
+                        | Some emailView ->
+                            if emailView.Email.Guid = selectedEmail.Guid then
+                                Cmd.none
+                            else
+                                Cmd.ofMsg (Open selectedEmail)
+                        | None ->
+                            Cmd.none
+
+                    { model with
+                        CheckedEmails =
+                            Set.toggle selectedEmail.Guid model.CheckedEmails
+                    }
+                    , cmd
+
+                | Inbox.EmailMeta.ExternalMsg.UnSelect _ ->
+                    match model.EmailView with
+                    | Some _ ->
+                        { model with
+                            EmailView = None
+                        }
+                        , Cmd.none
+                    | None ->
+                        model
+                        , Cmd.none
+
             { model with
                 Emails =
                     Map.add refGuid emailMetaModel model.Emails
@@ -147,43 +189,162 @@ let update (msg : Msg) (model : Model) =
         }
         , Cmd.none
 
+    | ToggleSelectAll ->
+        { model with
+            CheckedEmails =
+                if model.Emails.Count = model.CheckedEmails.Count then
+                    Set.empty
+                else
+                    model.Emails
+                    |> Map.toList
+                    |> List.map fst
+                    |> Set.ofList
+        }, Cmd.none
+
     | DeselectAll ->
         { model with
             CheckedEmails = Set.empty
         }
         , Cmd.none
 
-let buttonIcon icon =
-    Button.button [ ]
-        [ Icon.icon [ ]
-            [ Fa.i [ icon ]
-                [ ]
-            ]
+    | MarkAsRead ->
+        if model.CheckedEmails.IsEmpty then
+            model
+            , Cmd.none
+        else
+            model
+            , Cmd.OfPromise.either
+                API.Email.markAsRead
+                (Set.toList model.CheckedEmails)
+                (Read_Unread_Result.Success >> Read_Unread_Result)
+                (Read_Unread_Result.Errored >> Read_Unread_Result)
+
+    | MarkAsUnRead ->
+        // If there is no checked email
+        if model.CheckedEmails.IsEmpty then
+            // Try to see if we have an opened email
+            match model.EmailView with
+            | Some emailView ->
+                model
+                , Cmd.OfPromise.either
+                    API.Email.markAsUnread
+                    [ emailView.Email.Guid ]
+                    (Read_Unread_Result.Success >> Read_Unread_Result)
+                    (Read_Unread_Result.Errored >> Read_Unread_Result)
+            | None ->
+                model
+                , Cmd.none
+        else
+            model
+            , Cmd.OfPromise.either
+                API.Email.markAsUnread
+                (Set.toList model.CheckedEmails)
+                (Read_Unread_Result.Success >> Read_Unread_Result)
+                (Read_Unread_Result.Errored >> Read_Unread_Result)
+
+    | Read_Unread_Result result ->
+        match result with
+        | Read_Unread_Result.Success updatedEmails ->
+            let newModel = updateEmailsFromList updatedEmails model
+
+            { newModel with
+                EmailView = None
+                Emails =
+                    model.Emails
+                    |> Map.map (fun _ emailMeta ->
+                        Inbox.EmailMeta.unselect emailMeta
+                    )
+            }
+            , Cmd.none
+
+        | Read_Unread_Result.Errored error ->
+            Logger.errorfn "An error occured.\n%s" error.Message
+            model
+            , Cmd.none
+
+    | MoveToTrash ->
+        model
+        , Cmd.none
+
+    | MoveToArchive ->
+        model
+        , Cmd.none
+
+    | MoveToSpam ->
+        model
+        , Cmd.none
+
+
+let buttonIcon icon onClickMsg dispatch =
+    Button.button
+        [
+            Button.OnClick (fun _ ->
+                dispatch onClickMsg
+            )
+        ]
+        [
+            Icon.icon [ ]
+                [
+                    Fa.i [ icon ]
+                        [ ]
+                ]
         ]
 
-let menubar =
+let menubar (model : Model) (dispatch : Dispatch<Msg>) =
     Level.level
-        [ Level.Level.CustomClass "is-menubar"
-          Level.Level.Modifiers [ Modifier.IsMarginless ]
+        [
+            Level.Level.CustomClass "is-menubar"
+            Level.Level.Modifiers [ Modifier.IsMarginless ]
         ]
-        [ Level.left [ ]
-            [ Button.list [ Button.List.HasAddons ]
-                [ buttonIcon Fa.Solid.LongArrowAltLeft ]
-              Button.list [ Button.List.HasAddons ]
-                [ buttonIcon Fa.Solid.Eye
-                  buttonIcon Fa.Solid.EyeSlash ]
-              Button.list [ Button.List.HasAddons ]
-                [ buttonIcon Fa.Regular.TrashAlt
-                  buttonIcon Fa.Solid.Archive
-                  buttonIcon Fa.Solid.Ban ]
-            ]
-          Level.right [ ]
-            [ Button.list [ Button.List.HasAddons ]
-                [ buttonIcon Fa.Solid.AngleLeft
-                  buttonIcon Fa.Solid.AngleDown
-                  buttonIcon Fa.Solid.AngleRight
+        [
+            Level.left [ ]
+                [
+                    Field.div
+                        [
+                            Field.Props
+                                [
+                                    Style
+                                        [
+                                            MarginBottom "0"
+                                            MarginLeft "1rem"
+                                        ]
+                                ]
+                        ]
+                        [
+                            Checkradio.checkboxInline
+                                [
+                                    Checkradio.Id "inbox-select-all"
+                                    Checkradio.Color IsPrimary
+                                    Checkradio.CustomClass "is-outlined"
+                                    Checkradio.OnChange (fun _ ->
+                                        dispatch ToggleSelectAll
+                                    )
+                                    Checkradio.Checked (model.CheckedEmails.Count = model.Emails.Count)
+                                ]
+                                [ ]
+                        ]
+
+                    Button.list [ Button.List.HasAddons ]
+                        [
+                            buttonIcon Fa.Solid.Eye MarkAsRead dispatch
+                            buttonIcon Fa.Solid.EyeSlash MarkAsUnRead dispatch
+                        ]
+                    Button.list [ Button.List.HasAddons ]
+                        [
+                            buttonIcon Fa.Regular.TrashAlt MoveToTrash dispatch
+                            buttonIcon Fa.Solid.Archive MoveToArchive dispatch
+                            buttonIcon Fa.Solid.Ban MoveToSpam dispatch
+                        ]
                 ]
-            ]
+            Level.right [ ]
+                [
+                    Button.list [ Button.List.HasAddons ]
+                        [
+                            buttonIcon Fa.Solid.AngleLeft (unbox "todo") dispatch
+                            buttonIcon Fa.Solid.AngleDown (unbox "todo") dispatch
+                            buttonIcon Fa.Solid.AngleRight (unbox "todo") dispatch
+                        ]
+                ]
         ]
 
 let private renderActiveEmail (email : Email) =
@@ -220,7 +381,7 @@ let private renderCheckedEmailsView (model : Model) (dispatch : Dispatch<Msg>) =
         div [ Class "checked-summary-item" ]
 
     let actionButton =
-        if Set.count model.CheckedEmails > 0 then
+        if Set.count model.CheckedEmails > 1 then
             Button.button
                 [
                     Button.Color IsPrimary
@@ -297,7 +458,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
         match model.EmailView with
         | Some emailViewModel ->
             // Only render the emailView if we have no selection
-            if Set.count model.CheckedEmails > 0 then
+            if Set.count model.CheckedEmails > 1 then
                 renderCheckedEmailsView model dispatch
             else
                 Inbox.EmailView.view emailViewModel (EmailViewMsg >> dispatch)
@@ -308,7 +469,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
 
     div [ Class "inbox-container" ]
         [
-            menubar
+            menubar model dispatch
             Columns.columns [ Columns.IsGapless ]
                 [
                     Column.column

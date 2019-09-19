@@ -60,6 +60,7 @@ and [<AllowNullLiteral>] [<Import("LoDashWrapper","Lowdb")>] LoDashWrapper<'LowE
     member __.find(?predicate: string, ?thisArg: obj): 'LowEntryClass = jsNative
     member __.find(?predicate: 'TObject): 'LowEntryClass = jsNative
     member __.filter(?predicate: 'TObject): 'LowEntryClass = jsNative
+    member __.each(iteratee: 'TObject -> unit): 'LowEntryClass = jsNative
     // member __.filter(?predicate: ListIterator<'T, bool>, ?thisArg: obj): 'LowEntryClass = jsNative
     // member __.filter(predicate: string, ?thisArg: obj): 'LowEntryClass = jsNative
     // member __.filter(predicate: U2<ListIterator<'T, bool>, DictionaryIterator<'T, bool>>, ?thisArg: obj): 'LowEntryClass = jsNative

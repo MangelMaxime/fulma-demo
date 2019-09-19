@@ -5,29 +5,56 @@ open Elmish
 open Fable.FontAwesome
 open Fable.React
 open Fable.React.Props
+open Types
+
+
+type Settings =
+    | Category of Email.Category
+
 
 type Model =
     {
+        ActiveCategory : Email.Category
         Inbox : Mailbox.Inbox.Model
     }
+
 
 type Msg =
     | InboxMsg of Mailbox.Inbox.Msg
 
+
+let private initInbox (pageRank : int option) (category : Email.Category) =
+    let (inboxModel, inboxCmd) =
+        Mailbox.Inbox.init
+            {
+                PageRank =
+                    Option.defaultValue 1 pageRank
+                Category = category
+            }
+
+    {
+        ActiveCategory = category
+        Inbox = inboxModel
+    }
+    , Cmd.map InboxMsg inboxCmd
+
+
 let init (route : Router.MailboxRoute) =
     match route with
     | Router.MailboxRoute.Inbox pageRank ->
-        let pageRank =
-            Option.defaultValue 1 pageRank
+        initInbox pageRank Email.Category.Inbox
 
-        let (inboxModel, inboxCmd) = Mailbox.Inbox.init pageRank
-        {
-            Inbox = inboxModel
-        }
-        , Cmd.map InboxMsg inboxCmd
+    | Router.MailboxRoute.Archive pageRank ->
+        initInbox pageRank Email.Category.Archive
 
-    | _ ->
-        failwithf "Route not supported yet: %A" route
+    | Router.MailboxRoute.Sent pageRank ->
+        initInbox pageRank Email.Category.Sent
+
+    | Router.MailboxRoute.Stared pageRank ->
+        initInbox pageRank Email.Category.Stared
+
+    | Router.MailboxRoute.Trash pageRank ->
+        initInbox pageRank Email.Category.Trash
 
 let update (msg  : Msg) (model : Model) =
     match msg with
@@ -39,13 +66,29 @@ let update (msg  : Msg) (model : Model) =
         , Cmd.map InboxMsg inboxCmd
 
 
-let private item txt icon isActive =
-    Menu.Item.li [ Menu.Item.IsActive isActive ]
-        [ Icon.icon [ ]
-            [ Fa.i [ icon ]
-                [ ]
-            ]
-          str txt
+let private standardCategoryItem
+    (props :
+        {|
+            IsActive : bool
+            Route : Router.Route
+            Icon : Fa.IconOption
+            Text : string
+        |}
+    ) =
+    Menu.Item.li
+        [
+            Menu.Item.IsActive props.IsActive
+            Menu.Item.OnClick (fun _ ->
+                Router.modifyLocation props.Route
+            )
+        ]
+        [
+            Icon.icon [ ]
+                [
+                    Fa.i [ props.Icon ]
+                        [ ]
+                ]
+            str props.Text
         ]
 
 let private renderFolderItem (txt : string) (color : string) =
@@ -70,15 +113,61 @@ let private renderTagItem (txt : string) (color : string) =
             str txt
         ]
 
-let private sideMenu =
+let private sideMenu (model : Model) (dispatch : Dispatch<Msg>) =
     Menu.menu [ CustomClass "sidebar-main" ]
         [
             Menu.list [ ]
-                [ item "Inbox" Fa.Solid.Inbox true
-                  item "Sent" Fa.Regular.Envelope false
-                  item "Archive" Fa.Solid.Archive false
-                  item "Stared" Fa.Solid.Star false
-                  item "Trash" Fa.Regular.TrashAlt false
+                [
+                    standardCategoryItem
+                        {|
+                            IsActive =
+                                model.ActiveCategory = Email.Category.Inbox
+                            Route =
+                                Router.MailboxRoute.Inbox None
+                                |> Router.Mailbox
+                            Icon = Fa.Solid.Inbox
+                            Text = "Inbox"
+                        |}
+                    standardCategoryItem
+                        {|
+                            IsActive =
+                                model.ActiveCategory = Email.Category.Sent
+                            Route =
+                                Router.MailboxRoute.Sent None
+                                |> Router.Mailbox
+                            Icon = Fa.Solid.Envelope
+                            Text = "Sent"
+                        |}
+                    standardCategoryItem
+                        {|
+                            IsActive =
+                                model.ActiveCategory = Email.Category.Archive
+                            Route =
+                                Router.MailboxRoute.Archive None
+                                |> Router.Mailbox
+                            Icon = Fa.Solid.Archive
+                            Text = "Archive"
+                        |}
+                    standardCategoryItem
+                        {|
+                            IsActive =
+                                model.ActiveCategory = Email.Category.Stared
+                            Route =
+                                Router.MailboxRoute.Stared None
+                                |> Router.Mailbox
+                            Icon = Fa.Solid.Star
+                            Text = "Stared"
+                        |}
+                    standardCategoryItem
+                        {|
+                            IsActive =
+                                model.ActiveCategory = Email.Category.Trash
+                            Route =
+                                Router.MailboxRoute.Trash None
+                                |> Router.Mailbox
+                            Icon = Fa.Solid.TrashAlt
+                            Text = "Trash"
+                        |}
                 ]
 
             Menu.label [ ]
@@ -134,7 +223,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                                 ]
                                 [ str "Compose" ]
                         ]
-                    sideMenu
+                    sideMenu model dispatch
                 ]
             Column.column [ ]
                 [

@@ -23,19 +23,39 @@ html {
                 overflow: hidden auto;
                 border-right: 1px solid $border;
 
+                .email-preview-container {
+                    position: relative;
+                    border-top: 1px solid $border;
+
+
+                    &:last-child {
+                        padding-bottom: $media-margin;
+                        border-bottom: 1px solid $border;
+                    }
+                }
+
                 .media.is-email-preview {
                     padding-right: $media-margin;
-                    border-top: 1px solid $border;
+
+
+                    &.is-unread {
+                        &::before {
+                            border-left: 4px solid $primary;
+                            position: absolute;
+                            height: 100%;
+                            top: 0;
+                            content: "";
+                            display: block;
+                        }
+
+                        .email-subject {
+                            font-weight: $weight-bold;
+                        }
+                    }
 
                     &:first-child {
                         padding-top: $media-margin;
                     }
-
-                    &:last-child {
-                        padding-bottom: $media-margin;
-                    }
-
-                    // border-left: 5px solid $background;
 
                     &:hover {
                         background-color: $grey-lighter;
@@ -87,9 +107,6 @@ html {
                             font-weight: $weight-semibold;
                             font-size: $size-7;
                             color: $grey-dark;
-                            // Modifier.TextWeight TextWeight.Bold
-                            // Modifier.TextColor IsGreyDark
-                            // Modifier.TextSize (Screen.All, TextSize.Is7)
                         }
                     }
 

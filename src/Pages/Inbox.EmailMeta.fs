@@ -15,6 +15,7 @@ type Model =
     {
         Email : Email
         IsSelected : bool
+        IsChecked : bool
     }
 
     member this.SortableKey =
@@ -27,15 +28,19 @@ type Model =
 type ExternalMsg =
     | NoOp
     | Selected of Email
+    | UnSelect of Email
+    | Checked of Email
 
 type Msg =
     | Select
     | Unselect
+    | Check
 
 let init (email : Email) =
     {
         Email = email
         IsSelected = false
+        IsChecked = false
     }
 
 let private notifyUnselect (guid : Guid) =
@@ -48,6 +53,22 @@ let private notifyUnselect (guid : Guid) =
 
     window.dispatchEvent(event)
     |> ignore
+
+let private notifyUnselectIfNotChecked (guid : Guid) =
+    let detail =
+        jsOptions<Browser.Types.CustomEventInit>(fun o ->
+            o.detail <- Some guid
+        )
+
+    let event = Browser.Event.CustomEvent.Create("inbox-email-meta-force-unselect-if-not-checked", detail)
+
+    window.dispatchEvent(event)
+    |> ignore
+
+let unselect (model : Model) =
+    { model with
+        IsSelected = false
+    }
 
 let update (msg : Msg) (model : Model) =
     match msg with
@@ -67,9 +88,28 @@ let update (msg : Msg) (model : Model) =
     | Unselect ->
         { model with
             IsSelected = false
+            IsChecked = false
         }
         , Cmd.none
         , ExternalMsg.NoOp
+
+    | Check ->
+        printfn "chek triggered"
+        if model.IsChecked then
+            { model with
+                IsSelected = false
+                IsChecked = false
+            }
+            , Cmd.none
+            , ExternalMsg.UnSelect model.Email
+
+        else
+            { model with
+                IsChecked = true
+                IsSelected = true
+            }
+            , Cmd.OfFunc.execute notifyUnselectIfNotChecked model.Email.Guid
+            , ExternalMsg.Checked model.Email
 
 type ViewProps =
     {
@@ -86,7 +126,7 @@ let view =
     FunctionComponent.Of(fun (props : ViewProps) ->
 
         Hooks.useEffectDisposable(fun () ->
-            let listener =
+            let unselectListener =
                 fun (ev : Browser.Types.Event) ->
                     let ev = ev :?>  Browser.Types.CustomEvent
                     let caller = ev.detail |> unbox<Guid>
@@ -94,72 +134,87 @@ let view =
                     if props.Model.IsSelected && props.Model.Key <> caller then
                         props.Dispatch Unselect
 
-            window.addEventListener("inbox-email-meta-force-unselect", listener)
+            let unselectListenerIFNotChecked =
+                fun (ev : Browser.Types.Event) ->
+                    let ev = ev :?>  Browser.Types.CustomEvent
+                    let caller = ev.detail |> unbox<Guid>
+
+                    if not props.Model.IsChecked && props.Model.Key <> caller then
+                        props.Dispatch Unselect
+
+            window.addEventListener("inbox-email-meta-force-unselect", unselectListener)
+            window.addEventListener("inbox-email-meta-force-unselect-if-not-checked", unselectListenerIFNotChecked)
 
             { new System.IDisposable with
                 member __.Dispose() =
-                    window.removeEventListener("inbox-email-meta-force-unselect", listener)
+                    window.removeEventListener("inbox-email-meta-force-unselect", unselectListener)
+                    window.removeEventListener("inbox-email-meta-force-unselect-if-not-checked", unselectListenerIFNotChecked)
             }
-        , [| props.Model.IsSelected |])
+        , [| props.Model.IsSelected; props.Model.IsChecked |])
 
         let mediaClass =
             Classes.fromListWithBase
                 "is-email-preview"
                 [
                     "is-active", props.Model.IsSelected
+                    "is-read", props.Model.Email.IsRead
+                    "is-unread", not props.Model.Email.IsRead
                 ]
 
-        Media.media
+        div [ Class "email-preview-container" ]
             [
-                Media.CustomClass mediaClass
-                Media.Props
+                Media.media
                     [
-                        OnClick (fun _ ->
-                            props.Dispatch Select
-                        )
-                    ]
-            ]
-            [
-                Media.left [ ]
-                    [
-                        Checkradio.checkbox
+                        Media.CustomClass mediaClass
+                        Media.Props
                             [
-                                Checkradio.Id (props.Model.Email.Guid.ToString())
-                                Checkradio.Color IsPrimary
-                                Checkradio.CustomClass "is-outlined"
-                                Checkradio.Checked props.IsChecked
-                                // We need to attach an onClick listner instead of onChange becasue the parent is listening to onClick.
-                                // If we use, onChange on the checkradio then both the child and parent events are triggering without having
-                                // an easy way to prevent parent events.
-                                Checkradio.LabelProps
-                                    [
-                                        OnClick (fun ev ->
-                                            ev.stopPropagation()
-                                            ev.preventDefault()
-                                            props.OnCheck props.Model.Key
-                                        )
-                                    ]
-                                // Set the input as read-only because we don't use onChange to detect the new state
-                                // This removes a react warning
-                                Checkradio.InputProps
-                                    [
-                                        ReadOnly true
-                                    ]
+                                OnClick (fun _ ->
+                                    props.Dispatch Select
+                                )
                             ]
-                            [ ]
                     ]
-                Media.content [ ]
                     [
-                        div [ ]
-                            [ str props.Model.Email.Subject ]
-                        div [ Class "email-sender" ]
-                            [ str props.Model.Email.From ]
-                    ]
-                Media.right [ ]
-                    [
-                        props.Model.Email.Date
-                        |> formatDate
-                        |> str
+                        Media.left [ ]
+                            [
+                                Checkradio.checkbox
+                                    [
+                                        Checkradio.Id (props.Model.Email.Guid.ToString())
+                                        Checkradio.Color IsPrimary
+                                        Checkradio.CustomClass "is-outlined"
+                                        Checkradio.Checked props.Model.IsChecked
+                                        // We need to attach an onClick listner instead of onChange becasue the parent is listening to onClick.
+                                        // If we use, onChange on the checkradio then both the child and parent events are triggering without having
+                                        // an easy way to prevent parent events.
+                                        Checkradio.LabelProps
+                                            [
+                                                OnClick (fun ev ->
+                                                    ev.stopPropagation()
+                                                    ev.preventDefault()
+                                                    props.Dispatch Check
+                                                )
+                                            ]
+                                        // Set the input as read-only because we don't use onChange to detect the new state
+                                        // This removes a react warning
+                                        Checkradio.InputProps
+                                            [
+                                                ReadOnly true
+                                            ]
+                                    ]
+                                    [ ]
+                            ]
+                        Media.content [ ]
+                            [
+                                div [ Class "email-subject" ]
+                                    [ str props.Model.Email.Subject ]
+                                div [ Class "email-sender" ]
+                                    [ str props.Model.Email.From ]
+                            ]
+                        Media.right [ ]
+                            [
+                                props.Model.Email.Date
+                                |> formatDate
+                                |> str
+                            ]
                     ]
             ]
 

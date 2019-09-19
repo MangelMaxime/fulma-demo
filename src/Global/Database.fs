@@ -19,20 +19,22 @@ type EmailType =
 
 type Email =
     {
-        Guid : Guid
-        From : string
-        To : string []
-        Date : DateTime
-        Subject : string
-        Body : string
-        Type : EmailType
-        IsStared : bool
-        IsTrashed : bool
-        Tags : string []
-        Ancestor : Guid option
+        mutable Guid : Guid
+        mutable From : string
+        mutable To : string []
+        mutable Date : DateTime
+        mutable Subject : string
+        mutable Body : string
+        mutable Type : EmailType
+        mutable IsStared : bool
+        mutable IsTrashed : bool
+        mutable IsArchived : bool
+        mutable IsRead : bool
+        mutable Tags : string []
+        mutable Ancestor : Guid option
     }
 
-type DatabaseData =
+type private DatabaseData =
     {
         Version : int
         Emails : Email []
@@ -76,6 +78,8 @@ let private fakeEmails =
             Type = EmailType.Received
             IsStared = false
             IsTrashed = false
+            IsArchived = false
+            IsRead = false
             Tags = [| |]
             Ancestor = None
         }
@@ -106,6 +110,8 @@ Maxime
             Type = EmailType.Received
             IsStared = false
             IsTrashed = false
+            IsArchived = false
+            IsRead = true
             Tags = [| |]
             Ancestor = None
         }
@@ -128,6 +134,8 @@ Kitty
             Type = EmailType.Received
             IsStared = false
             IsTrashed = false
+            IsArchived = false
+            IsRead = false
             Tags = [| |]
             Ancestor = None
         }
@@ -154,6 +162,8 @@ Maxime
             Type = EmailType.Sent
             IsStared = false
             IsTrashed = false
+            IsArchived = false
+            IsRead = false
             Tags = [| |]
             Ancestor = Some (Guid.Parse("3c11ef7f-8ace-430d-a880-aad798c11367"))
         }
@@ -172,6 +182,8 @@ thank you.
             Type = EmailType.Received
             IsStared = false
             IsTrashed = false
+            IsArchived = false
+            IsRead = false
             Tags = [| |]
             Ancestor = Some (Guid.Parse("30182082-9be1-4da0-834e-bef3d8234ee8"))
         }
@@ -180,13 +192,13 @@ thank you.
 type Database =
     static member Lowdb
         with get() : Lowdb.Lowdb =
-            if dbInstance.IsNone then
-                dbInstance <-
+            // if dbInstance.IsNone then
+            //     dbInstance <-
                     Lowdb.LocalStorageAdapter("database", adapterOptions)
                     |> Lowdb.Lowdb
-                    |> Some
+            //         |> Some
 
-            dbInstance.Value
+            // dbInstance.Value
 
     static member Emails
         with get() : Lowdb.Lowdb =
