@@ -16,11 +16,13 @@ type Model =
     {
         ActiveCategory : Email.Category
         Inbox : Mailbox.Inbox.Model
+        Composer : Mailbox.Composer.Model
     }
 
 
 type Msg =
     | InboxMsg of Mailbox.Inbox.Msg
+    | ComposerMsg of Mailbox.Composer.Msg
 
 
 let private initInbox (pageRank : int option) (category : Email.Category) =
@@ -35,6 +37,7 @@ let private initInbox (pageRank : int option) (category : Email.Category) =
     {
         ActiveCategory = category
         Inbox = inboxModel
+        Composer = Mailbox.Composer.init ()
     }
     , Cmd.map InboxMsg inboxCmd
 
@@ -220,6 +223,10 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                                     Button.Color IsPrimary
                                     Button.IsFullWidth
                                     Button.Modifiers [ Modifier.TextWeight TextWeight.Bold ]
+                                    Button.OnClick (fun _ ->
+                                        // dispatch
+                                        ()
+                                    )
                                 ]
                                 [ str "Compose" ]
                         ]
@@ -227,6 +234,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                 ]
             Column.column [ ]
                 [
+                    Mailbox.Composer.view model.Composer (ComposerMsg >> dispatch)
                     Mailbox.Inbox.view model.Inbox (InboxMsg >> dispatch)
                 ]
         ]

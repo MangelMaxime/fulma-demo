@@ -161,8 +161,6 @@ let update (msg : Msg) (model : Model) =
 type ViewProps =
     {
         Model : Model
-        // IsChecked : bool
-        // OnCheck : Guid -> unit
         Dispatch : Dispatch<Msg>
     }
 
