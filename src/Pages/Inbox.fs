@@ -92,6 +92,29 @@ let init (context : Context) =
 //         Emails = updater updatedEmails model.Emails
 //     }
 
+let tryGetGuidsToMarkAsReadOrUnread (model : Model) =
+    // If there is no checked email
+    if model.NumberOfChecked = 0 then
+        // Try to see if we have an opened email
+        match model.EmailView with
+        | Some emailView ->
+            Some [ emailView.Email.Guid ]
+        | None ->
+            None
+
+    else
+        let guids =
+            model.Emails
+            |> Seq.filter (fun kv ->
+                kv.Value.IsChecked
+            )
+            |> Seq.map (fun kv ->
+                kv.Key
+            )
+            |> Seq.toList
+
+        Some guids
+
 let update (msg : Msg) (model : Model) =
     match msg with
     | FetchEmailListResult result ->
@@ -206,7 +229,7 @@ let update (msg : Msg) (model : Model) =
             model
             , Cmd.batch
                 [
-                    Cmd.map EmailMetaMsg emailMetaCmd
+                    Cmd.mapWithGuid EmailMetaMsg refGuid emailMetaCmd
                     extraCmd
                 ]
 
@@ -247,60 +270,30 @@ let update (msg : Msg) (model : Model) =
         , Cmd.none
 
     | MarkAsRead ->
-        if model.NumberOfChecked = 0 then
+        match tryGetGuidsToMarkAsReadOrUnread model with
+        | Some guids ->
             model
-            , Cmd.none
-        else
-            let guids =
-                model.Emails
-                |> Seq.filter (fun kv ->
-                    kv.Value.IsChecked
-                )
-                |> Seq.map (fun kv ->
-                    kv.Key
-                )
-                |> Seq.toList
-
-            model
-            , Cmd.OfPromise.either
-                API.Email.markAsRead
-                guids
-                (Read_Unread_Result.Success >> Read_Unread_Result)
-                (Read_Unread_Result.Errored >> Read_Unread_Result)
-
-    | MarkAsUnRead ->
-        // If there is no checked email
-        if model.NumberOfChecked = 0 then
-            // Try to see if we have an opened email
-            match model.EmailView with
-            | Some emailView ->
-                model
                 , Cmd.OfPromise.either
-                    API.Email.markAsUnread
-                    [ emailView.Email.Guid ]
+                    API.Email.markAsRead
+                    guids
                     (Read_Unread_Result.Success >> Read_Unread_Result)
                     (Read_Unread_Result.Errored >> Read_Unread_Result)
-            | None ->
-                model
-                , Cmd.none
-
-        else
-            let guids =
-                model.Emails
-                |> Seq.filter (fun kv ->
-                    kv.Value.IsChecked
-                )
-                |> Seq.map (fun kv ->
-                    kv.Key
-                )
-                |> Seq.toList
-
+        | None ->
             model
-            , Cmd.OfPromise.either
-                API.Email.markAsUnread
-                guids
-                (Read_Unread_Result.Success >> Read_Unread_Result)
-                (Read_Unread_Result.Errored >> Read_Unread_Result)
+            , Cmd.none
+
+    | MarkAsUnRead ->
+        match tryGetGuidsToMarkAsReadOrUnread model with
+        | Some guids ->
+            model
+                , Cmd.OfPromise.either
+                    API.Email.markAsUnread
+                    guids
+                    (Read_Unread_Result.Success >> Read_Unread_Result)
+                    (Read_Unread_Result.Errored >> Read_Unread_Result)
+        | None ->
+            model
+            , Cmd.none
 
     | Read_Unread_Result result ->
         match result with
@@ -312,9 +305,7 @@ let update (msg : Msg) (model : Model) =
                 )
                 |> Cmd.batch
 
-            { model with
-                EmailView = None
-            }
+            model
             , cmds
 
         | Read_Unread_Result.Errored error ->

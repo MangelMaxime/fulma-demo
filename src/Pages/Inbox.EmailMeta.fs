@@ -31,11 +31,17 @@ type ExternalMsg =
     | UnSelect of Email
     | Checked of Email
 
+[<RequireQualifiedAccessAttribute>]
+type ReadResult =
+    | Success of Email list
+    | Errored of exn
+
 type Msg =
     | Select
     | Unselect
     | Check
     | UpdateEmail of Email
+    | ReadResult of ReadResult
 
 let init (email : Email) =
     {
@@ -87,10 +93,21 @@ let update (msg : Msg) (model : Model) =
             , ExternalMsg.NoOp
 
         else
+            let cmds =
+                Cmd.batch
+                    [
+                        Cmd.OfPromise.either
+                            API.Email.markAsRead
+                            [ model.Email.Guid ]
+                            (ReadResult.Success >> ReadResult)
+                            (ReadResult.Errored >> ReadResult)
+                        Cmd.OfFunc.execute notifyUnselect model.Email.Guid
+                    ]
+
             { model with
                 IsSelected = true
             }
-            , Cmd.OfFunc.execute notifyUnselect model.Email.Guid
+            , cmds
             , ExternalMsg.Selected model.Email
 
     | Unselect ->
@@ -124,6 +141,22 @@ let update (msg : Msg) (model : Model) =
         }
         , Cmd.none
         , ExternalMsg.NoOp
+
+    | ReadResult result ->
+        match result with
+        | ReadResult.Success email ->
+            model
+            // Use the dedicated UpdateEmail message also used by the parent.
+            // This helps mutualize the logic in a single plat
+            , Cmd.ofMsg (UpdateEmail email.[0])
+            , ExternalMsg.NoOp
+
+        | ReadResult.Errored error ->
+            Logger.errorfn "[Inbox.EmailMeta] An error occured when marking the email as read.\n%A" error
+
+            model
+            , Cmd.none
+            , ExternalMsg.NoOp
 
 type ViewProps =
     {
