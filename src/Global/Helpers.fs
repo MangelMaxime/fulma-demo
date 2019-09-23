@@ -54,6 +54,12 @@ module Cmd =
             (cmd : Cmd<'subCmd>) : Cmd<'msg> =
         Cmd.map (fun msg -> outMsg (guid, msg)) cmd
 
+    let mapWithIdentifier
+            (outMsg : 'Identifier * 'subCmd -> 'msg)
+            (guid : 'Identifier)
+            (cmd : Cmd<'subCmd>) : Cmd<'msg> =
+        Cmd.map (fun msg -> outMsg (guid, msg)) cmd
+
     module OfFunc =
 
         let execute (task: 'a -> _) (arg: 'a) : Cmd<'msg> =

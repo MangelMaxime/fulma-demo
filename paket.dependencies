@@ -19,6 +19,7 @@ nuget Fulma.Extensions.Wikiki.PageLoader
 nuget Fulma.Extensions.Wikiki.Checkradio
 nuget Fable.FontAwesome.Free
 nuget Thoth.Json
+nuget Thoth.Elmish.Toast
 nuget Fable.Browser.Dom
 nuget Fable.Browser.Css
 

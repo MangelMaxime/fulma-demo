@@ -15,6 +15,8 @@ type Model =
 
 type Msg =
     | ComposerMsg of Guid * Composer.Editor.Msg
+    | ComposeNewEmail
+    | CloseComposer of Guid
 
 let init () =
     {
@@ -23,220 +25,96 @@ let init () =
 
 let update (msg  : Msg) (model : Model) =
     match msg with
-    | ComposerMsg (guid, composerMsg) ->
-        match Map.tryFind guid model.Composers with
+    | ComposerMsg (composerId, composerMsg) ->
+        match Map.tryFind composerId model.Composers with
         | Some composerModel ->
-            let (composerModel, composerMsg) = Composer.Editor.update composerMsg composerModel
+            let (composerModel, composerMsg) = Composer.Editor.update composerId composerMsg composerModel
             { model with
-                Composers = Map.add guid composerModel model.Composers
+                Composers = Map.add composerId composerModel model.Composers
             }
-            , Cmd.mapWithGuid ComposerMsg guid composerMsg
+            , Cmd.mapWithIdentifier ComposerMsg composerId composerMsg
 
         | None ->
             model, Cmd.none
 
-let private renderAction icon =
-    Icon.icon [ Icon.Size IsMedium ]
-        [
-            Fa.i
-                [
-                    icon
-                    Fa.Size Fa.FaLarge
-                ]
-                [ ]
-        ]
+    | ComposeNewEmail ->
+        let composers = Map.add (Guid.NewGuid()) (Composer.Editor.init None) model.Composers
+        { model with
+            Composers = composers
+        }
+        , Cmd.none
 
-let styleFromRank (rank : int) =
-    Style
+    | CloseComposer composerId ->
+        { model with
+            Composers = Map.remove composerId model.Composers
+        }
+        , Cmd.none
+
+let composeButton (dispatch : Dispatch<Msg>) =
+    Button.button
         [
-            Transform (sprintf "translate(%ipx)" (rank * -600 + (rank + 1) * -20))
+            Button.Color IsPrimary
+            Button.IsFullWidth
+            Button.Modifiers [ Modifier.TextWeight TextWeight.Bold ]
+            Button.OnClick (fun _ ->
+                dispatch ComposeNewEmail
+
+            )
         ]
+        [ str "Compose" ]
+
+type EventListenerProps =
+    {
+        Dispatch : Dispatch<Msg>
+    }
+
+type private EventListener(initProps) =
+    inherit Component<EventListenerProps, obj>(initProps)
+
+    let mutable closeEmailHandler = Unchecked.defaultof<Browser.Types.Event -> unit>
+
+    override this.shouldComponentUpdate(nextProps, _) =
+        HMR.equalsButFunctions this.props nextProps
+        |> not
+
+    override this.componentDidMount() =
+        closeEmailHandler <-
+            fun (ev : Browser.Types.Event) ->
+                let ev = ev :?>  Browser.Types.CustomEvent
+                let caller = ev.detail |> unbox<Guid>
+
+                this.props.Dispatch (CloseComposer caller)
+                ()
+
+        Browser.Dom.window.addEventListener("composer-editor-ask-to-close", closeEmailHandler)
+
+    override this.componentWillUnmount() =
+        Browser.Dom.window.removeEventListener("composer-editor-ask-to-close", closeEmailHandler)
+
+    override this.render() =
+        nothing
+
 
 let view (model : Model) (dispatch : Dispatch<Msg>) =
     div [ Class "composer-container" ]
         [
-            div
-                [
-                    Class "composer-editor"
-                    styleFromRank 0
-                ]
-                [
-                    div [ Class "composer-editor-header" ]
-                        [
-                            div [ Class "composer-editor-title" ]
-                                [
-                                    str "New message"
-                                ]
-                            div [ Class "composer-editor-actions" ]
-                                [
-                                    renderAction Fa.Solid.Compress
-                                    renderAction Fa.Solid.Expand
-                                    renderAction Fa.Solid.Times
-                                ]
-                        ]
-                ]
-            div
-                [
-                    Class "composer-editor is-expanded"
-                    styleFromRank 1
-                ]
-                [
-                    div [ Class "composer-editor-header" ]
-                        [
-                            div [ Class "composer-editor-title" ]
-                                [
-                                    str "New message"
-                                ]
-                            div [ Class "composer-editor-actions" ]
-                                [
-                                    renderAction Fa.Solid.Compress
-                                    renderAction Fa.Solid.Expand
-                                    renderAction Fa.Solid.Times
-                                ]
-                        ]
-                    div [ Class "composer-editor-body" ]
-                        [
-                            Field.div
-                                [
-                                    Field.HasAddons
-                                ]
-                                [
-                                    Control.div [ ]
-                                        [
-                                            Button.button [ Button.IsStatic true ]
-                                                [
-                                                    str "From"
-                                                ]
-                                        ]
+            ofType<EventListener,_,_> { Dispatch = dispatch } [ ]
+            model.Composers
+            |> Map.toList
+            |> List.sortBy (fun (composerId, composerModel) ->
+                composerModel.SortableKey
+            )
+            |> List.mapi (fun index (composerId, composerModel) ->
+                let onClose () =
+                    dispatch (CloseComposer composerId)
 
-                                    Control.div [ Control.IsExpanded ]
-                                        [
-                                            Input.input
-                                                [
-                                                    Input.CustomClass "is-fullwidth"
-                                                    Input.IsReadOnly true
-                                                    Input.Value "mangel.maxime@fulma.com"
-                                                ]
-                                        ]
-                                ]
+                let dispatch =
+                    (fun msg -> dispatch (ComposerMsg (composerId, msg)) )
 
-                            Field.div
-                                [
-                                    Field.HasAddons
-                                ]
-                                [
-                                    Control.div [ ]
-                                        [
-                                            Button.button [ Button.IsStatic true ]
-                                                [
-                                                    str "To"
-                                                ]
-                                        ]
-
-                                    Control.div [ Control.IsExpanded ]
-                                        [
-                                            Input.input
-                                                [
-                                                    Input.CustomClass "is-fullwidth"
-                                                    Input.IsReadOnly true
-                                                    Input.Value "mangel.maxime@fulma.com"
-                                                ]
-                                        ]
-                                ]
-
-                            Field.div [ ]
-                                [
-                                    Control.div [ Control.IsExpanded ]
-                                        [
-                                            Input.input
-                                                [
-                                                    Input.CustomClass "is-fullwidth"
-                                                    // Input.IsReadOnly true
-                                                    // Input.Value "mangel.maxime@fulma.com"
-                                                    Input.Placeholder "Subject"
-                                                ]
-                                        ]
-                                ]
-
-                            Field.div [ ]
-                                [
-                                    Textarea.textarea
-                                        [
-                                            Textarea.CustomClass "composer-content-editor"
-                                        ]
-                                        [ ]
-                                ]
-
-                            Button.list
-                                [
-                                    Button.List.IsRight
-                                    Button.List.Props
-                                        [
-                                            Style
-                                                [
-                                                    Padding ".5rem"
-                                                ]
-                                        ]
-                                ]
-                                [
-                                    Button.button
-                                        [
-                                            Button.Color IsBlack
-                                            Button.IsInverted
-                                        ]
-                                        [
-                                            Icon.icon [ ]
-                                                [
-                                                    Fa.i
-                                                        [
-                                                            Fa.Solid.TrashAlt
-                                                        ]
-                                                        [ ]
-                                                ]
-                                        ]
-                                    Button.button
-                                        [
-                                            Button.Color IsBlack
-                                            Button.IsInverted
-                                        ]
-                                        [
-                                            Icon.icon [ ]
-                                                [
-                                                    Fa.i
-                                                        [
-                                                            Fa.Solid.Save
-                                                        ]
-                                                        [ ]
-                                                ]
-                                        ]
-                                    Button.button
-                                        [
-                                            Button.Color IsPrimary
-                                        ]
-                                        [
-                                            str "SEND"
-                                        ]
-                                ]
-                        ]
-                ]
-            div
-                [
-                    Class "composer-editor"
-                    styleFromRank 2
-                ]
-                [
-                    div [ Class "composer-editor-header" ]
-                        [
-                            div [ Class "composer-editor-title" ]
-                                [
-                                    str "New message"
-                                ]
-                            div [ Class "composer-editor-actions" ]
-                                [
-                                    renderAction Fa.Solid.Compress
-                                    renderAction Fa.Solid.Expand
-                                    renderAction Fa.Solid.Times
-                                ]
-                        ]
-                ]
+                fragment [ FragmentProp.Key ("composer-editor-" + string composerId) ]
+                    [
+                        Composer.Editor.view index composerModel dispatch onClose
+                    ]
+            )
+            |> ofList
         ]

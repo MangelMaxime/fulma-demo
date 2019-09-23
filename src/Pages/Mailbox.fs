@@ -68,6 +68,13 @@ let update (msg  : Msg) (model : Model) =
         }
         , Cmd.map InboxMsg inboxCmd
 
+    | ComposerMsg composerMsg ->
+        let (composerModel, composerCmd) = Mailbox.Composer.update composerMsg model.Composer
+        { model with
+            Composer = composerModel
+        }
+        , Cmd.map ComposerMsg composerCmd
+
 
 let private standardCategoryItem
     (props :
@@ -218,17 +225,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
                                 ]
                         ]
                         [
-                            Button.button
-                                [
-                                    Button.Color IsPrimary
-                                    Button.IsFullWidth
-                                    Button.Modifiers [ Modifier.TextWeight TextWeight.Bold ]
-                                    Button.OnClick (fun _ ->
-                                        // dispatch
-                                        ()
-                                    )
-                                ]
-                                [ str "Compose" ]
+                            Mailbox.Composer.composeButton (ComposerMsg >> dispatch)
                         ]
                     sideMenu model dispatch
                 ]

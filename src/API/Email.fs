@@ -108,3 +108,60 @@ let markAsUnread (guids : Guid list) =
 
         return updatedEmails
     }
+
+type SendEmailParameters =
+    {
+        From : string
+        To : string []
+        Subject : string
+        Body : string
+        Tags : string []
+        Ancestor : Guid option
+    }
+
+let sendEmail (parameters : SendEmailParameters) =
+    promise {
+        let errors : Validation.ErrorDef list =
+            [
+                if String.IsNullOrEmpty parameters.From then
+                    yield
+                        {
+                            Key = "from"
+                            Text = "This field is required"
+                        }
+
+                if Array.isEmpty parameters.To then
+                    yield
+                        {
+                            Key = "to"
+                            Text = "You need to provide at least one recipient"
+                        }
+            ]
+
+        if List.isEmpty errors then
+            let email =
+                {
+                    Guid = Guid.NewGuid()
+                    From = parameters.From
+                    To = parameters.To
+                    Subject = parameters.Subject
+                    Date = DateTime.UtcNow
+                    Body = parameters.Body
+                    Type = EmailType.Sent
+                    IsStared = false
+                    IsTrashed = false
+                    IsArchived = false
+                    IsRead = true
+                    Tags = [| |]
+                    Ancestor = parameters.Ancestor
+                }
+
+            Database.Emails
+                .push(email)
+                .write()
+
+            return Ok ()
+
+        else
+            return Error errors
+    }

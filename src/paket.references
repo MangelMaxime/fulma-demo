@@ -11,6 +11,7 @@ Fulma.Extensions.Wikiki.PageLoader
 Fulma.Extensions.Wikiki.Checkradio
 Fable.FontAwesome.Free
 Thoth.Json
+Thoth.Elmish.Toast
 Fable.Browser.Dom
 Fable.Browser.Css
 Fable.Date

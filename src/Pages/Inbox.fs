@@ -238,7 +238,7 @@ let update (msg : Msg) (model : Model) =
 
     | ToggleSelectAll ->
         let selectAll = model.NumberOfChecked < model.Emails.Count
-        printfn "selectAll: %b" selectAll
+
         { model with
             NumberOfChecked =
                 if selectAll then
