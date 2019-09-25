@@ -203,7 +203,7 @@ thank you.
 let private defaultUsers =
     [|
         {
-            Id = Guid.NewGuid()
+            Id = Guid.Parse("f7549690-05aa-4ae9-95f7-de486979d62f")
             Firstname = "Maxime"
             Surname = "Mangel"
             Email = "mangel.maxime@fulma.com"

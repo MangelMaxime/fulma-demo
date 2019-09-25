@@ -26,13 +26,12 @@ type Msg =
     | ComposerMsg of Mailbox.Composer.Msg
 
 
-let private initInbox (session : Types.Session) (pageRank : int option) (category : Email.Category) =
+let private initInbox (pageRank : int option) (category : Email.Category) =
     let pageRank = Option.defaultValue 1 pageRank
 
     let (inboxModel, inboxCmd) =
         Mailbox.Inbox.init
             {
-                Session = session
                 PageRank = pageRank
                 Category = category
             }
@@ -46,30 +45,29 @@ let private initInbox (session : Types.Session) (pageRank : int option) (categor
     , Cmd.map InboxMsg inboxCmd
 
 
-let init (session : Types.Session) (route : Router.MailboxRoute) =
+let init (route : Router.MailboxRoute) =
     match route with
     | Router.MailboxRoute.Inbox pageRank ->
-        initInbox session pageRank Email.Category.Inbox
+        initInbox pageRank Email.Category.Inbox
 
     | Router.MailboxRoute.Archive pageRank ->
-        initInbox session pageRank Email.Category.Archive
+        initInbox pageRank Email.Category.Archive
 
     | Router.MailboxRoute.Sent pageRank ->
-        initInbox session pageRank Email.Category.Sent
+        initInbox pageRank Email.Category.Sent
 
     | Router.MailboxRoute.Stared pageRank ->
-        initInbox session pageRank Email.Category.Stared
+        initInbox pageRank Email.Category.Stared
 
     | Router.MailboxRoute.Trash pageRank ->
-        initInbox session pageRank Email.Category.Trash
+        initInbox pageRank Email.Category.Trash
 
-let update (session : Types.Session) (msg  : Msg) (model : Model) =
+let update (msg  : Msg) (model : Model) =
     match msg with
     | InboxMsg inboxMsg ->
         let (inboxModel, inboxCmd) =
             Mailbox.Inbox.update
                 {
-                    Session = session
                     PageRank = model.PageRank
                     Category = model.ActiveCategory
                 }

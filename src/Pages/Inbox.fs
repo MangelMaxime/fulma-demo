@@ -46,7 +46,6 @@ type Msg =
 
 type Context =
     {
-        Session : Types.Session
         PageRank : int
         Category : Email.Category
     }
@@ -55,8 +54,7 @@ let private fetchInboxEmails (context : Context) =
     promise {
         let request = API.Email.fetchInboxEmails context.PageRank context.Category
         let! emails =
-            request context.Session
-            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+            request Types.Session.Fake
 
         return FetchEmailListResult.Success emails
     }
@@ -65,8 +63,7 @@ let private markAsRead (context : Context, guids : Guid list) =
     promise {
         let request = API.Email.markAsRead guids
         let! emails =
-            request context.Session
-            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+            request Types.Session.Fake
 
         return emails
     }
@@ -75,8 +72,7 @@ let private markAsUnread (context : Context, guids : Guid list) =
     promise {
         let request = API.Email.markAsUnread guids
         let! emails =
-            request context.Session
-            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+            request Types.Session.Fake
 
         return emails
     }
@@ -165,9 +161,6 @@ let update (context : Context) (msg : Msg) (model : Model) =
         | Some emailMetaModel ->
             let (emailMetaModel, emailMetaCmd, externalMsg) =
                 Inbox.EmailMeta.update
-                    {
-                        Session = context.Session
-                    }
                     emailMetaMsg
                     emailMetaModel
 

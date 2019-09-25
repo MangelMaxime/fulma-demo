@@ -60,30 +60,3 @@ let private refreshJWTToken (token : string) =
 
         return res
     }
-
-let private notifySessionChange (session : Session) =
-    let detail =
-        jsOptions<Browser.Types.CustomEventInit>(fun o ->
-            o.detail <- Some (box session)
-        )
-    let event = Browser.Event.CustomEvent.Create("on-session-update", detail)
-    Browser.Dom.window.dispatchEvent(event)
-    |> ignore
-
-
-let handleRefreshToken (session : Session) (httpRequest : Session -> JS.Promise<'Result>) (error : exn) =
-    match error with
-    | :? ExpiredSession ->
-        promise {
-            let! refreshSessionRes = refreshJWTToken session.RefreshToken
-            match refreshSessionRes with
-            | Ok newSession ->
-                notifySessionChange newSession
-                return! httpRequest newSession
-            | Error msg ->
-                return failwith msg
-        }
-
-    | _ ->
-        // "Reraise the error again" to propagate it
-        raise error

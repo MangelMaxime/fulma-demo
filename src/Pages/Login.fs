@@ -20,36 +20,10 @@ type Model =
         Waiting : bool
     }
 
-[<RequireQualifiedAccess>]
-type SignInResult =
-    | Success of Types.Session
-    | ValidationFailed of Validation.ErrorDef list
-    | Errored of exn
-
-[<RequireQualifiedAccess>]
-type ExternalMsg =
-    | NoOp
-    | SignIn of Types.Session
-
 type Msg =
     | ChangeEmail of string
     | ChangePassword of string
     | Submit
-    | SignInResult of SignInResult
-
-module Request =
-
-    let signIn (email : string, password : string) =
-        promise {
-            let! res = API.User.signIn email password
-
-            match res with
-            | Ok user ->
-                return SignInResult.Success user
-
-            | Error errors ->
-                return SignInResult.ValidationFailed errors
-        }
 
 let init () =
     {
@@ -68,7 +42,6 @@ let update (msg : Msg) (model : Model) =
                 Validation.removeError LoginErrorKey model.Errors
         }
         , Cmd.none
-        , ExternalMsg.NoOp
 
     | ChangePassword newValue ->
         { model with
@@ -77,42 +50,6 @@ let update (msg : Msg) (model : Model) =
                 Validation.removeError PasswordErrorKey model.Errors
         }
         , Cmd.none
-        , ExternalMsg.NoOp
-
-    | Submit ->
-        { model with
-            Waiting = true
-        }
-        , Cmd.OfPromise.either Request.signIn (model.Email, model.Password) SignInResult (SignInResult.Errored >> SignInResult)
-        , ExternalMsg.NoOp
-
-    | SignInResult result ->
-        match result with
-        | SignInResult.Success user ->
-            model
-            , Router.MailboxRoute.Inbox None
-                |> Router.Mailbox
-                |> Router.newUrl
-            , ExternalMsg.SignIn user
-
-        | SignInResult.ValidationFailed errors ->
-            { model with
-                Errors = errors
-                Waiting = false
-                Password = ""
-            }
-            , Cmd.none
-            , ExternalMsg.NoOp
-
-        | SignInResult.Errored error ->
-            Logger.errorfn "[Login] An error occured:\n%A" error
-
-            { model with
-                Waiting = false
-            }
-            , Toast.``something went wrong``
-            , ExternalMsg.NoOp
-
 
 let private viewGlobalErrors errors =
     Validation.tryGetError "summary" errors

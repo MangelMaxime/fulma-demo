@@ -88,18 +88,18 @@ let private renderSessionItems (session : Types.Session option) =
 
                                 Navbar.divider [ ] [ ]
 
-                                Navbar.Item.a
-                                    [
-                                        Navbar.Item.Props
-                                            [
-                                                OnClick (fun _ ->
-                                                    Router.SessionRoute.Logout
-                                                    |> Router.Session
-                                                    |> Router.modifyLocation
-                                                )
-                                            ]
-                                    ]
-                                    [ str "Logout" ]
+                                // Navbar.Item.a
+                                //     [
+                                //         Navbar.Item.Props
+                                //             [
+                                //                 OnClick (fun _ ->
+                                //                     Router.SessionRoute.Logout
+                                //                     |> Router.Session
+                                //                     |> Router.modifyLocation
+                                //                 )
+                                //             ]
+                                //     ]
+                                //     [ str "Logout" ]
                             ]
                     ]
             ]

@@ -20,7 +20,7 @@
     <Compile Include="Components/Toast.fs" />
     <Compile Include="Views/Navbar.fs" />
     <Compile Include="Views/Errored.fs" />
-    <Compile Include="Pages/Login.fs" />
+    <!-- <Compile Include="Pages/Login.fs" /> -->
     <Compile Include="Pages/Inbox.EmailView.EmailMedia.fs" />
     <Compile Include="Pages/Inbox.EmailView.fs" />
     <Compile Include="Pages/Inbox.EmailMeta.fs" />

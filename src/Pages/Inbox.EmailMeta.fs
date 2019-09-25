@@ -84,22 +84,16 @@ let select (model : Model) =
         IsChecked = true
     }
 
-type Context =
-    {
-        Session : Types.Session
-    }
-
-let private markAsRead (context : Context, guids : Guid list) =
+let private markAsRead (guids : Guid list) =
     promise {
         let request = API.Email.markAsRead guids
         let! emails =
-            request context.Session
-            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+            request Types.Session.Fake
 
         return emails
     }
 
-let update (context : Context) (msg : Msg) (model : Model) =
+let update (msg : Msg) (model : Model) =
     match msg with
     | Select ->
         if model.IsSelected then
@@ -113,7 +107,7 @@ let update (context : Context) (msg : Msg) (model : Model) =
                     [
                         Cmd.OfPromise.either
                             markAsRead
-                            (context, [ model.Email.Guid ])
+                            [ model.Email.Guid ]
                             (ReadResult.Success >> ReadResult)
                             (ReadResult.Errored >> ReadResult)
                         Cmd.OfFunc.execute notifyUnselect model.Email.Guid
