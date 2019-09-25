@@ -56,37 +56,67 @@ let private navbarStart dispatch =
             ]
         ]
 
-let view isBurgerOpen dispatch =
-    Navbar.navbar
-        [ Navbar.Color IsPrimary
-          Navbar.IsFixedTop ]
-        [ Navbar.Brand.div [ ]
-            [ Navbar.Item.a [ ]
-                [ str "Fulma - Inbox" ]
-            ]
+let private renderSessionItems (session : Types.Session option) =
+    session
+    |> Option.map (fun session ->
+        let accountText =
+            session.Firstname + " " + session.Surname
 
-          Navbar.End.div [ ]
-            [ Navbar.Item.div
-                [ Navbar.Item.HasDropdown
-                  Navbar.Item.IsHoverable ]
-                [ Navbar.Link.a [ ]
-                    [  str "Account" ]
-
-                  Navbar.Dropdown.div [ ]
-                    [ Navbar.Item.a [ ]
-                        [ str "Dashboard" ]
-
-                      Navbar.Item.a [ ]
-                        [ str "Profile" ]
-
-                      Navbar.Item.a [ ]
-                        [ str "Settings" ]
-
-                      Navbar.divider [ ] [ ]
-
-                      Navbar.Item.a [ ]
-                        [ str "Logout" ]
+        Navbar.End.div [ ]
+            [
+                Navbar.Item.div
+                    [
+                        Navbar.Item.HasDropdown
+                        Navbar.Item.IsHoverable
                     ]
-                ]
+                    [
+                        Navbar.Link.a [ ]
+                            [
+                                str accountText
+                            ]
+
+                        Navbar.Dropdown.div [ ]
+                            [
+                                // Navbar.Item.a [ ]
+                                //     [ str "Dashboard" ]
+
+                                // Navbar.Item.a [ ]
+                                //     [ str "Profile" ]
+
+                                // Navbar.Item.a [ ]
+                                //     [ str "Settings" ]
+
+                                Navbar.divider [ ] [ ]
+
+                                Navbar.Item.a
+                                    [
+                                        Navbar.Item.Props
+                                            [
+                                                OnClick (fun _ ->
+                                                    Router.SessionRoute.Logout
+                                                    |> Router.Session
+                                                    |> Router.modifyLocation
+                                                )
+                                            ]
+                                    ]
+                                    [ str "Logout" ]
+                            ]
+                    ]
             ]
+    )
+    |> ofOption
+
+
+let view (session : Types.Session option) isBurgerOpen dispatch =
+    Navbar.navbar
+        [
+            Navbar.Color IsPrimary
+            Navbar.IsFixedTop ]
+        [
+            Navbar.Brand.div [ ]
+                [ Navbar.Item.a [ ]
+                    [ str "Fulma - Inbox" ]
+                ]
+
+            renderSessionItems session
         ]

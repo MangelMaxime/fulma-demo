@@ -20,20 +20,24 @@ let hasError key (errors : ErrorDef list) =
         error.Key = key
     )
 
-let getError key (errors : ErrorDef list) =
+let tryGetError key (errors : ErrorDef list) =
     errors
     |> List.tryFind (fun error ->
         error.Key = key
     )
+    |> Option.map (fun error ->
+        error.Text
+    )
+
+let getError key (errors : ErrorDef list) =
+    tryGetError key errors
     |> function
-        | Some error -> error.Text
+        | Some error -> error
         | None -> ""
 
 let getErrorsByPartialKey (partialKey : string) (errors : ErrorDef list) =
     errors
     |> List.filter (fun error ->
-        printfn "%A" error
-        printfn "%A" (error.Key.Contains(partialKey))
         error.Key.Contains(partialKey)
     )
     |> List.map (fun error ->

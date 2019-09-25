@@ -34,10 +34,21 @@ type Email =
         mutable Ancestor : Guid option
     }
 
+type User =
+    {
+        Id : Guid
+        Firstname : string
+        Surname : string
+        Email : string
+        Password : string
+        RefreshToken : string option
+    }
+
 type private DatabaseData =
     {
         Version : int
         Emails : Email []
+        Users : User []
     }
 
 /// Database helpers
@@ -76,10 +87,10 @@ let private fakeEmails =
             Date = DateTime(2018, 11, 7, 9, 45, 33, DateTimeKind.Utc)
             Body = faker.hacker.phrase()
             Type = EmailType.Received
-            IsStared = false
-            IsTrashed = false
-            IsArchived = false
-            IsRead = false
+            IsStared = index % 3 = 0
+            IsTrashed = index % 2 = 0
+            IsArchived = index % 2 <> 0
+            IsRead = Helpers.Random.between 1. 7. < 3.
             Tags = [| |]
             Ancestor = None
         }
@@ -189,6 +200,26 @@ thank you.
         }
     |]
 
+let private defaultUsers =
+    [|
+        {
+            Id = Guid.NewGuid()
+            Firstname = "Maxime"
+            Surname = "Mangel"
+            Email = "mangel.maxime@fulma.com"
+            Password = "OpenFsharp"
+            RefreshToken = None
+        }
+        {
+            Id = Guid.NewGuid()
+            Firstname = "John"
+            Surname = "Doe"
+            Email = "user1@mail.com"
+            Password = "user1"
+            RefreshToken = None
+        }
+    |]
+
 type Database =
     static member Lowdb
         with get() : Lowdb.Lowdb =
@@ -205,10 +236,10 @@ type Database =
             Database.Lowdb
                 .get(!^"Emails")
 
-    // static member Users
-    //     with get() : Lowdb.Lowdb =
-    //         Database.Lowdb
-    //             .get(!^"Users")
+    static member Users
+        with get() : Lowdb.Lowdb =
+            Database.Lowdb
+                .get(!^"Users")
 
     // static member GetUserById (userId: int) =
     //     Database.Users
@@ -250,6 +281,8 @@ type Database =
                     Version = CurrentVersion
                     Emails =
                         Array.concat [ cleanEmails; fakeEmails]
+                    Users =
+                        defaultUsers
                 }
             ).write()
         Logger.debug "Database restored"

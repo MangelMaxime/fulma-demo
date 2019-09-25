@@ -19,9 +19,16 @@ type SettingsRoute =
     | Folders
     | Labels
 
+[<RequireQualifiedAccess>]
+type SessionRoute =
+    | Restore
+    | Logout
+
 type Route =
     | Mailbox of MailboxRoute
     | Settings of SettingsRoute
+    | Login
+    | Session of SessionRoute
 
 let private segment (pathA : string) (pathB : string) =
     pathA + "/" + pathB
@@ -63,6 +70,18 @@ let private toHash page =
             "labels"
         |> segment "settings"
 
+    | Session sessionRoute ->
+        match sessionRoute with
+        | SessionRoute.Restore ->
+            "restore"
+        | SessionRoute.Logout ->
+            "logout"
+
+        |> segment "session"
+
+    | Login ->
+        "login"
+
     |> segment "#"
 
 let pageParser: Parser<Route -> Route, Route> =
@@ -77,8 +96,12 @@ let pageParser: Parser<Route -> Route, Route> =
             map (SettingsRoute.Folders |> Settings) (s "settings" </> s "folders")
             map (SettingsRoute.Labels |> Settings) (s "settings" </> s "labels")
 
-            // Default page of the application
-            map (None |> MailboxRoute.Inbox |> Mailbox) top
+            map Login (s "login")
+
+            map (SessionRoute.Restore |> Session) (s "session" </> s "restore")
+            map (SessionRoute.Logout |> Session) (s "session" </> s "logout")
+
+            map (SessionRoute.Restore |> Session) top
         ]
 
 let href route =

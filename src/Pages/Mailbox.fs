@@ -17,6 +17,7 @@ type Model =
         ActiveCategory : Email.Category
         Inbox : Mailbox.Inbox.Model
         Composer : Mailbox.Composer.Model
+        PageRank : int
     }
 
 
@@ -25,12 +26,14 @@ type Msg =
     | ComposerMsg of Mailbox.Composer.Msg
 
 
-let private initInbox (pageRank : int option) (category : Email.Category) =
+let private initInbox (session : Types.Session) (pageRank : int option) (category : Email.Category) =
+    let pageRank = Option.defaultValue 1 pageRank
+
     let (inboxModel, inboxCmd) =
         Mailbox.Inbox.init
             {
-                PageRank =
-                    Option.defaultValue 1 pageRank
+                Session = session
+                PageRank = pageRank
                 Category = category
             }
 
@@ -38,31 +41,40 @@ let private initInbox (pageRank : int option) (category : Email.Category) =
         ActiveCategory = category
         Inbox = inboxModel
         Composer = Mailbox.Composer.init ()
+        PageRank = pageRank
     }
     , Cmd.map InboxMsg inboxCmd
 
 
-let init (route : Router.MailboxRoute) =
+let init (session : Types.Session) (route : Router.MailboxRoute) =
     match route with
     | Router.MailboxRoute.Inbox pageRank ->
-        initInbox pageRank Email.Category.Inbox
+        initInbox session pageRank Email.Category.Inbox
 
     | Router.MailboxRoute.Archive pageRank ->
-        initInbox pageRank Email.Category.Archive
+        initInbox session pageRank Email.Category.Archive
 
     | Router.MailboxRoute.Sent pageRank ->
-        initInbox pageRank Email.Category.Sent
+        initInbox session pageRank Email.Category.Sent
 
     | Router.MailboxRoute.Stared pageRank ->
-        initInbox pageRank Email.Category.Stared
+        initInbox session pageRank Email.Category.Stared
 
     | Router.MailboxRoute.Trash pageRank ->
-        initInbox pageRank Email.Category.Trash
+        initInbox session pageRank Email.Category.Trash
 
-let update (msg  : Msg) (model : Model) =
+let update (session : Types.Session) (msg  : Msg) (model : Model) =
     match msg with
     | InboxMsg inboxMsg ->
-        let (inboxModel, inboxCmd) = Mailbox.Inbox.update inboxMsg model.Inbox
+        let (inboxModel, inboxCmd) =
+            Mailbox.Inbox.update
+                {
+                    Session = session
+                    PageRank = model.PageRank
+                    Category = model.ActiveCategory
+                }
+                inboxMsg
+                model.Inbox
         { model with
             Inbox = inboxModel
         }
@@ -102,7 +114,7 @@ let private standardCategoryItem
         ]
 
 let private renderFolderItem (txt : string) (color : string) =
-    Menu.Item.li [ ]
+    Menu.Item.li [ Menu.Item.CustomClass "force-disabled-style" ]
         [
             Icon.icon [ Icon.Props [ Style [ Color color ] ] ]
                 [
@@ -113,7 +125,7 @@ let private renderFolderItem (txt : string) (color : string) =
         ]
 
 let private renderTagItem (txt : string) (color : string) =
-    Menu.Item.li [ ]
+    Menu.Item.li [ Menu.Item.CustomClass "force-disabled-style" ]
         [
             Icon.icon [ Icon.Props [ Style [ Color color ] ] ]
                 [

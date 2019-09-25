@@ -1,5 +1,43 @@
 module Helpers
 
+module Session =
+
+    open Thoth.Json
+
+    let store (session : Types.Session) =
+        let json = Encode.Auto.toString(0, session)
+
+        Browser.WebStorage.localStorage.setItem("session", json)
+
+    let delete () =
+        Browser.WebStorage.localStorage.removeItem("session")
+
+    let tryGet () =
+        match Browser.WebStorage.localStorage.getItem("session") with
+        | null ->
+            None
+
+        | userInfo ->
+            match Decode.Auto.fromString<Types.Session>(userInfo) with
+            | Ok userInfo ->
+                Some userInfo
+            | Error msg ->
+                Logger.warning "Error when decoding the stored session"
+                Logger.warning msg
+                Logger.warning "Cleaning, stored session..."
+                Browser.WebStorage.localStorage.removeItem("session")
+                None
+
+module Toast =
+
+    open Elmish
+    open Thoth.Elmish
+
+    let inline ``something went wrong``<'T> : Cmd<'T> =
+        Toast.message "An error occured, please contact an administrator if it persist"
+        |> Toast.position Toast.TopRight
+        |> Toast.error
+
 module Random =
 
     open Fable.Core
@@ -96,3 +134,13 @@ module Uncurry =
     let apply5 func (a, b, c, d, e, f) = func a b c d e f
 
     let apply6 func (a, b, c, d, e, f, g) = func a b c d e f g
+
+module Lowdb =
+
+    let tryValue<'T> (entry : Lowdb.Lowdb) =
+        let value = entry.value()
+
+        if isNull value then
+            None
+        else
+            Some (unbox<'T> value)

@@ -5,66 +5,61 @@ open Helpers
 open Types
 open System
 
-let fetchInboxEmails (pageRank : int) (category : Email.Category) =
+let fetchInboxEmails (pageRank : int) (category : Email.Category) (session : Session) =
     promise {
-        do! Promise.sleep (int (Random.between 500. 1200.))
-
-        let filter =
-            match category with
-            | Email.Category.Archive ->
-                {|
-                    Ancestor = None
-                    IsArchived = true
-                    IsTrashed = false
-                    Type = EmailType.Received
-                |} |> box
-            | Email.Category.Inbox ->
-                {|
-                    Ancestor = None
-                    IsTrashed = false
-                    Type = EmailType.Received
-                |} |> box
-            | Email.Category.Sent ->
-                {|
-                    Ancestor = None
-                    IsTrashed = false
-                    Type = EmailType.Sent
-                |} |> box
-            | Email.Category.Stared ->
-                {|
-                    Ancestor = None
-                    IsStared = false
-                    IsTrashed = false
-                    Type = EmailType.Received
-                |} |> box
-            | Email.Category.Trash ->
-                {|
-                    Ancestor = None
-                    IsTrashed = false
-                    Type = EmailType.Received
-                |} |> box
-            | Email.Category.Folder(_) -> failwith "this type of request is not implemented yet"
-            | Email.Category.Tag(_) -> failwith "this type of request is not implemented yet"
+        do! Common.checkSessionValidity session
+        do! Common.randomDelay ()
 
         let emails =
             Database.Emails
-                .orderBy("Date", Lowdb.Desc)
-                .filter(filter)
                 .value()
             |> unbox<Email []>
+            |> Array.filter (fun email ->
+                match category with
+                | Email.Category.Archive ->
+                    email.Ancestor = None
+                        && email.IsArchived
+                        && not email.IsTrashed
+                        && email.Type = EmailType.Received
+
+                | Email.Category.Inbox ->
+                    email.Ancestor = None
+                       && not email.IsTrashed
+                        && email.Type = EmailType.Received
+
+                | Email.Category.Sent ->
+                    email.Ancestor = None
+                       && not email.IsTrashed
+                        && email.Type = EmailType.Sent
+
+                | Email.Category.Stared ->
+                    email.Ancestor = None
+                        && email.IsStared
+                        && not email.IsTrashed
+                        && email.Type = EmailType.Received
+
+                | Email.Category.Trash ->
+                    email.Ancestor = None
+                       && email.IsTrashed
+                        && email.Type = EmailType.Received
+
+                | Email.Category.Folder(_) -> failwith "this type of request is not implemented yet"
+                | Email.Category.Tag(_) -> failwith "this type of request is not implemented yet"
+            )
             |> Array.toList
 
         let minOffset = (pageRank - 1) * 10
         let maxOffet = Math.Min(minOffset + 9, emails.Length - 1) // + 9 -> Means takins 10 elements because the index start to 0
 
         return
-            // Temporary limitation in order to limit the number of mails to render at one time on the screen
-            // This improves the responsiveness
             emails.[minOffset..maxOffet]
     }
 
-let markAsRead (guids : Guid list) =
+let markAsRead (guids : Guid list) (session : Session) =
     promise {
+        do! Common.checkSessionValidity session
+        do! Common.randomDelay ()
+
         Database.Emails
             .filter(fun (email : Email) ->
                 List.contains email.Guid guids
@@ -86,8 +81,11 @@ let markAsRead (guids : Guid list) =
         return updatedEmails
     }
 
-let markAsUnread (guids : Guid list) =
+let markAsUnread (guids : Guid list) (session : Session) =
     promise {
+        do! Common.checkSessionValidity session
+        do! Common.randomDelay ()
+
         Database.Emails
             .filter(fun (email : Email) ->
                 List.contains email.Guid guids
@@ -121,6 +119,8 @@ type SendEmailParameters =
 
 let sendEmail (parameters : SendEmailParameters) =
     promise {
+        do! Common.randomDelay ()
+
         let errors : Validation.ErrorDef list =
             [
                 if String.IsNullOrEmpty parameters.From then

@@ -17,6 +17,7 @@ type Model =
         IsLoading : bool
         EmailView : Inbox.EmailView.Model option
         NumberOfChecked : int
+        TotalPage : int
     }
 
 [<RequireQualifiedAccess>]
@@ -45,16 +46,39 @@ type Msg =
 
 type Context =
     {
+        Session : Types.Session
         PageRank : int
         Category : Email.Category
     }
 
 let private fetchInboxEmails (context : Context) =
     promise {
+        let request = API.Email.fetchInboxEmails context.PageRank context.Category
         let! emails =
-            API.Email.fetchInboxEmails context.PageRank context.Category
+            request context.Session
+            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
 
         return FetchEmailListResult.Success emails
+    }
+
+let private markAsRead (context : Context, guids : Guid list) =
+    promise {
+        let request = API.Email.markAsRead guids
+        let! emails =
+            request context.Session
+            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+
+        return emails
+    }
+
+let private markAsUnread (context : Context, guids : Guid list) =
+    promise {
+        let request = API.Email.markAsUnread guids
+        let! emails =
+            request context.Session
+            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+
+        return emails
     }
 
 let init (context : Context) =
@@ -63,34 +87,10 @@ let init (context : Context) =
         IsLoading = true
         EmailView = None
         NumberOfChecked = 0
+        TotalPage = 0
     }
     , Cmd.OfPromise.either fetchInboxEmails context FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
 
-// let updateEmailsFromList (updatedEmails : Email list) (model : Model) =
-//     let emailToUpdate =
-//         updatedEmails
-//         |> List.map (fun email ->
-//             email.Guid, email
-//         )
-//         |> Map.ofList
-
-//     model.Emails
-//     |> Map.map (fun key email ->
-
-//     )
-
-
-//     let rec updater (toUpdate : Email list) (state : Map<Guid, Inbox.EmailMeta.Model>) =
-//         match toUpdate with
-//         | email::tail ->
-//             Map.add email.Guid (Inbox.EmailMeta.updateEmailValue email) state
-//             |> updater tail
-//         | [ ] ->
-//             state
-
-//     { model with
-//         Emails = updater updatedEmails model.Emails
-//     }
 
 let tryGetGuidsToMarkAsReadOrUnread (model : Model) =
     // If there is no checked email
@@ -115,7 +115,7 @@ let tryGetGuidsToMarkAsReadOrUnread (model : Model) =
 
         Some guids
 
-let update (msg : Msg) (model : Model) =
+let update (context : Context) (msg : Msg) (model : Model) =
     match msg with
     | FetchEmailListResult result ->
         match result with
@@ -134,7 +134,7 @@ let update (msg : Msg) (model : Model) =
             , Cmd.none
 
         | FetchEmailListResult.Errored error ->
-            Logger.errorfn "Failed to retrieved the email list.\n%s" error.Message
+            Logger.errorfn "Failed to retrieved the email list.\n%A" error
             { model with
                 IsLoading = false
             }
@@ -163,7 +163,14 @@ let update (msg : Msg) (model : Model) =
     | EmailMetaMsg (refGuid, emailMetaMsg) ->
         match Map.tryFind refGuid model.Emails with
         | Some emailMetaModel ->
-            let (emailMetaModel, emailMetaCmd, externalMsg) = Inbox.EmailMeta.update emailMetaMsg emailMetaModel
+            let (emailMetaModel, emailMetaCmd, externalMsg) =
+                Inbox.EmailMeta.update
+                    {
+                        Session = context.Session
+                    }
+                    emailMetaMsg
+                    emailMetaModel
+
             let model =
                 { model with
                     Emails =
@@ -273,11 +280,11 @@ let update (msg : Msg) (model : Model) =
         match tryGetGuidsToMarkAsReadOrUnread model with
         | Some guids ->
             model
-                , Cmd.OfPromise.either
-                    API.Email.markAsRead
-                    guids
-                    (Read_Unread_Result.Success >> Read_Unread_Result)
-                    (Read_Unread_Result.Errored >> Read_Unread_Result)
+            , Cmd.OfPromise.either
+                markAsRead
+                (context, guids)
+                (Read_Unread_Result.Success >> Read_Unread_Result)
+                (Read_Unread_Result.Errored >> Read_Unread_Result)
         | None ->
             model
             , Cmd.none
@@ -286,11 +293,12 @@ let update (msg : Msg) (model : Model) =
         match tryGetGuidsToMarkAsReadOrUnread model with
         | Some guids ->
             model
-                , Cmd.OfPromise.either
-                    API.Email.markAsUnread
-                    guids
-                    (Read_Unread_Result.Success >> Read_Unread_Result)
-                    (Read_Unread_Result.Errored >> Read_Unread_Result)
+            , Cmd.OfPromise.either
+                markAsUnread
+                (context, guids)
+                (Read_Unread_Result.Success >> Read_Unread_Result)
+                (Read_Unread_Result.Errored >> Read_Unread_Result)
+
         | None ->
             model
             , Cmd.none
@@ -341,6 +349,22 @@ let buttonIcon icon onClickMsg dispatch =
                 ]
         ]
 
+let buttonIconDisabled icon onClickMsg dispatch =
+    Button.button
+        [
+            // Button.OnClick (fun _ ->
+            //     dispatch onClickMsg
+            // )
+            Button.Disabled true
+        ]
+        [
+            Icon.icon [ ]
+                [
+                    Fa.i [ icon ]
+                        [ ]
+                ]
+        ]
+
 let menubar (model : Model) (dispatch : Dispatch<Msg>) =
     Level.level
         [
@@ -370,7 +394,7 @@ let menubar (model : Model) (dispatch : Dispatch<Msg>) =
                                     Checkradio.OnChange (fun _ ->
                                         dispatch ToggleSelectAll
                                     )
-                                    Checkradio.Checked (model.NumberOfChecked = model.Emails.Count)
+                                    Checkradio.Checked (model.Emails.Count <> 0 && model.NumberOfChecked = model.Emails.Count)
                                 ]
                                 [ ]
                         ]
@@ -382,20 +406,20 @@ let menubar (model : Model) (dispatch : Dispatch<Msg>) =
                         ]
                     Button.list [ Button.List.HasAddons ]
                         [
-                            buttonIcon Fa.Regular.TrashAlt MoveToTrash dispatch
-                            buttonIcon Fa.Solid.Archive MoveToArchive dispatch
-                            buttonIcon Fa.Solid.Ban MoveToSpam dispatch
+                            buttonIconDisabled Fa.Regular.TrashAlt MoveToTrash dispatch
+                            buttonIconDisabled Fa.Solid.Archive MoveToArchive dispatch
+                            buttonIconDisabled Fa.Solid.Ban MoveToSpam dispatch
                         ]
                 ]
-            Level.right [ ]
-                [
-                    Button.list [ Button.List.HasAddons ]
-                        [
-                            buttonIcon Fa.Solid.AngleLeft (unbox "todo") dispatch
-                            buttonIcon Fa.Solid.AngleDown (unbox "todo") dispatch
-                            buttonIcon Fa.Solid.AngleRight (unbox "todo") dispatch
-                        ]
-                ]
+            // Level.right [ ]
+            //     [
+            //         Button.list [ Button.List.HasAddons ]
+            //             [
+            //                 buttonIcon Fa.Solid.AngleLeft (unbox "todo") dispatch
+            //                 buttonIcon Fa.Solid.AngleDown (unbox "todo") dispatch
+            //                 buttonIcon Fa.Solid.AngleRight (unbox "todo") dispatch
+            //             ]
+            //     ]
         ]
 
 let private renderActiveEmail (email : Email) =

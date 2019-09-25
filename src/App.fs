@@ -10,177 +10,303 @@ open Fulma
 open Fulma.Extensions.Wikiki
 open Fable.Core
 open Fable.Core.JsInterop
+open Helpers
+open System
+
+
+[<RequireQualifiedAccess>]
+type AuthPage =
+    | Mailbox of Mailbox.Model
+    | Settings of Settings.Model
+
+[<RequireQualifiedAccess>]
+type LogoutResult =
+    | Success
+    | Errored of exn
 
 [<RequireQualifiedAccess>]
 type Page =
     | Loading
-    | Mailbox of Mailbox.Model
-    | Settings of Settings.Model
+    | Login of Login.Model
+    | AuthPage of AuthPage
+    | NotFound
 
 type Model =
     {
-        CurrentRoute : Router.Route
+        CurrentRoute : Router.Route option
         ActivePage : Page
+        Session : Types.Session option
     }
 
 type Msg =
     | MailboxMsg of Mailbox.Msg
     | SettingsMsg of Settings.Msg
+    | LoginMsg of Login.Msg
+    | OnSessionChange of Types.Session
+    | LogoutResult of LogoutResult
 
+let private setRoute (result: Option<Router.Route>) (model : Model) =
+    let model = { model with CurrentRoute = result }
 
-let setRoute (result: Option<Router.Route>) (model : Model) =
     match result with
     | None ->
         let requestedUrl = Browser.Dom.window.location.href
 
         JS.console.error("Error parsing url: " + requestedUrl)
 
-        model
-        , Router.modifyUrl model.CurrentRoute
+        { model with
+            ActivePage = Page.NotFound
+        }
+        , Cmd.none
 
     | Some route ->
         match route with
-        | Router.Mailbox mailboxRoute ->
-            let (mailboxModel, mailboxCmd) = Mailbox.init mailboxRoute
+        | Router.Session sessionRoute ->
+            match sessionRoute with
+            | Router.SessionRoute.Restore ->
+                match model.Session with
+                | Some _ ->
+                    model, Router.MailboxRoute.Inbox None
+                            |> Router.Mailbox
+                            |> Router.newUrl
 
-            { model with
-                ActivePage = Page.Mailbox mailboxModel
-            }
-            , Cmd.map MailboxMsg mailboxCmd
+                | None ->
+                    model, Router.Login
+                            |> Router.newUrl
+
+            | Router.SessionRoute.Logout ->
+                match model.Session with
+                | Some session ->
+                    let request (userId : Guid) =
+                        promise {
+                            do! API.User.logout userId
+                            return LogoutResult.Success
+                        }
+
+                    model
+                    , Cmd.OfPromise.either request session.UserId LogoutResult (LogoutResult.Errored >> LogoutResult)
+
+                | None ->
+                    model
+                    , Router.Login
+                        |> Router.newUrl
+
+        | Router.Mailbox mailboxRoute ->
+            match model.Session with
+            | Some session ->
+                let (mailboxModel, mailboxCmd) = Mailbox.init session mailboxRoute
+
+                { model with
+                    ActivePage =
+                        AuthPage.Mailbox mailboxModel
+                        |> Page.AuthPage
+                }
+                , Cmd.map MailboxMsg mailboxCmd
+
+            | None ->
+                model
+                , Router.Login
+                    |> Router.newUrl
 
         | Router.Settings settingsRoute ->
             let (settingsModel, settingsCmd) = Settings.init settingsRoute
 
             { model with
-                ActivePage = Page.Settings settingsModel
+                ActivePage =
+                    AuthPage.Settings settingsModel
+                    |> Page.AuthPage
             }
             , Cmd.map SettingsMsg settingsCmd
 
+        | Router.Login ->
+            let loginModel = Login.init ()
+            { model with
+                ActivePage =
+                    Page.Login loginModel
+            }
+            , Cmd.none
 
-let init (optRoute : Router.Route option) =
-    let initialModel =
+
+let private init (optRoute : Router.Route option) =
+    match Session.tryGet () with
+    | Some session ->
         {
-            CurrentRoute =
-                Router.MailboxRoute.Inbox None
-                |> Router.Mailbox
+            CurrentRoute = None
             ActivePage = Page.Loading
+            Session = Some session
         }
+        |> setRoute optRoute
 
-    setRoute optRoute initialModel
+    | None ->
+        Router.modifyLocation Router.Route.Login
 
+        {
+            CurrentRoute = None
+            ActivePage = Page.Loading
+            Session = None
+        }
+        |> setRoute optRoute
 
 let private update (msg : Msg) (model : Model) =
     match msg with
     | MailboxMsg mailboxMsg ->
         match model.ActivePage with
-        | Page.Mailbox mailboxModel ->
-            let (mailboxModel, mailboxCmd) = Mailbox.update mailboxMsg mailboxModel
+        | Page.AuthPage (AuthPage.Mailbox mailboxModel) ->
+            match model.Session with
+            | Some session ->
+                let (mailboxModel, mailboxCmd) = Mailbox.update session mailboxMsg mailboxModel
 
-            { model with
-                ActivePage = Page.Mailbox mailboxModel
-            }
-            , Cmd.map MailboxMsg mailboxCmd
+                { model with
+                    ActivePage =
+                        AuthPage.Mailbox mailboxModel
+                        |> Page.AuthPage
+                }
+                , Cmd.map MailboxMsg mailboxCmd
+
+            | None ->
+                model
+                , Cmd.none
 
         | _ ->
             model, Cmd.none
 
     | SettingsMsg settingsMsg ->
         match model.ActivePage with
-        | Page.Settings settingsModel ->
+        | Page.AuthPage (AuthPage.Settings settingsModel) ->
             let (settingsModel, mailboxCmd) = Settings.update settingsMsg settingsModel
 
             { model with
-                ActivePage = Page.Settings settingsModel
+                ActivePage =
+                    AuthPage.Settings settingsModel
+                    |> Page.AuthPage
             }
             , Cmd.map SettingsMsg mailboxCmd
 
         | _ ->
             model, Cmd.none
 
+    | LoginMsg loginMsg ->
+        match model.ActivePage with
+        | Page.Login loginModel ->
+            let (loginModel, loginCmd, extraMsg) = Login.update loginMsg loginModel
+
+            let model =
+                match extraMsg with
+                | Login.ExternalMsg.NoOp ->
+                    model
+
+                | Login.ExternalMsg.SignIn session ->
+                    Session.store session
+
+                    { model with
+                        Session = Some session
+                    }
+
+            { model with
+                ActivePage =
+                    Page.Login loginModel
+            }
+            , Cmd.map LoginMsg loginCmd
+
+        | _ ->
+            model, Cmd.none
+
+    | OnSessionChange newSession ->
+        Session.store newSession
+
+        { model with
+            Session = Some newSession
+        }
+        , Cmd.none
+
+    | LogoutResult result ->
+        match result with
+        | LogoutResult.Success ->
+            Session.delete()
+            model
+            , Router.Login
+                |> Router.newUrl
+
+        | LogoutResult.Errored error ->
+            Logger.errorfn "[App] An error occured when try to logout.\n%A" error
+            model
+            , Cmd.none
+
+type EventListenerProps =
+    {
+        Dispatch : Dispatch<Msg>
+    }
+
+type private EventListener(initProps) =
+    inherit Component<EventListenerProps, obj>(initProps)
+
+    let mutable closeEmailHandler = Unchecked.defaultof<Browser.Types.Event -> unit>
+
+    override this.shouldComponentUpdate(nextProps, _) =
+        HMR.equalsButFunctions this.props nextProps
+        |> not
+
+    override this.componentDidMount() =
+        closeEmailHandler <-
+            fun (ev : Browser.Types.Event) ->
+                let ev = ev :?>  Browser.Types.CustomEvent
+                let newSession = ev.detail |> unbox<Types.Session>
+
+                this.props.Dispatch (OnSessionChange newSession)
+                ()
+
+        Browser.Dom.window.addEventListener("on-session-update", closeEmailHandler)
+
+    override this.componentWillUnmount() =
+        Browser.Dom.window.removeEventListener("on-session-update", closeEmailHandler)
+
+    override this.render() =
+        nothing
+
 let private root (model : Model) (dispatch : Dispatch<Msg>) =
     match model.ActivePage with
     | Page.Loading ->
         PageLoader.pageLoader [ PageLoader.IsActive true ]
-            [ ]
+            [
+                ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
+                ofType<EventListener,_,_> { Dispatch = dispatch } [ ]
+            ]
 
-    | Page.Mailbox mailboxModel ->
-        div [ ]
-            [ ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
-            //   navbarView model.IsBurgerOpen dispatch
-            //   Button.button [ Button.OnClick (fun _ ->
-            //     dispatch ToggleTheme
-            //   ) ]
-            //     [ str "Change theme" ]
-              Navbar.view false ignore
-              Mailbox.view mailboxModel (MailboxMsg >> dispatch) ]
-
-    | Page.Settings settingsModel ->
-        div [ ]
-            [ ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
-            //   navbarView model.IsBurgerOpen dispatch
-            //   Button.button [ Button.OnClick (fun _ ->
-            //     dispatch ToggleTheme
-            //   ) ]
-            //     [ str "Change theme" ]
-              Navbar.view false ignore
-              Settings.view settingsModel (SettingsMsg >> dispatch) ]
-
-
-let renderToastWithFulma =
-    { new Toast.IRenderer<Fa.IconOption> with
-        member __.Toast children color =
-            Notification.notification [ Notification.CustomClass color ]
-                children
-
-        member __.CloseButton onClick =
-            Notification.delete [ Props [ OnClick onClick ] ]
-                [ ]
-
-        member __.InputArea children =
-            Columns.columns [ Columns.IsGapless
-                              Columns.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ]
-                              Columns.CustomClass "notify-inputs-area" ]
-                children
-
-        member __.Input (txt : string) (callback : (unit -> unit)) =
-            Column.column [ ]
-                [ Button.button [ Button.OnClick (fun _ -> callback ())
-                                  Button.Color IsWhite ]
-                    [ str txt ] ]
-
-        member __.Title txt =
-            Heading.h5 []
-                       [ str txt ]
-
-        member __.Icon (icon : Fa.IconOption) =
-            Icon.icon [ Icon.Size IsMedium ]
-                [ Fa.i [ icon
-                         Fa.Size Fa.Fa2x ]
-                    [ ] ]
-
-        member __.SingleLayout title message =
+    | Page.AuthPage authPage ->
+        match authPage with
+        | AuthPage.Mailbox mailboxModel ->
             div [ ]
-                [ title; message ]
+                [
+                    ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
+                    ofType<EventListener,_,_> { Dispatch = dispatch } [ ]
+                    Navbar.view model.Session false ignore
+                    Mailbox.view mailboxModel (MailboxMsg >> dispatch)
+                ]
 
-        member __.Message txt =
-            span [ ]
-                 [ str txt ]
+        | AuthPage.Settings settingsModel ->
+            div [ ]
+                [
+                    ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
+                    ofType<EventListener,_,_> { Dispatch = dispatch } [ ]
+                    Navbar.view model.Session false ignore
+                    Settings.view settingsModel (SettingsMsg >> dispatch)
+                ]
 
-        member __.SplittedLayout iconView title message =
-            Columns.columns [ Columns.IsGapless
-                              Columns.IsVCentered ]
-                [ Column.column [ Column.Width (Screen.All, Column.Is2) ]
-                    [ iconView ]
-                  Column.column [ ]
-                    [ title
-                      message ] ]
+    | Page.Login loginModel ->
+        div [ Style [ MarginTop "-3.1rem" ] ]
+            [
+                ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
+                ofType<EventListener,_,_> { Dispatch = dispatch } [ ]
+                Login.view loginModel (LoginMsg >> dispatch)
+            ]
 
-        member __.StatusToColor status =
-            match status with
-            | Toast.Success -> "is-success"
-            | Toast.Warning -> "is-warning"
-            | Toast.Error -> "is-danger"
-            | Toast.Info -> "is-info" }
+    | Page.NotFound ->
+        div [ Style [ MarginTop "-3.1rem" ] ]
+            [
+                ofType<ThemeChanger.ThemeChanger,_,_> { Theme = "light" } [ ]
+                ofType<EventListener,_,_> { Dispatch = dispatch } [ ]
+                Errored.notFound
+            ]
 
 open Elmish.Debug
 open Elmish.Navigation
@@ -192,6 +318,6 @@ Database.Init()
 
 Program.mkProgram init update root
 |> Program.toNavigable (parseHash Router.pageParser) setRoute
-|> Toast.Program.withToast renderToastWithFulma
+|> Toast.Program.withToast Toast.renderToastWithFulma
 |> Program.withReactSynchronous "elmish-app"
 |> Program.run

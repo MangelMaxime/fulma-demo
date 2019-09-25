@@ -222,3 +222,8 @@ html {
 
 @import './email-media.scss';
 @import './composer.scss';
+
+.force-disabled-style {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
