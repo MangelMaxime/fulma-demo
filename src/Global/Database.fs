@@ -26,7 +26,7 @@ type Email =
         mutable Subject : string
         mutable Body : string
         mutable Type : EmailType
-        mutable IsStared : bool
+        mutable IsStarred : bool
         mutable IsTrashed : bool
         mutable IsArchived : bool
         mutable IsRead : bool
@@ -87,7 +87,7 @@ let private fakeEmails =
             Date = DateTime(2018, 11, 7, 9, 45, 33, DateTimeKind.Utc)
             Body = faker.hacker.phrase()
             Type = EmailType.Received
-            IsStared = index % 3 = 0
+            IsStarred = index % 3 = 0
             IsTrashed = index % 2 = 0
             IsArchived = index % 2 <> 0
             IsRead = Helpers.Random.between 1. 7. < 3.
@@ -119,7 +119,7 @@ Here are some useful ressources:
 Maxime
                 """
             Type = EmailType.Received
-            IsStared = false
+            IsStarred = false
             IsTrashed = false
             IsArchived = false
             IsRead = true
@@ -143,7 +143,7 @@ Can you please point me in the right direction?
 Kitty
                 """
             Type = EmailType.Received
-            IsStared = false
+            IsStarred = false
             IsTrashed = false
             IsArchived = false
             IsRead = false
@@ -171,7 +171,7 @@ Here are some useful ressources:
 Maxime
                 """
             Type = EmailType.Sent
-            IsStared = false
+            IsStarred = false
             IsTrashed = false
             IsArchived = false
             IsRead = false
