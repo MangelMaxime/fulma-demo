@@ -32,9 +32,9 @@ let fetchInboxEmails (pageRank : int) (category : Email.Category) (session : Ses
                        && not email.IsTrashed
                         && email.Type = EmailType.Sent
 
-                | Email.Category.Stared ->
+                | Email.Category.Starred ->
                     email.Ancestor = None
-                        && email.IsStared
+                        && email.IsStarred
                         && not email.IsTrashed
                         && email.Type = EmailType.Received
 
@@ -148,7 +148,7 @@ let sendEmail (parameters : SendEmailParameters) =
                     Date = DateTime.UtcNow
                     Body = parameters.Body
                     Type = EmailType.Sent
-                    IsStared = false
+                    IsStarred = false
                     IsTrashed = false
                     IsArchived = false
                     IsRead = true

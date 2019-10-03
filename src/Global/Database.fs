@@ -191,7 +191,7 @@ Awesome,
 thank you.
                 """
             Type = EmailType.Received
-            IsStared = false
+            IsStarred = false
             IsTrashed = false
             IsArchived = false
             IsRead = false

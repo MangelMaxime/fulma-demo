@@ -11,7 +11,7 @@ type MailboxRoute =
     | Inbox of int option
     | Sent of int option
     | Archive of int option
-    | Stared of int option
+    | Starred of int option
     | Trash of int option
 
 [<RequireQualifiedAccess>]
@@ -54,8 +54,8 @@ let private toHash page =
         | MailboxRoute.Sent pageRank ->
             mailboxRouteToHash "sent" pageRank
 
-        | MailboxRoute.Stared pageRank ->
-            mailboxRouteToHash "stared" pageRank
+        | MailboxRoute.Starred pageRank ->
+            mailboxRouteToHash "starred" pageRank
 
         | MailboxRoute.Trash pageRank ->
             mailboxRouteToHash "trash" pageRank
@@ -89,7 +89,7 @@ let pageParser: Parser<Route -> Route, Route> =
         [
             map (MailboxRoute.Inbox >> Mailbox) (s "mailbox" </> s "inbox" <?> intParam "page")
             map (MailboxRoute.Sent >> Mailbox) (s "mailbox" </> s "sent" <?> intParam "page")
-            map (MailboxRoute.Stared >> Mailbox) (s "mailbox" </> s "stared" <?> intParam "page")
+            map (MailboxRoute.Starred >> Mailbox) (s "mailbox" </> s "starred" <?> intParam "page")
             map (MailboxRoute.Trash >> Mailbox) (s "mailbox" </> s "trash" <?> intParam "page")
             map (MailboxRoute.Archive >> Mailbox) (s "mailbox" </> s "archive" <?> intParam "page")
 

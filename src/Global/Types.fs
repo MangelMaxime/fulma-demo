@@ -21,7 +21,7 @@ module Email =
         | Inbox
         | Sent
         | Archive
-        | Stared
+        | Starred
         | Trash
         | Folder of string
         | Tag of string
