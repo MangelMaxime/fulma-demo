@@ -244,6 +244,6 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
             Column.column [ ]
                 [
                     Mailbox.Composer.view model.Composer (ComposerMsg >> dispatch)
-                    Mailbox.Inbox.view model.Inbox (InboxMsg >> dispatch)
+                    Mailbox.Inbox.view model.ActiveCategory model.Inbox (InboxMsg >> dispatch)
                 ]
         ]

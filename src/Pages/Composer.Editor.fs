@@ -35,6 +35,7 @@ type SendResult =
 type Msg =
     | ChangeBody of string
     | ChangeSubject of string
+    | ToggleCollapseExpand
     | Collapse
     | Expand
     | RemoveTo of string
@@ -109,6 +110,12 @@ let update (composerGuid : Guid) (msg  : Msg) (model : Model) =
     | Expand ->
         { model with
             IsExpanded = true
+        }
+        , Cmd.none
+
+    | ToggleCollapseExpand ->
+        { model with
+            IsExpanded = not model.IsExpanded
         }
         , Cmd.none
 
@@ -330,7 +337,12 @@ let view (rank : int) (model : Model) (dispatch : Dispatch<Msg>) (onClose : unit
         [
             div [ Class "composer-editor-container" ]
                 [
-                    div [ Class "composer-editor-header" ]
+                    div [
+                            Class "composer-editor-header"
+                            OnDoubleClick (fun _ ->
+                                dispatch ToggleCollapseExpand
+                            )
+                        ]
                         [
                             div [ Class "composer-editor-title" ]
                                 [

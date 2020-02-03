@@ -107,6 +107,40 @@ let markAsUnread (guids : Guid list) (session : Session) =
         return updatedEmails
     }
 
+let moveToTrask (guids : Guid list) (session : Session) =
+    promise {
+        do! Common.checkSessionValidity session
+        do! Common.randomDelay ()
+
+        Database.Emails
+            .filter(fun (email : Email) ->
+                List.contains email.Guid guids
+            )
+            .each(fun (email : Email) ->
+                email.IsTrashed <- true
+            )
+            .write()
+
+        return ()
+    }
+
+let moveToInbox (guids : Guid list) (session : Session) =
+    promise {
+        do! Common.checkSessionValidity session
+        do! Common.randomDelay ()
+
+        Database.Emails
+            .filter(fun (email : Email) ->
+                List.contains email.Guid guids
+            )
+            .each(fun (email : Email) ->
+                email.IsTrashed <- false
+            )
+            .write()
+
+        return ()
+    }
+
 type SendEmailParameters =
     {
         From : string

@@ -30,6 +30,16 @@ type Read_Unread_Result =
     | Success of emails : Email list
     | Errored of exn
 
+[<RequireQualifiedAccess>]
+type MoveToTrashResult =
+    | Success of unit
+    | Errored of exn
+
+[<RequireQualifiedAccess>]
+type MoveToInboxResult =
+    | Success of unit
+    | Errored of exn
+
 type Msg =
     | FetchEmailListResult of FetchEmailListResult
     | Open of Email
@@ -39,8 +49,11 @@ type Msg =
     | EmailMetaMsg of Guid * Inbox.EmailMeta.Msg
     | MarkAsRead
     | Read_Unread_Result of Read_Unread_Result
+    | MoveToTrashResult of MoveToTrashResult
+    | MoveToInboxResult of MoveToInboxResult
     | MarkAsUnRead
     | MoveToTrash
+    | MoveToInbox
     | MoveToArchive
     | MoveToSpam
 
@@ -81,6 +94,26 @@ let private markAsUnread (context : Context, guids : Guid list) =
         return emails
     }
 
+let private moveToTrask (context : Context, guids : Guid list) =
+    promise {
+        let request = API.Email.moveToTrask guids
+        let! res =
+            request context.Session
+            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+
+        return res
+    }
+
+let private moveToInbox (context : Context, guids : Guid list) =
+    promise {
+        let request = API.Email.moveToInbox guids
+        let! res =
+            request context.Session
+            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+
+        return res
+    }
+
 let init (context : Context) =
     {
         Emails = Map.empty
@@ -91,8 +124,9 @@ let init (context : Context) =
     }
     , Cmd.OfPromise.either fetchInboxEmails context FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
 
-
-let tryGetGuidsToMarkAsReadOrUnread (model : Model) =
+/// Returns None if no mail is opened or selected
+/// Returns Some [...] with ... the guids of the emails opened or selected
+let tryGetGuidsToApplyActions (model : Model) =
     // If there is no checked email
     if model.NumberOfChecked = 0 then
         // Try to see if we have an opened email
@@ -130,6 +164,9 @@ let update (context : Context) (msg : Msg) (model : Model) =
             { model with
                 Emails = emails
                 IsLoading = false
+                EmailView = None
+                NumberOfChecked = 0
+                TotalPage = 0
             }
             , Cmd.none
 
@@ -277,7 +314,7 @@ let update (context : Context) (msg : Msg) (model : Model) =
         , Cmd.none
 
     | MarkAsRead ->
-        match tryGetGuidsToMarkAsReadOrUnread model with
+        match tryGetGuidsToApplyActions model with
         | Some guids ->
             model
             , Cmd.OfPromise.either
@@ -290,7 +327,7 @@ let update (context : Context) (msg : Msg) (model : Model) =
             , Cmd.none
 
     | MarkAsUnRead ->
-        match tryGetGuidsToMarkAsReadOrUnread model with
+        match tryGetGuidsToApplyActions model with
         | Some guids ->
             model
             , Cmd.OfPromise.either
@@ -322,9 +359,58 @@ let update (context : Context) (msg : Msg) (model : Model) =
             , Cmd.none
 
     | MoveToTrash ->
-        model
-        , Cmd.none
+        match tryGetGuidsToApplyActions model with
+        | Some guids ->
+            model
+            , Cmd.OfPromise.either
+                moveToTrask
+                (context, guids)
+                (MoveToTrashResult.Success >> MoveToTrashResult)
+                (MoveToTrashResult.Errored >> MoveToTrashResult)
 
+        | None ->
+            model
+            , Cmd.none
+
+    | MoveToTrashResult result ->
+        match result with
+        | MoveToTrashResult.Success () ->
+            { model with
+                IsLoading = true
+            }
+            , Cmd.OfPromise.either fetchInboxEmails context FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
+
+        | MoveToTrashResult.Errored error ->
+            Logger.errorfn "An error occured.\n%s" error.Message
+            model
+            , Cmd.none
+
+    | MoveToInbox ->
+        match tryGetGuidsToApplyActions model with
+        | Some guids ->
+            model
+            , Cmd.OfPromise.either
+                moveToInbox
+                (context, guids)
+                (MoveToInboxResult.Success >> MoveToInboxResult)
+                (MoveToInboxResult.Errored >> MoveToInboxResult)
+
+        | None ->
+            model
+            , Cmd.none
+
+    | MoveToInboxResult result ->
+        match result with
+        | MoveToInboxResult.Success () ->
+            { model with
+                IsLoading = true
+            }
+            , Cmd.OfPromise.either fetchInboxEmails context FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
+
+        | MoveToInboxResult.Errored error ->
+            Logger.errorfn "An error occured.\n%s" error.Message
+            model
+            , Cmd.none
     | MoveToArchive ->
         model
         , Cmd.none
@@ -365,7 +451,13 @@ let buttonIconDisabled icon onClickMsg dispatch =
                 ]
         ]
 
-let menubar (model : Model) (dispatch : Dispatch<Msg>) =
+let menubar (category : Email.Category) (model : Model) (dispatch : Dispatch<Msg>) =
+    let moveToTrashOrInboxButton =
+        match category with
+        | Email.Category.Trash ->
+            buttonIcon Fa.Solid.Inbox MoveToInbox dispatch
+        | _ -> buttonIcon Fa.Regular.TrashAlt MoveToTrash dispatch
+
     Level.level
         [
             Level.Level.CustomClass "is-menubar"
@@ -406,7 +498,7 @@ let menubar (model : Model) (dispatch : Dispatch<Msg>) =
                         ]
                     Button.list [ Button.List.HasAddons ]
                         [
-                            buttonIconDisabled Fa.Regular.TrashAlt MoveToTrash dispatch
+                            moveToTrashOrInboxButton
                             buttonIconDisabled Fa.Solid.Archive MoveToArchive dispatch
                             buttonIconDisabled Fa.Solid.Ban MoveToSpam dispatch
                         ]
@@ -569,7 +661,7 @@ let private renderNoSelectionSummary =
                 ]
         ]
 
-let view (model : Model) (dispatch : Dispatch<Msg>) =
+let view (category : Email.Category) (model : Model) (dispatch : Dispatch<Msg>) =
     let emailMetaDispatch (guid : Guid) =
         Curry.apply EmailMetaMsg guid >> dispatch
 
@@ -618,7 +710,7 @@ let view (model : Model) (dispatch : Dispatch<Msg>) =
 
     div [ Class "inbox-container" ]
         [
-            menubar model dispatch
+            menubar category model dispatch
             Columns.columns [ Columns.IsGapless ]
                 [
                     Column.column
