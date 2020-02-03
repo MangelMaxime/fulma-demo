@@ -49,9 +49,15 @@
                 padding-top: .2rem;
                 padding-left: .5rem;
                 font-weight: $weight-semibold;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .composer-editor-actions {
+                // Prevents the actions to take severals line on very long title
+                flex-shrink:0;
+
                 .icon {
                     &:hover {
                         color: $grey-lighter;
@@ -82,7 +88,6 @@
                         border-radius: 0;
                     }
                 }
-
 
                 .composer-content-editor {
                     height: 300px;
