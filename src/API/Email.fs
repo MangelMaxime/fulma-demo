@@ -26,6 +26,7 @@ let fetchInboxEmails (pageRank : int) (category : Email.Category) (session : Ses
                     email.Ancestor = None
                        && not email.IsTrashed
                         && email.Type = EmailType.Received
+                        && not email.IsArchived
 
                 | Email.Category.Sent ->
                     email.Ancestor = None
@@ -135,11 +136,30 @@ let moveToInbox (guids : Guid list) (session : Session) =
             )
             .each(fun (email : Email) ->
                 email.IsTrashed <- false
+                email.IsArchived <- false
             )
             .write()
 
         return ()
     }
+
+let moveToArchive (guids : Guid list) (session : Session) =
+    promise {
+        do! Common.checkSessionValidity session
+        do! Common.randomDelay ()
+
+        Database.Emails
+            .filter(fun (email : Email) ->
+                List.contains email.Guid guids
+            )
+            .each(fun (email : Email) ->
+                email.IsArchived <- true
+            )
+            .write()
+
+        return ()
+    }
+    
 
 type SendEmailParameters =
     {

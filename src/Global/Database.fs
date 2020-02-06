@@ -78,7 +78,12 @@ let mutable private dbInstance : Lowdb.Lowdb option = Option.None
 let faker = FakerJS.fakerStatic
 
 let private fakeEmails =
-    Array.init 100 (fun index ->
+    Array.init 100 (fun _ ->
+        let randomState = Helpers.Random.between 1. 3.
+        let isStarred = randomState = 1.
+        let isTrashed = randomState = 2.
+        let isArchived = randomState = 3.
+
         {
             Guid = Guid.NewGuid()
             From = faker.internet.email()
@@ -87,9 +92,9 @@ let private fakeEmails =
             Date = DateTime(2018, 11, 7, 9, 45, 33, DateTimeKind.Utc)
             Body = faker.hacker.phrase()
             Type = EmailType.Received
-            IsStarred = index % 3 = 0
-            IsTrashed = index % 2 = 0
-            IsArchived = index % 2 <> 0
+            IsStarred = isStarred
+            IsTrashed = isTrashed
+            IsArchived = isArchived
             IsRead = Helpers.Random.between 1. 7. < 3.
             Tags = [| |]
             Ancestor = None

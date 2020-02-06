@@ -40,6 +40,11 @@ type MoveToInboxResult =
     | Success of unit
     | Errored of exn
 
+[<RequireQualifiedAccess>]
+type MoveToArchiveResult =
+    | Success of unit
+    | Errored of exn
+
 type Msg =
     | FetchEmailListResult of FetchEmailListResult
     | Open of Email
@@ -51,6 +56,7 @@ type Msg =
     | Read_Unread_Result of Read_Unread_Result
     | MoveToTrashResult of MoveToTrashResult
     | MoveToInboxResult of MoveToInboxResult
+    | MoveToArchiveResult of MoveToArchiveResult
     | MarkAsUnRead
     | MoveToTrash
     | MoveToInbox
@@ -113,6 +119,18 @@ let private moveToInbox (context : Context, guids : Guid list) =
 
         return res
     }
+
+
+let private moveToArchive (context : Context, guids : Guid list) =
+    promise {
+        let request = API.Email.moveToArchive guids
+        let! res =
+            request context.Session
+            |> Promise.catchBind (API.Common.handleRefreshToken context.Session request)
+
+        return res
+    }
+
 
 let init (context : Context) =
     {
@@ -411,9 +429,33 @@ let update (context : Context) (msg : Msg) (model : Model) =
             Logger.errorfn "An error occured.\n%s" error.Message
             model
             , Cmd.none
+            
     | MoveToArchive ->
-        model
-        , Cmd.none
+        match tryGetGuidsToApplyActions model with
+        | Some guids ->
+            model
+            , Cmd.OfPromise.either
+                moveToArchive
+                (context, guids)
+                (MoveToArchiveResult.Success >> MoveToArchiveResult)
+                (MoveToArchiveResult.Errored >> MoveToArchiveResult)
+
+        | None ->
+            model
+            , Cmd.none
+
+    | MoveToArchiveResult result ->
+        match result with
+        | MoveToArchiveResult.Success () ->
+            { model with
+                IsLoading = true
+            }
+            , Cmd.OfPromise.either fetchInboxEmails context FetchEmailListResult (FetchEmailListResult.Errored >> FetchEmailListResult)
+
+        | MoveToArchiveResult.Errored error ->
+            Logger.errorfn "An error occured.\n%s" error.Message
+            model
+            , Cmd.none
 
     | MoveToSpam ->
         model
@@ -458,6 +500,12 @@ let menubar (category : Email.Category) (model : Model) (dispatch : Dispatch<Msg
             buttonIcon Fa.Solid.Inbox MoveToInbox dispatch
         | _ -> buttonIcon Fa.Regular.TrashAlt MoveToTrash dispatch
 
+    let moveToArchiveOrInboxButton =
+        match category with
+        | Email.Category.Archive ->
+            buttonIcon Fa.Solid.Inbox MoveToInbox dispatch
+        | _ -> buttonIcon Fa.Solid.Archive MoveToArchive dispatch
+
     Level.level
         [
             Level.Level.CustomClass "is-menubar"
@@ -499,8 +547,9 @@ let menubar (category : Email.Category) (model : Model) (dispatch : Dispatch<Msg
                     Button.list [ Button.List.HasAddons ]
                         [
                             moveToTrashOrInboxButton
-                            buttonIconDisabled Fa.Solid.Archive MoveToArchive dispatch
-                            buttonIconDisabled Fa.Solid.Ban MoveToSpam dispatch
+                            moveToArchiveOrInboxButton
+                            // TODO: Should we implement a spam category?
+                            // buttonIcon Fa.Solid.Ban MoveToSpam dispatch 
                         ]
                 ]
             // Level.right [ ]
