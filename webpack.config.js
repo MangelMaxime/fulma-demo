@@ -41,6 +41,7 @@ var webpack = require("webpack");
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const execSync = require('child_process').execSync;
 
 // The HtmlWebpackPlugin allows us to use a template for the index.html page
 // and automatically injects <script> or <link> tags for generated bundles.
@@ -51,6 +52,17 @@ var commonPlugins = [
     }),
     new MiniCssExtractPlugin({ filename: '[name].css' })
 ];
+
+var isGitPod = process.env.GITPOD_INSTANCE_ID !== undefined;
+
+function getDevServerUrl() {
+    if (isGitPod) {
+        const url = execSync('gp url 8080');
+        return url.toString().trim();
+    } else {
+        return `http://localhost:${CONFIG.devServerPort}`;
+    }
+}
 
 module.exports = {
     // In development, have two different entries to speed up hot reloading.
@@ -110,12 +122,15 @@ module.exports = {
     },
     // Configuration for webpack-dev-server
     devServer: {
+        public: getDevServerUrl(),
         publicPath: "/",
         contentBase: CONFIG.assetsDir,
         port: CONFIG.devServerPort,
         proxy: CONFIG.devServerProxy,
         hot: true,
-        inline: true
+        inline: true,
+        host: '0.0.0.0',
+        allowedHosts: ['localhost', '.gitpod.io']
     },
     // - fable-loader: transforms F# into JS
     // - babel-loader: transforms JS to old syntax (compatible with old browsers)
