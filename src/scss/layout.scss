@@ -38,6 +38,19 @@ html {
                 .media.is-email-preview {
                     padding-right: $media-margin;
 
+                    .email-subject {
+                        display: table;
+                        table-layout: fixed;
+                        width: 100%;
+                        margin-top: auto;
+
+                        .email-subject-text {
+                            display: table-cell;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                        }
+                    }
 
                     &.is-unread {
                         &::before {
@@ -52,6 +65,7 @@ html {
                         .email-subject {
                             font-weight: $weight-bold;
                         }
+
                     }
 
                     &:first-child {

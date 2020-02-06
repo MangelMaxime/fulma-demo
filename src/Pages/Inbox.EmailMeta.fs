@@ -265,8 +265,11 @@ let view =
                         Media.content [ ]
                             [
                                 div [ Class "email-subject" ]
-                                    [ str props.Model.Email.Subject ]
-                                div [ Class "email-sender" ]
+                                    [ 
+                                        div [ Class "email-subject-text" ]
+                                            [ str props.Model.Email.Subject ] 
+                                    ]
+                                div [ Class "email-sender" ] 
                                     [ str props.Model.Email.From ]
                             ]
                         Media.right [ ]
