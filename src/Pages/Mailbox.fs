@@ -57,8 +57,8 @@ let init (session : Types.Session) (route : Router.MailboxRoute) =
     | Router.MailboxRoute.Sent pageRank ->
         initInbox session pageRank Email.Category.Sent
 
-    | Router.MailboxRoute.Stared pageRank ->
-        initInbox session pageRank Email.Category.Stared
+    | Router.MailboxRoute.Starred pageRank ->
+        initInbox session pageRank Email.Category.Starred
 
     | Router.MailboxRoute.Trash pageRank ->
         initInbox session pageRank Email.Category.Trash
@@ -173,12 +173,12 @@ let private sideMenu (model : Model) (dispatch : Dispatch<Msg>) =
                     standardCategoryItem
                         {|
                             IsActive =
-                                model.ActiveCategory = Email.Category.Stared
+                                model.ActiveCategory = Email.Category.Starred
                             Route =
-                                Router.MailboxRoute.Stared None
+                                Router.MailboxRoute.Starred None
                                 |> Router.Mailbox
                             Icon = Fa.Solid.Star
-                            Text = "Stared"
+                            Text = "Starred"
                         |}
                     standardCategoryItem
                         {|
