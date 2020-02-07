@@ -413,7 +413,7 @@ let update (context : Context) (msg : Msg) (model : Model) =
                 (MoveToInboxResult.Success >> MoveToInboxResult)
                 (MoveToInboxResult.Errored >> MoveToInboxResult)
 
-        | None ->
+        | None -> 
             model
             , Cmd.none
 

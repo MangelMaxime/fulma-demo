@@ -22,7 +22,7 @@ type Model =
         IsExpanded : bool
         IsWaitingServer : bool
         Errors : Validation.ErrorDef list
-    }
+    }   
 
     member this.SortableKey = this.CreatedAt
 
@@ -46,23 +46,29 @@ type Msg =
     | Send
     | SendResult of SendResult
 
-let init (ancestor : Email option) =
-    match ancestor with
-    | Some ancestor ->
-        {
-            CreatedAt = DateTime.Now
-            ToValue = None
-            To = []
-            Body =
-                sprintf "\n\n\n\n\n-------%s" ancestor.Body
-            Subject = "RE:" + ancestor.Subject
-            Ancestor = Some ancestor.Guid
-            IsExpanded = true
-            IsWaitingServer = false
-            Errors = []
-        }
+type InitKind =
+    | New
+    | FromReply of Email
+    | FromReplyAll of Email
+    | FromTransfer of Email
 
-    | None ->
+let private initFromAncestor (originalEmail : Email) (toList : string list) (suffix : string) =
+    {
+        CreatedAt = DateTime.Now
+        ToValue = None
+        To = toList
+        Body =
+            sprintf "\n\n\n\n\n-------\n%s" originalEmail.Body
+        Subject = sprintf "%s: %s" suffix originalEmail.Subject
+        Ancestor = Some originalEmail.Guid
+        IsExpanded = true
+        IsWaitingServer = false
+        Errors = []
+    }
+
+let init (session : Types.Session) (initKind : InitKind) =
+    match initKind with
+    | New ->
         {
             CreatedAt = DateTime.Now
             ToValue = None
@@ -74,6 +80,24 @@ let init (ancestor : Email option) =
             IsWaitingServer = false
             Errors = []
         }
+
+    | FromReply originalEmail ->
+        
+        initFromAncestor originalEmail [ originalEmail.From ] "RE"
+
+    | FromReplyAll originalEmail ->
+        let ancestorToFiltered = 
+            originalEmail.To
+            |> Array.filter (fun item ->
+                item <> session.Email
+            )
+            |> Array.toList
+
+        initFromAncestor originalEmail (originalEmail.From :: ancestorToFiltered) "RE"
+
+    | FromTransfer originalEmail ->
+        initFromAncestor originalEmail [ ] "TR"
+
 
 let private askToClose (guid : Guid) =
     let detail =

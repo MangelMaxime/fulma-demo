@@ -81,10 +81,10 @@ let update (session : Types.Session) (msg  : Msg) (model : Model) =
         , Cmd.map InboxMsg inboxCmd
 
     | ComposerMsg composerMsg ->
-        let (composerModel, composerCmd) = Mailbox.Composer.update composerMsg model.Composer
+        let (composerModel, composerCmd) = Mailbox.Composer.update session composerMsg model.Composer
         { model with
             Composer = composerModel
-        }
+        } 
         , Cmd.map ComposerMsg composerCmd
 
 

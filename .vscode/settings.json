@@ -16,7 +16,7 @@
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
     "workbench.iconTheme": "material-icon-theme",
-    "workbench.colorTheme": "dark",
+    "workbench.colorTheme": "One Dark Pro",
     "editor.fontSize": 13,
     "terminal.integrated.fontSize": 13,
     "editor.fontLigatures": true,

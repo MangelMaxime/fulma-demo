@@ -6,6 +6,7 @@ open Fable.React
 open Fable.React.Props
 open Fable.FontAwesome
 open Elmish
+open Fable.Core.JsInterop
 
 type Model =
     {
@@ -42,8 +43,15 @@ let formatDate =
 let converter = Showdown.Globals.Converter.Create()
 
 
-let buttonIcon icon =
-    Button.button [ ]
+let buttonIcon icon (action : unit -> unit) =
+    Button.button 
+        [ 
+            Button.OnClick (fun ev ->
+                ev.stopPropagation()
+                ev.preventDefault()
+                action ()
+            )
+        ]
         [ Icon.icon [ ]
             [ Fa.i [ icon ]
                 [ ]
@@ -99,9 +107,36 @@ let private emailMediaContent (model : Model) (dispatch : Dispatch<Msg>) =
                                     dropdownAction Fa.Solid.Tag
                                     Button.list [ Button.List.HasAddons ]
                                         [
-                                            buttonIcon Fa.Solid.Reply
-                                            buttonIcon Fa.Solid.ReplyAll
-                                            buttonIcon Fa.Solid.Share
+                                            buttonIcon Fa.Solid.Reply (fun _ -> 
+                                                let detail =
+                                                    jsOptions<Browser.Types.CustomEventInit>(fun o ->
+                                                        o.detail <- Some (box model.Email)
+                                                    )
+
+                                                let event = Browser.Event.CustomEvent.Create("composer-editor-compose-from-reply", detail)
+                                                Browser.Dom.window.dispatchEvent(event)
+                                                |> ignore
+                                            )
+                                            buttonIcon Fa.Solid.ReplyAll (fun _ -> 
+                                                let detail =
+                                                    jsOptions<Browser.Types.CustomEventInit>(fun o ->
+                                                        o.detail <- Some (box model.Email)
+                                                    )
+
+                                                let event = Browser.Event.CustomEvent.Create("composer-editor-compose-from-reply-all", detail)
+                                                Browser.Dom.window.dispatchEvent(event)
+                                                |> ignore
+                                            )
+                                            buttonIcon Fa.Solid.Share (fun _ -> 
+                                                let detail =
+                                                    jsOptions<Browser.Types.CustomEventInit>(fun o ->
+                                                        o.detail <- Some (box model.Email)
+                                                    )
+
+                                                let event = Browser.Event.CustomEvent.Create("composer-editor-compose-from-transfer", detail)
+                                                Browser.Dom.window.dispatchEvent(event)
+                                                |> ignore
+                                            )
                                         ]
                                 ]
 

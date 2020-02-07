@@ -21,12 +21,12 @@
     <Compile Include="Views/Navbar.fs" />
     <Compile Include="Views/Errored.fs" />
     <Compile Include="Pages/Login.fs" />
+    <Compile Include="Pages/Composer.Editor.fs" />
+    <Compile Include="Pages/Composer.fs" />
     <Compile Include="Pages/Inbox.EmailView.EmailMedia.fs" />
     <Compile Include="Pages/Inbox.EmailView.fs" />
     <Compile Include="Pages/Inbox.EmailMeta.fs" />
     <Compile Include="Pages/Inbox.fs" />
-    <Compile Include="Pages/Composer.Editor.fs" />
-    <Compile Include="Pages/Composer.fs" />
     <Compile Include="Pages/Mailbox.fs" />
     <Compile Include="Pages/Settings.Labels.fs" />
     <Compile Include="Pages/Settings.fs" />
