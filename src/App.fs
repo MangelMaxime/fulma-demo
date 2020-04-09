@@ -51,8 +51,8 @@ let private navbarView isBurgerOpen dispatch =
                                         [ Fa.i [ Fa.Brand.Github
                                                  Fa.Size Fa.FaLarge ] [ ] ] ]
                       // Make sure to have the navbar burger as the last child of the brand
-                      Navbar.burger [ Fulma.Common.CustomClass (if isBurgerOpen then "is-active" else "")
-                                      Fulma.Common.Props [
+                      Navbar.burger [ Navbar.Burger.CustomClass (if isBurgerOpen then "is-active" else "")
+                                      Navbar.Burger.Props [
                                         OnClick (fun _ -> dispatch ToggleBurger) ] ]
                         [ span [ ] [ ]
                           span [ ] [ ]
