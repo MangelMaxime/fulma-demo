@@ -1,3 +1,4 @@
+*.fs.js
 packages/
 paket-files/
 paket.local

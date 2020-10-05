@@ -35,11 +35,11 @@ Target.create "YarnInstall" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-    Yarn.exec "webpack" id
+    DotNet.exec id "fable" "src --run webpack" |> ignore
 )
 
 Target.create "Watch" (fun _ ->
-    Yarn.exec "webpack-dev-server" id
+    DotNet.exec id "fable" "watch src --run webpack-dev-server" |> ignore
 )
 
 // Where to push generated documentation
