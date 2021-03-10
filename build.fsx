@@ -21,7 +21,12 @@ Target.create "Clean" (fun _ ->
     !! "src/bin"
     ++ "src/obj"
     ++ "output"
+    ++ "src/.fable"
     |> Seq.iter Shell.cleanDir
+
+    !! "src/**/*fs.js"
+    ++ "src/**/*fs.js.map"
+    |> Seq.iter Shell.rm
 )
 
 Target.create "DotnetRestore" (fun _ ->
