@@ -39,7 +39,7 @@ Target.create "Build" (fun _ ->
 )
 
 Target.create "Watch" (fun _ ->
-    DotNet.exec id "fable" "watch src -s --run webpack-dev-server" |> ignore
+    DotNet.exec id "fable" "watch src -s --run webpack serve" |> ignore
 )
 
 // Where to push generated documentation
