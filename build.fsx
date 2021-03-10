@@ -21,7 +21,12 @@ Target.create "Clean" (fun _ ->
     !! "src/bin"
     ++ "src/obj"
     ++ "output"
+    ++ "src/.fable"
     |> Seq.iter Shell.cleanDir
+
+    !! "src/**/*fs.js"
+    ++ "src/**/*fs.js.map"
+    |> Seq.iter Shell.rm
 )
 
 Target.create "DotnetRestore" (fun _ ->
@@ -35,11 +40,11 @@ Target.create "YarnInstall" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-    Yarn.exec "webpack" id
+    DotNet.exec id "fable" "src --run webpack" |> ignore
 )
 
 Target.create "Watch" (fun _ ->
-    Yarn.exec "webpack-dev-server" id
+    DotNet.exec id "fable" "watch src -s --run webpack serve" |> ignore
 )
 
 // Where to push generated documentation

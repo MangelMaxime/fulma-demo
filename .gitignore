@@ -1,3 +1,5 @@
+*.fs.js
+*.fs.js.map
 packages/
 paket-files/
 paket.local

@@ -6,7 +6,7 @@
 
 var CONFIG = {
     indexHtmlTemplate: './src/index.html',
-    fsharpEntry: './src/Demo.fsproj',
+    fsharpEntry: './src/App.fs.js',
     cssEntry: './src/scss/main.scss',
     outputDir: './output',
     assetsDir: './public',
@@ -30,7 +30,7 @@ var CONFIG = {
 }
 
 // If we're running the webpack-dev-server, assume we're in development mode
-var isProduction = !process.argv.find(v => v.indexOf('webpack-dev-server') !== -1);
+var isProduction = !process.argv.find(v => v.indexOf('serve') !== -1);
 console.log("Bundling for " + (isProduction ? "production" : "development") + "...");
 
 var path = require("path");
@@ -51,19 +51,16 @@ var commonPlugins = [
 module.exports = {
     // In development, have two different entries to speed up hot reloading.
     // In production, have a single entry but use mini-css-extract-plugin to move the styles to a separate file.
-    entry: isProduction ? {
+    entry: {
         app: [CONFIG.fsharpEntry, CONFIG.cssEntry]
-    } : {
-            app: [CONFIG.fsharpEntry],
-            style: [CONFIG.cssEntry]
-        },
+    },
     // Add a hash to the output file name in production
     // to prevent browser caching if code changes
     output: {
         path: path.join(__dirname, CONFIG.outputDir),
-        filename: isProduction ? '[name].[hash].js' : '[name].js',
+        filename: isProduction ? '[name].[fullhash].js' : '[name].js',
         devtoolModuleFilenameTemplate: info =>
-          path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
+            path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
     },
     mode: isProduction ? "production" : "development",
     devtool: isProduction ? "source-map" : "eval-source-map",
@@ -89,7 +86,11 @@ module.exports = {
     plugins: isProduction ?
         commonPlugins.concat([
             new MiniCssExtractPlugin({ filename: 'style.css' }),
-            new CopyWebpackPlugin([{ from: CONFIG.assetsDir }]),
+            new CopyWebpackPlugin({
+                patterns: [
+                    { from: CONFIG.assetsDir }
+                ]
+            }),
         ])
         : commonPlugins.concat([
             new webpack.HotModuleReplacementPlugin(),
@@ -107,20 +108,15 @@ module.exports = {
         hot: true,
         inline: true
     },
-    // - fable-loader: transforms F# into JS
     // - babel-loader: transforms JS to old syntax (compatible with old browsers)
     // - sass-loaders: transforms SASS/SCSS into JS
     // - file-loader: Moves files referenced in the code (fonts, images) into output folder
     module: {
         rules: [
             {
-                test: /\.fs(x|proj)?$/,
-                use: {
-                    loader: "fable-loader",
-                    options: {
-                        babel: CONFIG.babel
-                    }
-                },
+                test: /\.js$/,
+                enforce: "pre",
+                use: ["source-map-loader"],
             },
             {
                 test: /\.js$/,

@@ -2,13 +2,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Chrome",
-            "type": "chrome",
+            "name": "Launch Chrome",
             "request": "launch",
+            "type": "chrome",
             "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
             "sourceMapPathOverrides": {
-                "webpack://*": "${workspaceFolder}/*",
+                "webpack:///./~/*": "${workspaceFolder}/node_modules/*",
+                "webpack://?:*/*": "${workspaceFolder}/*"
             },
             "preLaunchTask": "Start"
         }
