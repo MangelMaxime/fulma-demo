@@ -12,7 +12,7 @@
     "bulma": "^0.8.1",
     "bulma-pageloader": "^0.3.0",
     "lowdb": "^1.0.0",
-    "marked": "^0.8.2",
+    "marked": "^4.0.10",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "showdown": "^1.9.1"
