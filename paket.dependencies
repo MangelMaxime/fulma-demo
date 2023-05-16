@@ -16,19 +16,3 @@ nuget Fulma
 nuget Fulma.Extensions.Wikiki.PageLoader
 nuget Fable.FontAwesome.Free
 nuget Thoth.Json
-
-group netcorebuild
-    storage:none
-    source https://www.nuget.org/api/v2
-    framework: netstandard2.0
-
-    nuget NETStandard.Library.NETFramework
-    nuget Fake.DotNet.Cli
-    nuget Fake.DotNet.Paket
-    nuget Fake.Core.Target
-    nuget Fake.Core.Process
-    nuget Fake.Core.String
-    nuget Fake.Core.ReleaseNotes
-    nuget Fake.IO.FileSystem
-    nuget Fake.Tools.Git
-    nuget Fake.JavaScript.Yarn

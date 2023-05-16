@@ -48,7 +48,7 @@ type Answer =
     static member Decoder =
         Decode.object (fun get ->
             { Id        = get.Required.Field "id" Decode.int
-              CreatedAt = get.Required.Field "created_at" Decode.datetime
+              CreatedAt = get.Required.Field "created_at" Decode.datetimeUtc
               AuthorId  = get.Required.Field "author_id" Decode.int
               Content   = get.Required.Field "content" Decode.string
               Score     = get.Required.Field "score" Decode.int } : Answer)
@@ -76,7 +76,7 @@ type Question =
               AuthorId    = get.Required.Field "author_id" Decode.int
               Title       = get.Required.Field "title" Decode.string
               Description = get.Required.Field "description" Decode.string
-              CreatedAt   = get.Required.Field "created_at" Decode.datetime
+              CreatedAt   = get.Required.Field "created_at" Decode.datetimeUtc
               Answers     = get.Required.Field "answers" (Decode.array Answer.Decoder) } : Question)
 
     static member Encoder question =
@@ -114,7 +114,7 @@ type DatabaseData =
 
 /// Database helpers
 
-let adapterOptions = jsOptions<Lowdb.AdapterOptions>(fun o ->
+let adapterOptions = jsOptions<Lowdb.AdapterOptions<DatabaseData>>(fun o ->
     o.serialize <- Some(DatabaseData.Encoder >> Encode.toString 0)
 
     o.deserialize <- Some(fun (data:string) ->
@@ -124,11 +124,11 @@ let adapterOptions = jsOptions<Lowdb.AdapterOptions>(fun o ->
     )
 )
 
-let mutable private dbInstance : Lowdb.Lowdb option = Option.None
+let mutable private dbInstance : Lowdb.Lowdb<DatabaseData> option = Option.None
 
 type Database =
     static member Lowdb
-        with get() : Lowdb.Lowdb =
+        with get() : Lowdb.Lowdb<DatabaseData> =
             if dbInstance.IsNone then
                 dbInstance <-
                     Lowdb.LocalStorageAdapter("database", adapterOptions)
@@ -138,12 +138,12 @@ type Database =
             dbInstance.Value
 
     static member Questions
-        with get() : Lowdb.Lowdb =
+        with get() : Lowdb.Lowdb<DatabaseData> =
             Database.Lowdb
                 .get(!^"Questions")
 
     static member Users
-        with get() : Lowdb.Lowdb =
+        with get() : Lowdb.Lowdb<DatabaseData> =
             Database.Lowdb
                 .get(!^"Users")
 

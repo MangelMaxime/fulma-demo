@@ -4,7 +4,7 @@ open Elmish
 open Types
 
 let init id =
-    Model.Empty id , Cmd.OfFunc.result (GetDetails id)
+    Model.Empty id , Cmd.ofMsg (GetDetails id)
 
 let update (user : Database.User) msg (model: Model) =
     match msg with

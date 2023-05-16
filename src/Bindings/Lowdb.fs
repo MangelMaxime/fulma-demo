@@ -104,33 +104,35 @@ open Fable.Core
         abstract format: Format option with get, set
         abstract writeOnChange: bool option with get, set
 
-    type [<AllowNullLiteral>] AdapterOptions =
+    type [<AllowNullLiteral>] AdapterOptions<'T> =
+        // This code now cause errors in recent version of F#
         abstract defaultValue : 'T option with get, set
         abstract serialize : ('T -> string) option with get, set
         abstract deserialize : (string -> 'T) option with get, set
 
-    and IAdapter(source: string, ?option: AdapterOptions) =
+
+    and IAdapter<'T>(source: string, ?option: AdapterOptions<'T>) =
         class end
 
-    and [<Import("*", "lowdb/adapters/FileAsync")>] FileAsyncAdapter(source: string, ?option: AdapterOptions) =
-        inherit IAdapter(source, ?option = option)
+    and [<Import("*", "lowdb/adapters/FileAsync")>] FileAsyncAdapter<'T>(source: string, ?option: AdapterOptions<'T>) =
+        inherit IAdapter<'T>(source, ?option = option)
 
-    and [<Import("*", "lowdb/adapters/FileSync")>] FileSyncAdapter(source: string, ?option: AdapterOptions) =
-        inherit IAdapter(source, ?option = option)
+    and [<Import("*", "lowdb/adapters/FileSync")>] FileSyncAdapter<'T>(source: string, ?option: AdapterOptions<'T>) =
+        inherit IAdapter<'T>(source, ?option = option)
 
-    and [<Import("*", "lowdb/adapters/Memory")>] MemoryAdapter(source: string, ?option: AdapterOptions) =
-        inherit IAdapter(source, ?option = option)
+    and [<Import("*", "lowdb/adapters/Memory")>] MemoryAdapter<'T>(source: string, ?option: AdapterOptions<'T>) =
+        inherit IAdapter<'T>(source, ?option = option)
 
-    and [<Import("*", "lowdb/adapters/LocalStorage")>] LocalStorageAdapter(source: string, ?option: AdapterOptions) =
-        inherit IAdapter(source, ?option = option)
+    and [<Import("*", "lowdb/adapters/LocalStorage")>] LocalStorageAdapter<'T>(source: string, ?option: AdapterOptions<'T>) =
+        inherit IAdapter<'T>(source, ?option = option)
 
     // type Adapter =
     //      static member FileAsync(source: string, ?options: AdapterOptions) :FileAsyncAdapter = jsNative
 
     // let FileAsyncAdapter =
 
-    type [<AllowNullLiteral>] [<Import("*","lowdb")>] Lowdb(adapter: IAdapter, ?options: Options) =
-        inherit LoDashWrapper<Lowdb>()
+    type [<AllowNullLiteral>] [<Import("*","lowdb")>] Lowdb<'T>(adapter: IAdapter<'T>, ?options: Options) =
+        inherit LoDashWrapper<Lowdb<'T>>()
         member __.getState(): obj = jsNative
         member __.setState(newState: obj): unit = jsNative
         member __.write(?source: string): unit = jsNative

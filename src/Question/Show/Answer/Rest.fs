@@ -16,6 +16,8 @@ let voteUp (questionId, answerId) =
             |> unbox<Answer>
             |> (fun answer -> answer.Score + 1)
 
+        printfn "New score: %d" newScore
+
         answer
             .assign(createObj [ "Score" ==> newScore])
             .write()

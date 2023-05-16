@@ -13,3 +13,4 @@ output/
 temp/
 
 .ionide/
+src/dist/

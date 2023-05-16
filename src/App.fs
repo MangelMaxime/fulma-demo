@@ -8,6 +8,9 @@ open Types
 open Fulma
 open Fable.FontAwesome
 open Fable.FontAwesome.Free
+open Fable.Core.JsInterop
+
+importSideEffects "./scss/main.scss"
 
 let private navbarEnd =
     Navbar.End.div [ ]

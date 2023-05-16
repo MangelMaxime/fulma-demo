@@ -1,5 +1,5 @@
-@import "~bulma/sass/utilities/initial-variables";
-@import "~bulma/sass/utilities/functions";
+@import "../../node_modules/bulma/sass/utilities/initial-variables";
+@import "../../node_modules/bulma/sass/utilities/functions";
 
 // Customize
 // Colors
@@ -7,14 +7,14 @@ $primary: #2D3947;
 // Links
 $link-hover: #00D1B2;
 
-$fa-font-path: "~@fortawesome/fontawesome-free/webfonts/";
-@import '~@fortawesome/fontawesome-free/scss/fontawesome.scss';
-@import "~@fortawesome/fontawesome-free/scss/solid.scss";
-@import "~@fortawesome/fontawesome-free/scss/regular.scss";
-@import "~@fortawesome/fontawesome-free/scss/brands.scss";
+$fa-font-path: "../../node_modules/@fortawesome/fontawesome-free/webfonts/";
+@import '../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss';
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/brands.scss";
 
-@import '~bulma/bulma.sass';
-@import '~bulma-pageloader/dist/css/bulma-pageloader.sass';
+@import '../../node_modules/bulma/bulma.sass';
+@import '../../node_modules/bulma-pageloader/dist/css/bulma-pageloader.sass';
 
 html,
 body {

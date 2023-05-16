@@ -1,82 +1,100 @@
-#r "paket: groupref netcorebuild //"
-#load ".fake/build.fsx/intellisense.fsx"
-#if !FAKE
-#r "Facades/netstandard"
-#r "netstandard"
-#endif
+#r "nuget: Fun.Build, 0.3.8"
+#r "nuget: Fake.IO.FileSystem, 5.23.1"
 
-#nowarn "52"
-
-open System
-open Fake.Core
-open Fake.Core.TargetOperators
-open Fake.DotNet
+open Fun.Build
 open Fake.IO
 open Fake.IO.Globbing.Operators
 open Fake.IO.FileSystemOperators
-open Fake.Tools.Git
-open Fake.JavaScript
 
-Target.create "Clean" (fun _ ->
-    !! "src/bin"
-    ++ "src/obj"
-    ++ "output"
-    ++ "src/.fable"
-    |> Seq.iter Shell.cleanDir
+[<Literal>]
+let SRC_DIR = "src"
 
-    !! "src/**/*fs.js"
-    ++ "src/**/*fs.js.map"
-    |> Seq.iter Shell.rm
-)
+module Glob =
 
-Target.create "DotnetRestore" (fun _ ->
-    DotNet.restore
-        (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
-        "fulma-demo.sln"
-)
+    let fableJs baseDir =
+        baseDir
+        </> "**/*.fs.js"
 
-Target.create "YarnInstall" (fun _ ->
-    Yarn.install id
-)
+    let fableJsMap baseDir =
+        baseDir
+        </> "**/*.fs.js.map"
 
-Target.create "Build" (fun _ ->
-    DotNet.exec id "fable" "src --run webpack" |> ignore
-)
+    let js baseDir =
+        baseDir
+        </> "**/*.js"
 
-Target.create "Watch" (fun _ ->
-    DotNet.exec id "fable" "watch src -s --run webpack serve" |> ignore
-)
+    let jsMap baseDir =
+        baseDir
+        </> "**/*.js.map"
 
-// Where to push generated documentation
-let githubLink = "git@github.com:MangelMaxime/fulma-demo.git"
-let publishBranch = "gh-pages"
-let fableRoot   = __SOURCE_DIRECTORY__
-let temp        = fableRoot </> "temp"
-let docsOuput = fableRoot </> "output"
+pipeline "Client" {
 
-// --------------------------------------------------------------------------------------
-// Release Scripts
-Target.create "PublishDocs" (fun _ ->
-    Shell.cleanDir temp
-    Repository.cloneSingleBranch "" githubLink publishBranch temp
+    stage "Restore dependencies" {
+        run "dotnet tool restore"
+        run "pnpm install"
+    }
 
-    Shell.copyRecursive docsOuput temp true |> Trace.logfn "%A"
-    Staging.stageAll temp
-    Commit.exec temp (sprintf "Update site (%s)" (DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
-    Branches.push temp
-)
+    stage "Clean artifacts" {
+        paralle
 
-// Build order
-"Clean"
-    ==> "DotnetRestore"
-    ==> "YarnInstall"
-    ==> "Build"
+        run(fun _ ->
+            [ SRC_DIR </> "bin"; SRC_DIR </> "obj"; SRC_DIR </> "dist" ]
+            |> Shell.cleanDirs
+        )
 
-"YarnInstall"
-    ==> "Watch"
+        run(fun _ ->
+            !!(Glob.fableJs SRC_DIR)
+            ++ (Glob.fableJsMap SRC_DIR)
+            |> Seq.iter Shell.rm
+        )
+    }
 
-"Build"
-    ==> "PublishDocs"
+    stage "Restore dependencies" {
+        // This is to avoid errors from the IDE because
+        // we deleted the obj and bin folder
+        workingDir "src"
 
-// start build
-Target.runOrDefault "Build"
+        run "dotnet build"
+        // Accept exit code 0 and 1 because it can happen that the user
+        // relaunches the build when having errors in the code
+        acceptExitCodes [ 0; 1 ]
+        // Hide the output in the console for the same reason
+        // no need to afraid the user with non useful errors
+        // If there are errors, the IDE will show them or the next steps will reveal them
+        noStdRedirectForStep
+    }
+
+    stage "Watch" {
+        workingDir "src"
+
+        whenCmd {
+            name "--watch"
+            alias "-w"
+            description "Watch for changes and rebuild"
+        }
+
+        paralle
+
+        run "dotnet fable watch"
+        run "npx vite"
+    }
+
+    stage "Build" {
+        workingDir "src"
+
+        whenNot {
+            whenCmd {
+                name "--watch"
+                alias "-w"
+                description "Watch for changes and rebuild"
+            }
+        }
+
+        run "dotnet fable"
+        run "npx vite build"
+    }
+
+    runIfOnlySpecified false
+}
+
+tryPrintPipelineCommandHelp()

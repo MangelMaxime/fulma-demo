@@ -4,19 +4,13 @@
 
 # Build for production
 
-Run: `./fake.sh build`
+Run: `dotnet fsi build.fsx`
 
-All the files needed for deployment are under the `output` folder.
+All the files needed for deployment are under the `src/dist/` folder.
 
 # Watch mode
 
-Run: `./fake.sh build -t Watch`
-
-# Running Fable without FAKE
-
-- Install tools: `dotnet tool restore && yarn`
-- Building for development: `dotnet fable watch src --run webpack-dev-server`
-- Building for production: `dotnet fable src --run webpack`
+Run: `dotnet fsi build.fsx --watch`
 
 # Debugging in VS Code
 
