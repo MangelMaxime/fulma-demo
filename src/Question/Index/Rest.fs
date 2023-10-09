@@ -13,7 +13,7 @@ let getQuestions _ =
             |> unbox<Database.Question []>
             |> Array.map(fun question ->
                 match Database.GetUserById question.AuthorId with
-                | None -> failwithf "Unkown author of id#%i for the question#%i" question.AuthorId question.Id
+                | None -> failwithf "Unknown author of id#%i for the question#%i" question.AuthorId question.Id
                 | Some user ->
                     { Id = question.Id
                       Author = user
