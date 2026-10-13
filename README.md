@@ -2,6 +2,9 @@
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/MangelMaxime/fulma-demo)
 
+> [!NOTE]
+> This project is being archived because it is considered done
+
 # Build for production
 
 Run: `dotnet fsi build.fsx`
